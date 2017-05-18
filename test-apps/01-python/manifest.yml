@@ -1,0 +1,6 @@
+applications:
+- name: helloworld-py
+  instances: 1
+  memory: 64M
+  disk_quota: 512M
+  buildpack: python_buildpack
