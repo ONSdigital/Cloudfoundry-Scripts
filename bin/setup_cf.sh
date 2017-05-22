@@ -52,9 +52,11 @@ if [ -z "$SKIP_TESTS" ]; then
 	for i in `ls "$TEST_APPS"`; do
 		cd "$TEST_APPS/$i"
 
-		buildpack="`awk '/^\s*buildpack:/{print $2}' manifest.yml`"
+		buildpack="`awk '/^ *buildpack:/{print $2}' manifest.yml`"
 
-		[ -n "$buildpack" ] && "$CF" buildpacks | grep -q "^$buildpack" || FATAL "Buildpack '$buildpack' not available - please retry"
+		if [ -n "$buildpack" ]; then
+			"$CF" buildpacks | grep -q "^$buildpack" || FATAL "Buildpack '$buildpack' not available - please retry"
+		fi
 
 		"$BASE_DIR/cf_push.sh" "$DEPLOYMENT_NAME" "$i" "$ORG_NAME" "$TEST_SPACE"
 
