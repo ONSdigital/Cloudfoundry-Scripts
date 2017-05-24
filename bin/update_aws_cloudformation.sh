@@ -60,14 +60,15 @@ aws_change_set(){
 
 		INFO 'Waiting for Cloudformation stack to finish creation'
 		"$AWS" --output table cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
-	fi
 
-	parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
+		parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
+	fi
 }
 
 [ -d "$DEPLOYMENT_FOLDER" ] || FATAL "Existing stack does not exist: '$DEPLOYMENT_FOLDER'"
 
 aws_change_set "$DEPLOYMENT_NAME-preamble" "$STACK_PREAMBLE_URL" "$STACK_PREAMBLE_OUTPUTS"
+
 aws_change_set "$DEPLOYMENT_NAME" "$STACK_MAIN_URL" "$STACK_MAIN_OUTPUTS" "file://$STACK_PARAMETERS"
 
 calculate_vpc_dns_ip "$STACK_MAIN_OUTPUTS" >>"$STACK_MAIN_OUTPUTS"

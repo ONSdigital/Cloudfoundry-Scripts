@@ -65,10 +65,6 @@ cat >"$STACK_PARAMETERS" <<EOF
 		"ParameterValue": "${ORGANISATION:-Unknown}"
 	},
 	{
-		"ParameterKey": "TemplateBucketHttpUrl",
-		"ParameterValue": "$templates_bucket_http_url"
-	},
-	{
 		"ParameterKey": "HostedZone",
 		"ParameterValue": "${HOSTED_ZONE:-localhost}"
 	},
