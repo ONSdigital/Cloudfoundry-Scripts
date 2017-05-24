@@ -43,18 +43,12 @@ aws_change_set(){
 		--template-body '$stack_url' \
 		$aws_opts"
 
+
 	INFO 'Waiting for Cloudformation changeset to be created'
-	"$AWS" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"
-
-	INFO 'Stack change set details:'
-	"$AWS" --output table cloudformation list-change-sets --stack-name "$stack_arn"
-
-	if "$AWS" --output json --query 'Changes' cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name" | grep -Eq '^\[\]$'; then
-		WARN 'Change set did not contain any changes'
-
-		WARN 'Deleting empty change set'
-		"$AWS" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
-	else
+	if "$AWS" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"; then
+	#if "$AWS" --output json --query 'Changes' cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name" | grep -Eq '^\[\]$'; then
+		INFO 'Stack change set details:'
+		"$AWS" --output table cloudformation list-change-sets --stack-name "$stack_arn"
 		INFO 'Starting Cloudformation changeset'
 		"$AWS" --output table cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
@@ -62,6 +56,11 @@ aws_change_set(){
 		"$AWS" --output table cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
 
 		parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
+	else
+		WARN 'Change set did not contain any changes'
+
+		WARN 'Deleting empty change set'
+		"$AWS" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 	fi
 }
 
