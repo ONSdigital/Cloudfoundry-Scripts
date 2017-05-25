@@ -88,6 +88,14 @@ EOF
 			# Bosh doesn't believe a cert starting with 'BEGIN TRUSTED CERTIFICATE' is a valid
 			unset TRUST_OPT
 			;;
+		--generate-public-key|-p)
+			shift
+			GENERATE_PUBLIC_KEY=1
+			;;
+		--generate-public-key-ssh-fingerprint|-f)
+			shift
+			GENERATE_PUBLIC_KEY_SSH_FINGER_PRINT=1
+			;;
 		-*)
 			FATAL "Unknown configuration option $i"
 			;;
@@ -214,4 +222,17 @@ if [ -n "$NAME" ]; then
 	# Generate file containing the metadata
 	INFO "Generating $NAME metadata file"
 	openssl x509 -text -noout -in "client/$NAME.crt" >"client/$NAME.txt"
+
+	if [ -n "$GENERATE_PUBLIC_KEY" ]; then
+		INFO "Generating $NAME public key"
+		openssl x509 -in "client/$NAME.crt" -noout -pubkey >"client/$NAME.pub"
+
+		if [ -n "$GENERATE_PUBLIC_KEY_SSH_FINGER_PRINT" ]; then
+			INFO 'Computing SSH public key'
+			ssh-keygen -i -m PKCS8 -f "client/$NAME.pub" >"client/$NAME.ssh-pub"
+
+			INFO 'Computing SSH public key fingerprint'
+			ssh-keygen -l -f "client/$NAME.ssh-pub" | awk '{print $2}' >"client/$NAME.ssh-fingerprint"
+		fi
+	fi
 fi
