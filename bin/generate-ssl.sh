@@ -22,6 +22,9 @@ EXTERNAL_DOMAIN="${8:-$EXTERNAL_CA_NAME}"
 # Append $EXTERNAL_CA_NAME
 EXTERNAL_SSL_NAMES='jwt'
 
+# Append $EXTERNAL_CA_NAME, generate public key and public key fingerprint
+EXTERNAL_SSH_NAMES='cf-ssh'
+
 # Append $SERVICE_DOMAIN
 INTERNAL_SERVICE_SSL_NAMES='cloud-controller-ng uaa blobstore'
 
@@ -65,18 +68,26 @@ generate_vars_yml(){
 		var_suffix="$variable_suffix"
 
 		[ -z "$var_name" ] && var_name="`echo $_k | sed -re "s,^([^/]*/)*([^./]+)(\.[^/]+)$,\2,g" -e 's/-/_/g'`"
-		[ -z "$var_suffix" ] && local var_suffix="`echo $_k | sed -re 's/^.*.(ce?rt|key)$/_\1/g'`"
+		[ x"$var_suffix" != x"NONE" -a -z "$var_suffix" ] && local var_suffix="`echo $_k | sed -re 's/^.*.(ce?rt|key)$/_\1/g'`"
 
 		[ -z "$var_name" ] && FATAL "Unable to determine variable name from $_k and nothing was supplied"
-		[ -z "$var_suffix" ] && FATAL "Unable to determine variable suffix from $_k and nothing was supplied"
-		
+		[ x"$var_suffix" != x"NONE" -a -z "$var_suffix" ] && FATAL "Unable to determine variable suffix from $_k and nothing was supplied"
+
+		unset var_suffix
+		local length="`wc -l \"$_k\" | awk '{print $1}'`"
 
 		[ -f "$var_file" ] || echo --- >"$var_file"
 
-		sed -re 's/^(.*)$/\L\1/g' >>"$var_file" <<EOF
+		if [ 0$length -gt 1 ]; then
+			sed -re 's/^(.*)$/\L\1/g' >>"$var_file" <<EOF
 $variable_prefix$var_name$var_suffix: |
 EOF
-		sed -re 's/^/  /g' "$_k" >>"$var_file"
+			sed -re 's/^/  /g' "$_k" >>"$var_file"
+		else
+			sed -re 's/^(.*)$/\L\1/g' >>"$var_file" <<EOF
+$variable_prefix$var_name$var_suffix: `cat "$_k"`
+EOF
+		fi
 
 		unset var_name var_suffix
 	done
@@ -86,7 +97,7 @@ EOF
 for _i in $EXTERNAL_CA_NAME $INTERNAL_CA_NAME; do
 	"$CA_TOOL" --new-ca --ca-name "$_i" --not-trusted
 done
-	
+
 generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/ca/$INTERNAL_CA_NAME.crt" internal_ca
 generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/ca/$EXTERNAL_CA_NAME.crt" external_ca
 
@@ -107,6 +118,14 @@ for i in $EXTERNAL_SSL_NAMES; do
 	"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "$i.$EXTERNAL_CA_NAME"
 
 	generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME"
+done
+
+for i in $EXTERNAL_SSH_NAMES; do
+	"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "$i.$EXTERNAL_CA_NAME" --generate-public-key --generate-public-key-ssh-fingerprint
+
+	generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME.key" ssh_host_key NONE NONE
+	generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME.pub" ssh_host_key_public_key NONE NONE
+	generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME.ssh-fingerprint" ssh_host_key_fingerprint NONE NONE
 done
 
 for i in $INTERNAL_CONSUL_SSL_NAMES; do
