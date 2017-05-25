@@ -73,7 +73,8 @@ generate_vars_yml(){
 		[ -z "$var_name" ] && FATAL "Unable to determine variable name from $_k and nothing was supplied"
 		[ x"$var_suffix" != x"NONE" -a -z "$var_suffix" ] && FATAL "Unable to determine variable suffix from $_k and nothing was supplied"
 
-		unset var_suffix
+		[ x"$var_suffix" = x"NONE" ] && unset var_suffix
+
 		local length="`wc -l \"$_k\" | awk '{print $1}'`"
 
 		[ -f "$var_file" ] || echo --- >"$var_file"
