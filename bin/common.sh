@@ -118,6 +118,9 @@ fi
 [ -z "$BASE_DIR" ] && FATAL 'BASE_DIR has not been set'
 [ -d "$BASE_DIR" ] || FATAL "$BASE_DIR does not exist"
 
+# Add ability to debug commands
+[ -n "$DEBUG" ] && set -x
+
 CACHE_DIRECTORY="$BASE_DIR/../../work"
 DEPLOYMENT_DIRECTORY="$BASE_DIR/../../deployment"
 DEPLOYMENT_DIRECTORY_RELATIVE='deployment'
