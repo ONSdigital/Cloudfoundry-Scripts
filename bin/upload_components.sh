@@ -19,8 +19,6 @@ RELEASE_DIEGO_VERSION="${2:-$RELEASE_DIEGO_VERSION}"
 RELEASE_GARDEN_RUNC_VERSION="${3:-$RELEASE_GARDEN_RUNC_VERSION}"
 # https://bosh.io/releases/github.com/cloudfoundry/cflinuxfs2-release
 RELEASE_CFLINUXFS2_ROOTFS_VERSION="${4:-$RELEASE_CFLINUXFS2_ROOTFS_VERSION}"
-# https://bosh.io/releases/github.com/cloudfoundry-community/cf-services-contrib-release
-RELEASE_CF_SERVICES_CONTRIB_VERSION="${5:-$RELEASE_CF_SERVICES_CONTRIB_VERSION}"
 
 # https://bosh.io/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY_VERSION="${5:-$STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY_VERSION}"
@@ -30,12 +28,11 @@ RELEASE_CF_URL='https://bosh.io/d/github.com/cloudfoundry/cf-release'
 RELEASE_DIEGO_URL='https://bosh.io/d/github.com/cloudfoundry/diego-release'
 RELEASE_GARDEN_RUNC_URL='https://bosh.io/d/github.com/cloudfoundry/garden-runc-release'
 RELEASE_CFLINUXFS2_ROOTFS_URL='https://bosh.io/d/github.com/cloudfoundry/cflinuxfs2-release'
-RELEASE_CF_SERVICES_CONTRIB_URL='https://bosh.io/d/github.com/cloudfoundry-community/cf-services-contrib-release'
 
 # Stemcells
 STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY_URL='https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent'
 
-BOSH_UPLOADS='STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY RELEASE_CF RELEASE_DIEGO RELEASE_GARDEN_RUNC RELEASE_CFLINUXFS2_ROOTFS RELEASE_CF_SERVICES_CONTRIB_URL'
+BOSH_UPLOADS='STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY RELEASE_CF RELEASE_DIEGO RELEASE_GARDEN_RUNC RELEASE_CFLINUXFS2_ROOTFS'
 
 INFO 'Uploading Bosh release(s)'
 for i in $BOSH_UPLOADS; do
