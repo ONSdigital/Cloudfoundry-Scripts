@@ -119,7 +119,7 @@ fi
 [ -d "$BASE_DIR" ] || FATAL "$BASE_DIR does not exist"
 
 # Add ability to debug commands
-[ -n "$DEBUG" ] && set -x
+[ -n "$DEBUG" -a x"$DEBUG" != x"false" ] && set -x
 
 CACHE_DIRECTORY="$BASE_DIR/../../work"
 DEPLOYMENT_DIRECTORY="$BASE_DIR/../../deployment"
