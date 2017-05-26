@@ -2,7 +2,7 @@
 #
 #
 
-set -ex
+set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
