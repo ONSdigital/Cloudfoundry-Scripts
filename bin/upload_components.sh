@@ -36,9 +36,9 @@ RELEASE_DIEGO_URL='https://bosh.io/d/github.com/cloudfoundry/diego-release'
 RELEASE_GARDEN_RUNC_URL='https://bosh.io/d/github.com/cloudfoundry/garden-runc-release'
 RELEASE_CFLINUXFS2_ROOTFS_URL='https://bosh.io/d/github.com/cloudfoundry/cflinuxfs2-release'
 RELEASE_CF_RABBITMQ_URL='https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-release'
-RELEASE_CF_REDIS_URL='https://github.com/pivotal-cf/cf-redis-release'
+RELEASE_CF_REDIS_URL='https://bosh.io/d/github.com/pivotal-cf/cf-redis-release'
 
-BOSH_UPLOADS='STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY RELEASE_CF RELEASE_DIEGO RELEASE_GARDEN_RUNC RELEASE_CFLINUXFS2_ROOTFS RELEASE_CF_RABBITMQ_URL RELEASE_CF_REDIS_URL'
+BOSH_UPLOADS='STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY RELEASE_CF RELEASE_DIEGO RELEASE_GARDEN_RUNC RELEASE_CFLINUXFS2_ROOTFS RELEASE_CF_RABBITMQ RELEASE_CF_REDIS'
 
 INFO 'Uploading Bosh release(s)'
 for i in $BOSH_UPLOADS; do
