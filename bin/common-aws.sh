@@ -31,7 +31,7 @@ aws_credentials(){
 	if [ -n "$new_aws_secret_access_key" ]; then
 		if ! "$AWS" configure get aws_secret_access_key | grep -qE "^$new_aws_secret_access_key"; then
 			INFO 'Updating AWS CLI Secret Access Key configuration'
-			"$AWS" configure set aws_access_key_id "$new_aws_secret_access_key"
+			"$AWS" configure set aws_secret_access_key "$new_aws_secret_access_key"
 		fi
 	fi
 }
