@@ -8,46 +8,10 @@ aws_region(){
 
 	# Do we need to update the config?
 	if [ -n "$new_aws_region" ]; then
-		if [ -f ~/.aws/config ]; then
-			INFO 'Checking if we need to update ~/.aws/config'
-			awk '{
-		if(/^\[default\]$/){
-			def=1
-		}else if(/^region = /){
-			# Check if region appears in the default section
-			if(def == 1)
-				ok=1
-
-			region++
-		}else{
-			def=0
-		}
-	}END{
-		if(region == 1 && ok == 1){
-			exit 0
-		}else if(region > 1){
-			printf("Multiple regions found\n")
-
-		}else if(region == 0){
-			printf("No existing region found\n")	
-		}
-
-		exit 1
-	}' ~/.aws/config || rc=$?
-
-			[ 0$rc -ne 0 ] && FATAL 'Modified ~/.aws/config exists'
-
-			INFO 'Updating ~/.aws/config'
-			sed -i -re "s/^(region) = .*$/\1 = $new_aws_region/g" ~/.aws/config
-		else
-			[ -d ~/.aws ] || mkdir -p ~/.aws
-
-			INFO 'Creating new ~/.aws/config'
-			cat >~/.aws/config <<EOF
-[default]
-region = $new_aws_region
-output = text
-EOF
+		if ! "$AWS" configure get region | grep -qE "^$new_aws_region"; then
+			INFO 'Updating AWS CLI region configuration'
+			"$AWS" configure set region "$new_aws_region"
+			"$AWS" configure set output text
 		fi
 	fi
 }
@@ -58,67 +22,16 @@ aws_credentials(){
 	local new_aws_secret_access_key="$2"
 	local stack_outputs="$3"
 
-	# Do we need to update the credentials?
-	if [ -n "$new_aws_access_key_id" -a -n "$new_aws_secret_access_key" ]; then
-		if [ -f ~/.aws/credentials ]; then
-			INFO 'Checking if we need to update ~/.aws/credentials'
-			awk '{
-		if(/^\[default\]$/){
-			def=1
-		}else if(/^aws_access_key_id = /){
-			# Check if aws_access_key_id appears in the default section
-			if(def == 1)
-				id=1
-
-			key++
-		}else if(/^aws_secret_access_key = /){
-			# Check if aws_secret_access_key appears in the default section
-			if(def == 1)
-				key=1
-
-		}else{
-			def=0
-		}
-	}END{
-		if(aws_access_key_id == 1 && aws_secret_access_key = 1 && ok == 1){
-			rc=0
-
-		}else if(aws_access_key_id > 1){
-			printf("Multiple AWS access key IDs found\n")
-
-			rc=2
-		}else if(aws_secret_access_key > 1){
-			printf("Multiple AWS access keys found\n")
-
-			rc=2
-		}else if(aws_access_id == 0){
-			printf("No existing AWS access key ID found\n")	
-
-			rc=1
-		}else if(aws_secret_access_key == 0){
-			printf("No existing AWS access key found\n")	
-
-			rc=1
-		}
-
-		exit rc
-	}' ~/.aws/credentials || local rc=$?
-
-			[ 0$rc -eq 2 ] && FATAL 'Modified ~/.aws/credentials exists'
-
-			INFO 'Updating ~/.aws/credentials'
-			sed -i -re "s/^(aws_access_key_id) = .*$/\1 = $new_aws_access_key_id/g" \
-				-e "s,^(aws_secret_access_key) = .*$,\1 = $new_aws_secret_access_key,g" \
-				~/.aws/credentials
-		else
-			[ -d ~/.aws ] || mkdir -p ~/.aws
-
-			INFO 'Creating new ~/.aws/credentials'
-			cat >~/.aws/credentials <<EOF
-[default]
-aws_access_key_id = $new_aws_access_key_id
-aws_secret_access_key = $new_aws_secret_access_key
-EOF
+	if [ -n "$new_aws_access_key_id" ]; then
+		if ! "$AWS" configure get aws_access_key_id | grep -qE "^$new_aws_access_key_id"; then
+			INFO 'Updating AWS CLI Access Key ID configuration'
+			"$AWS" configure set aws_access_key_id "$new_aws_access_key_id"
+		fi
+	fi
+	if [ -n "$new_aws_secret_access_key" ]; then
+		if ! "$AWS" configure get aws_secret_access_key | grep -qE "^$new_aws_secret_access_key"; then
+			INFO 'Updating AWS CLI Secret Access Key configuration'
+			"$AWS" configure set aws_access_key_id "$new_aws_secret_access_key"
 		fi
 	fi
 }
