@@ -75,6 +75,10 @@ applications:
     AWS_DB_SUBNET_GROUP: $database_subnet_group
 EOF
 
+if [ -f "$CONFIG_DIRECTORY/$SERVICE_NAME/catalog.yaml" ]; then
+	cp -f "$CONFIG_DIRECTORY/$SERVICE_NAME/catalog.yaml" "$RDS_BROKER_FOLDER/catalog.yaml"
+fi
+
 INFO "Ensuring space exists: $SERVICES_SPACE"
 "$BASE_DIR/setup_cf-orgspace.sh" "$DEPLOYMENT_NAME" "$ORG_NAME" "$SERVICES_SPACE"
 
