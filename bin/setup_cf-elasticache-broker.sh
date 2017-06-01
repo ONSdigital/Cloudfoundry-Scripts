@@ -14,12 +14,12 @@ eval export `prefix_vars "$DEPLOYMENT_FOLDER/outputs.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/passwords.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
 
-BROKER_NAME="${1:-elasticcache-broker}"
+BROKER_NAME="${1:-elasticache-broker}"
 
 BROKER_FOLDER="$TMP_DIRECTORY/$BROKER_NAME"
 BROKER_GIT_URL='https://github.com/cloudfoundry-community/elasticache-broker'
 
-BROKER_USERNAME='elasticcache-broker'
+BROKER_USERNAME='elasticache-broker'
 BROKER_PASSWORD="`generate_password`"
 
 [ -d "$TMP_DIRECTORY" ] || mkdir -p "$TMP_DIRECTORY"
@@ -33,19 +33,19 @@ if "$CF" service-brokers | grep -Eq "^$BROKER_NAME\s*http"; then
 	exit 0
 fi
 
-INFO 'Cloning Git Elasticcache repository'
+INFO 'Cloning Git ElastiCache repository'
 git clone "$BROKER_GIT_URL" "$BROKER_FOLDER"
 
-INFO 'Creating Elasticcache Broker Manifest'
+INFO 'Creating ElastiCache Broker Manifest'
 cat >"$BROKER_FOLDER/manifest.yml" <<EOF
 ---
 applications:
-  - name: elasticcache-broker
+  - name: elasticache-broker
     memory: 256M
     disk_quota: 256M
     env:
-      AWS_ACCESS_KEY_ID: $broker_access_key_id
-      AWS_SECRET_ACCESS_KEY: $broker_secret_key
+      AWS_ACCESS_KEY_ID: $elasti_cache_broker_access_key_id
+      AWS_SECRET_ACCESS_KEY: $elasti_cache_broker_access_key
       GO15VENDOREXPERIMENT: 0
 EOF
 
