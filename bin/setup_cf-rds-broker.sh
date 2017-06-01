@@ -23,6 +23,7 @@ DB_NAME="${1:-rds_broker}"
 BROKER_NAME="${2:-rds-broker}"
 CF_ORG="${3:-$organisation}"
 
+RDS_BROKER_USER='rds_broker_user'
 GOLANG_VERSION='1.8'
 RDS_BROKER_FOLDER="$TMP_DIRECTORY/$BROKER_NAME"
 RDS_BROKER_GIT_URL='https://github.com/cloudfoundry-community/rds-broker.git'
@@ -56,7 +57,7 @@ applications:
   env:
     GOVERSION: go$GOLANG_VERSION
     # Should we create a special user just for this?
-    AUTH_USER: broker_user
+    AUTH_USER: $RDS_BROKER_USER
     AUTH_PASS: $RDS_BROKER_PASSWORD
     DB_URL: $database_address
     DB_PORT: $database_port
@@ -93,13 +94,4 @@ INFO "Pushing $BROKER_NAME broker to Cloudfoundry"
 
 BROKER_URL="`cf_app_url \"$BROKER_NAME\"`"
 
-# If things really break you can purge and then delete:
-# cf purge-service-offering $SERVICE_NAME
-# cf delete-service-broker $SERVICE_NAME
-INFO "Setting up $SERVICE_NAME broker"
-"$CF" create-service-broker "$SERVICE_NAME" broker_user "$RDS_BROKER_PASSWORD" "https://$BROKER_URL"
-
-INFO "Enabling $SERVICE_NAME broker"
-"$CF" enable-service-access "$SERVICE_NAME"
-
-
+"$BASE_DIR/setup_cf-service-broker.sh" "$SERVICE_NAME" "$RDS_BROKER_USER" "$RDS_BROKER_PASSWORD" "https://$BROKER_URL"
