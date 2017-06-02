@@ -53,6 +53,9 @@ EOF
 
 sed -re "s/(\"username\"): \"[^\"]+\"/\1: \"$BROKER_USER\"/g" \
 	-e "s/(\"password\"): \"[^\"]+\"/\1: \"$BROKER_PASSWORD\"/g" \
+	-e "s/(\"region\"): "[^\"]+"/\1: \"$aws_region\"/g" \
+	-e "s/(\"cache_subnet_group_name\": \"[^\"]+\"/g" \
+	-e "s/\"default\"/\"$elasti_cache_security_group\"/g" \
 	"$JSON_CONFIG" >"$BROKER_FOLDER/config.json"
 
 INFO "Ensuring space exists: $SERVICES_SPACE"
