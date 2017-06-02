@@ -145,6 +145,7 @@ EOF
 	cat >>"$OPENSSL_CONF" <<'EOF'
 #
 [default]
+# This is ignored by openssl 'req'
 default_days			= $ENV::VALID_DAYS
 default_md			= $ENV::HASH_TYPE
 default_bits			= $ENV::KEY_SIZE
@@ -196,7 +197,7 @@ fi
 
 if [ -n "$NEW_CA" -o -n "$UPDATE_CA" ]; then
 	INFO "Generating $CA_NAME CA"
-	openssl req -new -out "ca/$CA_NAME.csr" -key "ca/$CA_NAME.key" -subj "/CN=$CA_NAME/" -extensions x509v3_ca 
+	openssl req -new -out "ca/$CA_NAME.csr" -key "ca/$CA_NAME.key" -subj "/CN=$CA_NAME/" -extensions x509v3_ca -days "$VALID_DAYS"
 	# OPENSSL_CONF doesn't seem to work for x509
 	openssl x509 $TRUST_OPT -req -in "ca/$CA_NAME.csr" -out "ca/$CA_NAME.crt" -signkey "ca/$CA_NAME.key" -CAserial serial.txt -extensions x509v3_ca -extfile "$OPENSSL_CONF"
 fi
@@ -213,7 +214,7 @@ if [ -n "$NAME" ]; then
 
 	# Generate CSR
 	INFO "Generating $NAME CSR"
-	openssl req -new -out "client/$NAME.csr" -key "client/$NAME.key" -extensions $EXTENSIONS -subj "/CN=$NAME/" 
+	openssl req -new -out "client/$NAME.csr" -key "client/$NAME.key" -extensions $EXTENSIONS -subj "/CN=$NAME/" -days "$VALID_DAYS"
 
 	# Sign CSR
 	INFO "Signing $NAME CSR"
