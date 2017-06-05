@@ -73,4 +73,4 @@ INFO 'Setting up RDS broker'
 IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-rds-broker.sh" "$DEPLOYMENT_NAME"
 
 INFO 'Setting up RabbitMQ broker'
-IGNORE_EXISTING=1 "$BASE_DIR/setup-cf-service-broker.sh" rabbitmq 'rabbitmq-broker' "$rabbitmq_broker_password" "https://rabbitmq-broker.system.$domain_name"
+IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-service-broker.sh" "$DEPLOYMENT_NAME" rabbitmq 'rabbitmq-broker' "$rabbitmq_broker_password" "https://rabbitmq-broker.system.$domain_name"
