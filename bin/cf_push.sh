@@ -30,7 +30,7 @@ fi
 if "$CF" app "$APP_NAME" >/dev/null 2>&1; then
 	WARN "Deleting existing app: $APP_NAME"
 
-	"$CF" delete "$APP_NAME"
+	"$CF" delete -f "$APP_NAME"
 fi
 
 "$CF" push "$APP_NAME" || FAILED=1

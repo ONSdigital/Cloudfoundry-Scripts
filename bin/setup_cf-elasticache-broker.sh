@@ -22,6 +22,8 @@ BROKER_GIT_URL='https://github.com/cloudfoundry-community/elasticache-broker'
 BROKER_USERNAME='elasticache-broker'
 BROKER_PASSWORD="`generate_password`"
 
+GOLANG_VERSION='1.6.3'
+
 [ -d "$TMP_DIRECTORY" ] || mkdir -p "$TMP_DIRECTORY"
 [ -d "$BROKER_FOLDER" ] && rm -rf "$BROKER_FOLDER"
 
@@ -44,18 +46,19 @@ applications:
     memory: 256M
     disk_quota: 256M
     env:
+      GOVERSION: go$GOLANG_VERSION
       AWS_ACCESS_KEY_ID: $elasti_cache_broker_access_key_id
       AWS_SECRET_ACCESS_KEY: $elasti_cache_broker_access_key
       GO15VENDOREXPERIMENT: 0
 EOF
 
-[ -f "$CONFIG_DIRECTORY/$SERVICE_NAME/config.json" ] && JSON_CONFIG="$CONFIG_DIRECTORY/$SERVICE_NAME/config.json" || JSON_CONFIG='config-sample.json'
+[ -f "$CONFIG_DIRECTORY/$SERVICE_NAME/config.json" ] && JSON_CONFIG="$CONFIG_DIRECTORY/$SERVICE_NAME/config.json" || JSON_CONFIG="$BROKER_FOLDER/config-sample.json"
 
 INFO 'Adjusting ElastiCache configuration'
 sed -re "s/(\"username\"): \"[^\"]+\"/\1: \"$BROKER_USER\"/g" \
 	-e "s/(\"password\"): \"[^\"]+\"/\1: \"$BROKER_PASSWORD\"/g" \
 	-e "s/(\"region\"): "[^\"]+"/\1: \"$aws_region\"/g" \
-	-e "s/(\"cache_subnet_group_name\": \"[^\"]+\"/\1: \"$elasti_cache_subnet_group\"g" \
+	-e "s/(\"cache_subnet_group_name\"): \"[^\"]+\"/\1: \"$elasti_cache_subnet_group\"/g" \
 	-e "s/\"default\"/\"$elasti_cache_security_group\"/g" \
 	"$JSON_CONFIG" >"$BROKER_FOLDER/config.json"
 
