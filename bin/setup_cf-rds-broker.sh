@@ -98,4 +98,4 @@ INFO "Pushing $BROKER_NAME broker to Cloudfoundry"
 
 BROKER_URL="`cf_app_url \"$BROKER_NAME\"`"
 
-"$BASE_DIR/setup_cf-service-broker.sh" "$SERVICE_NAME" "$RDS_BROKER_USER" "$RDS_BROKER_PASSWORD" "https://$BROKER_URL"
+"$BASE_DIR/setup_cf-service-broker.sh" "$DEPLOYMENT_NAME" "$SERVICE_NAME" "$RDS_BROKER_USER" "$RDS_BROKER_PASSWORD" "https://$BROKER_URL"
