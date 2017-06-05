@@ -55,7 +55,7 @@ EOF
 [ -f "$CONFIG_DIRECTORY/$SERVICE_NAME/config.json" ] && JSON_CONFIG="$CONFIG_DIRECTORY/$SERVICE_NAME/config.json" || JSON_CONFIG="$BROKER_FOLDER/config-sample.json"
 
 INFO 'Adjusting ElastiCache configuration'
-sed -re "s/(\"username\"): \"[^\"]+\"/\1: \"$BROKER_USER\"/g" \
+sed -re "s/(\"username\"): \"[^\"]+\"/\1: \"$BROKER_USERNAME\"/g" \
 	-e "s/(\"password\"): \"[^\"]+\"/\1: \"$BROKER_PASSWORD\"/g" \
 	-e "s/(\"region\"): "[^\"]+"/\1: \"$aws_region\"/g" \
 	-e "s/(\"cache_subnet_group_name\"): \"[^\"]+\"/\1: \"$elasti_cache_subnet_group\"/g" \
@@ -72,4 +72,4 @@ INFO "Pushing $BROKER_NAME broker to Cloudfoundry"
 
 BROKER_URL="`cf_app_url \"$BROKER_NAME\"`"
 
-"$BASE_DIR/setup_cf-service-broker.sh" "$SERVICE_NAME" "$BROKER_USER" "$BROKER_PASSWORD" "https://$BROKER_URL"
+"$BASE_DIR/setup_cf-service-broker.sh" "$DEPLOYMENT_NAME" "$SERVICE_NAME" "$BROKER_USER" "$BROKER_PASSWORD" "https://$BROKER_URL"
