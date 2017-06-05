@@ -51,10 +51,11 @@ EOF
 
 [ -f "$CONFIG_DIRECTORY/$SERVICE_NAME/config.json" ] && JSON_CONFIG="$CONFIG_DIRECTORY/$SERVICE_NAME/config.json" || JSON_CONFIG='config-sample.json'
 
+INFO 'Adjusting ElastiCache configuration'
 sed -re "s/(\"username\"): \"[^\"]+\"/\1: \"$BROKER_USER\"/g" \
 	-e "s/(\"password\"): \"[^\"]+\"/\1: \"$BROKER_PASSWORD\"/g" \
 	-e "s/(\"region\"): "[^\"]+"/\1: \"$aws_region\"/g" \
-	-e "s/(\"cache_subnet_group_name\": \"[^\"]+\"/g" \
+	-e "s/(\"cache_subnet_group_name\": \"[^\"]+\"/\1: \"$elasti_cache_subnet_group\"g" \
 	-e "s/\"default\"/\"$elasti_cache_security_group\"/g" \
 	"$JSON_CONFIG" >"$BROKER_FOLDER/config.json"
 
