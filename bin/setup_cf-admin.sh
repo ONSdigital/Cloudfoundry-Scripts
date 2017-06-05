@@ -7,7 +7,6 @@ set -e
 BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common.sh"
-
 . "$BASE_DIR/bosh-env.sh"
 
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/outputs.sh"`
