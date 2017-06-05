@@ -15,7 +15,6 @@ eval export `prefix_vars "$DEPLOYMENT_FOLDER/passwords.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
 
 BROKER_NAME="${1:-elasticache-broker}"
-
 BROKER_FOLDER="$TMP_DIRECTORY/$BROKER_NAME"
 BROKER_GIT_URL='https://github.com/cloudfoundry-community/elasticache-broker'
 
@@ -30,7 +29,7 @@ GOLANG_VERSION='1.6.3'
 if "$CF" service-brokers | grep -Eq "^$BROKER_NAME\s*http"; then
 	[ -n "$IGNORE_EXISTING" ] && LOG_LEVEL='WARN' || LOG_LEVEL='FATAL'
 	
-	$LOG_LEVEL "Service broker '$SERVICE_NAME' exists"
+	$LOG_LEVEL "Service broker '$BROKER_NAME' exists"
 
 	exit 0
 fi
@@ -52,12 +51,12 @@ applications:
       GO15VENDOREXPERIMENT: 0
 EOF
 
-[ -f "$CONFIG_DIRECTORY/$SERVICE_NAME/config.json" ] && JSON_CONFIG="$CONFIG_DIRECTORY/$SERVICE_NAME/config.json" || JSON_CONFIG="$BROKER_FOLDER/config-sample.json"
+[ -f "$CONFIG_DIRECTORY/$BROKER_NAME/config.json" ] && JSON_CONFIG="$CONFIG_DIRECTORY/$BROKER_NAME/config.json" || JSON_CONFIG="$BROKER_FOLDER/config-sample.json"
 
 INFO 'Adjusting ElastiCache configuration'
 sed -re "s/(\"username\"): \"[^\"]+\"/\1: \"$BROKER_USERNAME\"/g" \
 	-e "s/(\"password\"): \"[^\"]+\"/\1: \"$BROKER_PASSWORD\"/g" \
-	-e "s/(\"region\"): "[^\"]+"/\1: \"$aws_region\"/g" \
+	-e "s/(\"region\"): \"[^\"]+\"/\1: \"$aws_region\"/g" \
 	-e "s/(\"cache_subnet_group_name\"): \"[^\"]+\"/\1: \"$elasti_cache_subnet_group\"/g" \
 	-e "s/\"default\"/\"$elasti_cache_security_group\"/g" \
 	"$JSON_CONFIG" >"$BROKER_FOLDER/config.json"
@@ -72,4 +71,4 @@ INFO "Pushing $BROKER_NAME broker to Cloudfoundry"
 
 BROKER_URL="`cf_app_url \"$BROKER_NAME\"`"
 
-"$BASE_DIR/setup_cf-service-broker.sh" "$DEPLOYMENT_NAME" "$SERVICE_NAME" "$BROKER_USER" "$BROKER_PASSWORD" "https://$BROKER_URL"
+"$BASE_DIR/setup_cf-service-broker.sh" "$DEPLOYMENT_NAME" "$BROKER_NAME" "$BROKER_USERNAME" "$BROKER_PASSWORD" "https://$BROKER_URL"
