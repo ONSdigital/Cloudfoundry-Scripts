@@ -15,12 +15,12 @@ eval export `prefix_vars "$DEPLOYMENT_FOLDER/outputs.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/passwords.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
 
+ORG_NAME="${1:-$organisation}"
+SPACE_NAME="${2:-Test}"
+
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"
 export BOSH_CA_CERT
-
-ORG_NAME="${1:-$organisation}"
-SPACE_NAME="${2:-Test}"
 
 [ -z "$SPACE_NAME" ] && FATAL 'No space name provided'
 [ -z "$ORG_NAME" ] && FATAL 'No organisation name provided'
