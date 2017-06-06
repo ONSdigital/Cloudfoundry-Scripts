@@ -179,9 +179,22 @@ if [ -z "$SKIP_BOSH_CREATE_ENV" -o x"$SKIP_BOSH_CREATE_ENV" = x"false" -o x"$BOS
 	[ -z "$aws_access_key_id" ] && FATAL 'No AWS access key ID provided'
 	[ -z "$aws_secret_access_key" ] && FATAL 'No AWS secret access key provided'
 
+	# Urgh, this is rather messy.  Should really extract the common parts and pull in those common parts from a deploy/delete script
 	if [ x"$BOSH_DELETE_ENV" = x"true" ]; then
 		CREATE_OPT='delete-env'
 		INFO 'Deleting Bosh bootstrap environment'
+
+		INFO 'Deleting Bosh Deployment'
+		"$BOSH" deploy "$BOSH_FULL_MANIFEST_FILE" \
+			--force \
+			$BOSH_INTERACTIVE_OPT \
+			$BOSH_TTY_OPT \
+			--var bosh_name="$DEPLOYMENT_NAME" \
+			--var bosh_deployment="$BOSH_DEPLOYMENT" \
+			--var bosh_lite_ip="$director_dns" \
+			--vars-file="$SSL_YML" \
+			--vars-env="$ENV_PREFIX_NAME" \
+			--vars-store="$BOSH_FULL_VARS_FILE"
 	else
 		CREATE_OPT='create-env'
 		INFO 'Creating Bosh bootstrap environment'
