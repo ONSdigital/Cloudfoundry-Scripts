@@ -76,4 +76,4 @@ INFO 'Setting up RabbitMQ broker'
 IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-service-broker.sh" "$DEPLOYMENT_NAME" rabbitmq rabbitmq-broker "$rabbitmq_broker_password" "https://rabbitmq-broker.system.$domain_name"
 
 INFO 'Setting up ElastiCache broker'
-IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-elasticache-broker.sh" "$DEPLOYMENT_NAME" redis redis-broker "$redis_broker_password" "https://redis-broker.system.$domain_name"
+IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-elasticache-broker.sh" "$DEPLOYMENT_NAME" elasticache-broker
