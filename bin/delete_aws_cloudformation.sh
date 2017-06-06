@@ -30,6 +30,16 @@ else
 	STACKS="$DEPLOYMENT_NAME"
 fi
 
+if [ -n "$s3_buckets" ]; then
+	OLDIFS="$IFS"
+	IFS=","
+	for bucket in $s3_buckets; do
+		INFO "Emptying bucket: $bucket"
+		"$AWS" s3 rm --resursive "s3://$bucket"
+	done
+	IFS="$OLDIFS"
+fi
+
 eval `prefix_vars "$DEPLOYMENT_FOLDER/bosh-ssh.sh"`
 
 check_cloudformation_stack "$DEPLOYMENT_NAME"

@@ -32,6 +32,8 @@ INFO '. Main template'
 INFO 'Creating Cloudformation stack preamble'
 INFO 'Stack details:'
 "$AWS" --output table cloudformation create-stack \
+	--capabilities CAPABILITY_IAM \
+	--capabilities CAPABILITY_NAMED_IAM \
 	--stack-name "$DEPLOYMENT_NAME-preamble" \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
