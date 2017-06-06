@@ -59,6 +59,7 @@ sed -re "s/(\"username\"): \"[^\"]+\"/\1: \"$BROKER_USERNAME\"/g" \
 	-e "s/(\"region\"): \"[^\"]+\"/\1: \"$aws_region\"/g" \
 	-e "s/(\"cache_subnet_group_name\"): \"[^\"]+\"/\1: \"$elasti_cache_subnet_group\"/g" \
 	-e "s/\"default\"/\"$elasti_cache_security_group\"/g" \
+	-e "s/(\"name\"): \"awselasticache-redis\"/\1: \"$BROKER_NAME\"/g" \
 	"$JSON_CONFIG" >"$BROKER_FOLDER/config.json"
 
 INFO "Ensuring space exists: $SERVICES_SPACE"
