@@ -39,10 +39,7 @@ INFO 'Attempting to login'
 check_aws_keys
 
 INFO 'Deleting Bosh Deployment'
-"$BOSH" delete-deployment "$BOSH_FULL_MANIFEST_FILE" \
-	--force \
-	$BOSH_INTERACTIVE_OPT \
-	$BOSH_TTY_OPT
+"$BOSH" delete-deployment --force $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
 
 INFO 'Deleting Bosh bootstrap environment'
 bosh_env delete-env || FATAL 'Bosh environment deletion failed'
