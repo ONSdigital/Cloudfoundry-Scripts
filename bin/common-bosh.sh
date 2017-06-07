@@ -121,4 +121,4 @@ EXTERNAL_SSL_FOLDER="$SSL_FOLDER/$domain_name"
 # Used for Bosh CA cert
 EXTERNAL_SSL_FOLDER_RELATIVE="$SSL_FOLDER_RELATIVE/$domain_name"
 
-[ x"$deployment_name" != x"$DEPLOYMENT_NAME" ] && FATAL "Deployment names do not match: $deployment_name != $DEPLOYMENT_NAME"
+[ x"$deployment_name" = x"$DEPLOYMENT_NAME" ] || FATAL "Deployment names do not match: $deployment_name != $DEPLOYMENT_NAME"
