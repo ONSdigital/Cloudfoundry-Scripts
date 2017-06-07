@@ -38,7 +38,7 @@ if [ -n "$s3_buckets" ]; then
 	IFS=","
 	for bucket in $s3_buckets; do
 		INFO "Emptying bucket: $bucket"
-		"$AWS" s3 rm --resursive "s3://$bucket"
+		"$AWS" s3 rm --recursive "s3://$bucket"
 	done
 	IFS="$OLDIFS"
 fi
