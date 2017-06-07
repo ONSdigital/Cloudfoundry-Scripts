@@ -103,7 +103,7 @@ EOF
 done
 
 [ -z "$CA_NAME" ] && FATAL No CA name provided
-	
+
 # OpenSSL loads its config from this var
 export OPENSSL_CONF="$PWD/$CA_NAME/openssl-$CA_NAME.cnf"
 
