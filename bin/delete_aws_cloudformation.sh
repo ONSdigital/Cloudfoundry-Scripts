@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # See common-aws.sh for inputs
-# 
+#
 
 set -e
 
@@ -12,6 +12,18 @@ IGNORE_MISSING_CONFIG='true'
 
 # Run common AWS Cloudformation parts
 . "$BASE_DIR/common-aws.sh"
+
+
+empty_bucket(){
+	bucket_name="$1"
+
+	[ -n "$1" ] || FATAL 'No bucket name provided'
+
+	if "$AWS" --output text --query "Buckets[?Name == '$bucket_name'].Name" s3api list-buckets | grep -Eq "^$bucket_name$"; then
+		INFO "Emptying bucket: $bucket_name"
+		"$AWS" s3 rm --recursive "s3://$bucket_name"
+	fi
+}
 
 # Load outputs if we have one
 [ -f "$DEPLOYMENT_FOLDER/outputs.sh" ] && eval `prefix_vars "$DEPLOYMENT_FOLDER/outputs.sh"`
@@ -27,8 +39,8 @@ if [ -f "$DEPLOYMENT_FOLDER/outputs-preamble.sh" ]; then
 
 	eval `prefix_vars "$DEPLOYMENT_FOLDER/outputs-preamble.sh"`
 
-	INFO 'Emptying template bucket'
-	"$AWS" s3 rm --recursive "s3://$templates_bucket_name"
+	empty_bucket "$templates_bucket_name"
+
 else
 	STACKS="$DEPLOYMENT_NAME"
 fi
@@ -37,8 +49,7 @@ if [ -n "$s3_buckets" ]; then
 	OLDIFS="$IFS"
 	IFS=","
 	for bucket in $s3_buckets; do
-		INFO "Emptying bucket: $bucket"
-		"$AWS" s3 rm --recursive "s3://$bucket"
+		empty_bucket "$bucket"
 	done
 	IFS="$OLDIFS"
 fi
