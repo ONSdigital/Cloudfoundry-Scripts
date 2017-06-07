@@ -37,20 +37,18 @@ bosh_env(){
 INFO 'Setting secure umask'
 umask 077
 
-ACTION="$1"
-DEPLOYMENT_NAME="$2"
-BOSH_FULL_MANIFEST_NAME="${3:-Bosh-Template}"
-BOSH_CLOUD_MANIFEST_NAME="${4:-$BOSH_FULL_MANIFEST_NAME-AWS-CloudConfig}"
-BOSH_LITE_MANIFEST_NAME="${5:-$BOSH_FULL_MANIFEST_NAME}"
+DEPLOYMENT_NAME="$1"
+BOSH_FULL_MANIFEST_NAME="${2:-Bosh-Template}"
+BOSH_CLOUD_MANIFEST_NAME="${3:-$BOSH_FULL_MANIFEST_NAME-AWS-CloudConfig}"
+BOSH_LITE_MANIFEST_NAME="${4:-$BOSH_FULL_MANIFEST_NAME}"
 
-AWS_ACCESS_KEY_ID="${6:-$AWS_ACCESS_KEY_ID}"
-AWS_SECRET_ACCESS_KEY="${7:-$AWS_SECRET_ACCESS_KEY}"
+AWS_ACCESS_KEY_ID="${5:-$AWS_ACCESS_KEY_ID}"
+AWS_SECRET_ACCESS_KEY="${6:-$AWS_SECRET_ACCESS_KEY}"
 
-MANIFESTS_DIR="${8:-Bosh-Manifests}"
-INTERNAL_DOMAIN="${9:-cf.internal}"
+MANIFESTS_DIR="${7:-Bosh-Manifests}"
+INTERNAL_DOMAIN="${8:-cf.internal}"
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'No Bosh deployment name provided'
-echo "$ACTION" | grep -Eq "^(create|delete)$" || FATAL "Invalid action. Only 'create' or 'delete' are supported"
 
 grep -Eiq '^([[:alnum:]]+-?[[:alnum:]])+$' <<EOF || FATAL 'Invalid domain name, must be a valid domain label'
 $DEPLOYMENT_NAME
