@@ -13,8 +13,8 @@ BASE_DIR="`dirname \"$0\"`"
 . "$BASE_DIR/common.sh"
 	
 check_aws_keys(){
-	[ -z "$aws_access_key_id" ] && FATAL 'No AWS access key ID provided'
-	[ -z "$aws_secret_access_key" ] && FATAL 'No AWS secret access key provided'
+	[ -n "$aws_access_key_id" ] || FATAL 'No AWS access key ID provided'
+	[ -n "$aws_secret_access_key" ] || FATAL 'No AWS secret access key provided'
 }
 
 bosh_env(){
@@ -48,7 +48,7 @@ AWS_SECRET_ACCESS_KEY="${6:-$AWS_SECRET_ACCESS_KEY}"
 MANIFESTS_DIR="${7:-Bosh-Manifests}"
 INTERNAL_DOMAIN="${8:-cf.internal}"
 
-[ -z "$DEPLOYMENT_NAME" ] && FATAL 'No Bosh deployment name provided'
+[ -n "$DEPLOYMENT_NAME" ] || FATAL 'No Bosh deployment name provided'
 
 grep -Eiq '^([[:alnum:]]+-?[[:alnum:]])+$' <<EOF || FATAL 'Invalid domain name, must be a valid domain label'
 $DEPLOYMENT_NAME
@@ -94,7 +94,7 @@ ENV_PREFIX="${ENV_PREFIX_NAME}_"
 [ -n "$INTERACTIVE" ] || BOSH_INTERACTIVE_OPT="--non-interactive"
 
 # Without a TTY (eg within Jenkins) Bosh doesn't seem to output anything when deploying
-[ -z "$NO_FORCE_TTY" ] && BOSH_TTY_OPT="--tty"
+[ -n "$NO_FORCE_TTY" ] || BOSH_TTY_OPT="--tty"
 
 if [ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ]; then
 	INFO 'Attempting to set AWS credentials'
