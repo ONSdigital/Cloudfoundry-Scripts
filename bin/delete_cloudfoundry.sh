@@ -42,13 +42,7 @@ INFO 'Deleting Bosh Deployment'
 "$BOSH" delete-deployment "$BOSH_FULL_MANIFEST_FILE" \
 	--force \
 	$BOSH_INTERACTIVE_OPT \
-	$BOSH_TTY_OPT \
-	--var bosh_name="$DEPLOYMENT_NAME" \
-	--var bosh_deployment="$BOSH_DEPLOYMENT" \
-	--var bosh_lite_ip="$director_dns" \
-	--vars-file="$SSL_YML" \
-	--vars-env="$ENV_PREFIX_NAME" \
-	--vars-store="$BOSH_FULL_VARS_FILE"
+	$BOSH_TTY_OPT
 
 INFO 'Deleting Bosh bootstrap environment'
 bosh_env delete-env || FATAL 'Bosh environment deletion failed'
