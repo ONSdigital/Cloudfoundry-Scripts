@@ -5,25 +5,52 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-. "$BASE_DIR/common.sh"
+. "$BASE_DIR/common-bosh.sh"
+	
+# Sanity check
+[ -f "$PASSWORD_CONFIG_FILE" ] || FATAL "Password configuration file does not exist: '$PASSWORD_CONFIG_FILE'"
 
-# Set secure umask - the default permissions for ~/.bosh/config are wide open
-INFO 'Setting secure umask'
-umask 077
+INFO 'Loading password configuration'
+eval export `prefix_vars "$PASSWORD_CONFIG_FILE" "$ENV_PREFIX"`
+# We set BOSH_CLIENT_SECRET to this later on
+eval DIRECTOR_PASSWORD="\$${ENV_PREFIX}director_password"
 
-SKIP_SSL_GENERATION='true'
-SKIP_PASSWORD_GENERATION='true'
-SKIP_COMPONENT_UPLOAD='true'
-SKIP_STATE_CHECK='true'
-SKIP_BOSH_CONFIG_CREATION='true'
 
-BOSH_DELETE_ENV='true'
+INFO 'Loading Bosh config'
+[ -f "$BOSH_CONFIG_FILE" ] || FATAL "Bosh configuration file does not exist: '$BOSH_CONFIG_FILE'"
+eval export `prefix_vars "$BOSH_CONFIG_FILE"`
+eval export `prefix_vars "$BOSH_SSH_CONFIG_FILE" "$ENV_PREFIX"`
 
-export SKIP_SSL_GENERATION SKIP_PASSWORD_GENERATION SKIP_COMPONENT_UPLOAD SKIP_STATE_CHECK SKIP_BOSH_CONFIG_CREATION BOSH_DELETE_ENV
+# Convert from relative to an absolute path
+findpath BOSH_CA_CERT "$BOSH_CA_CERT"
+export BOSH_CA_CERT
 
-#"$BOSH" delete-deployment $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
+# The file is recorded relative to the base directory, but Bosh changes its directory internally, whilst running, to the location of the manifest,
+# so we need to make sure the SSH file is an absolute location
+eval bosh_ssh_key_file="\$${ENV_PREFIX}bosh_ssh_key_file"
+findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 
-# We have to give Bosh quite a few details to delete itself, so we call deploy_cloudfoundry.sh with a few tweaks
-# When we have Bosh/director deployed properly, we'll need to refactor things. We'll have to create a Bosh instance and use that to delete the setup
-# It may be possible that create-env will let us create a full fat CF setup
-"$BASE_DIR/deploy_cloudfroundry.sh" $@
+INFO 'Pointing Bosh at newly deployed Bosh'
+"$BOSH" alias-env $BOSH_TTY_OPT -e "$director_dns" "$BOSH_ENVIRONMENT"
+
+INFO 'Attempting to login'
+"$BOSH" log-in $BOSH_TTY_OPT
+
+check_aws_keys
+
+INFO 'Deleting Bosh Deployment'
+"$BOSH" delete-deployment "$BOSH_FULL_MANIFEST_FILE" \
+	--force \
+	$BOSH_INTERACTIVE_OPT \
+	$BOSH_TTY_OPT \
+	--var bosh_name="$DEPLOYMENT_NAME" \
+	--var bosh_deployment="$BOSH_DEPLOYMENT" \
+	--var bosh_lite_ip="$director_dns" \
+	--vars-file="$SSL_YML" \
+	--vars-env="$ENV_PREFIX_NAME" \
+	--vars-store="$BOSH_FULL_VARS_FILE"
+
+INFO 'Deleting Bosh bootstrap environment'
+bosh_env delete-env || FATAL 'Bosh environment deletion failed'
+
+INFO 'Successfully deleted Bosh environment'
