@@ -13,6 +13,9 @@ IGNORE_MISSING_CONFIG='true'
 # Run common AWS Cloudformation parts
 . "$BASE_DIR/common-aws.sh"
 
+# Load outputs if we have one
+[ -f "$DEPLOYMENT_FOLDER/outputs.sh" ] && eval `prefix_vars "$DEPLOYMENT_FOLDER/outputs.sh"`
+
 if [ -f "$DEPLOYMENT_FOLDER/bosh-ssh.sh" ]; then
 	SSH_KEY_EXISTS=1
 
