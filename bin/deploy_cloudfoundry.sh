@@ -49,6 +49,14 @@ EOF
 	done >>"$PASSWORD_CONFIG_FILE"
 fi
 
+# Sanity check
+[ -f "$PASSWORD_CONFIG_FILE" ] || FATAL "Password configuration file does not exist: '$PASSWORD_CONFIG_FILE'"
+
+INFO 'Loading password configuration'
+eval export `prefix_vars "$PASSWORD_CONFIG_FILE" "$ENV_PREFIX"`
+# We set BOSH_CLIENT_SECRET to this later on
+eval DIRECTOR_PASSWORD="\$${ENV_PREFIX}director_password"
+
 if [ -z "$SKIP_BOSH_CONFIG_CREATION" -o x"$SKIP_BOSH_CONFIG_CREATION" != x"false" ]; then
 	INFO 'Generating Bosh configurations'
 		cat <<EOF >"$BOSH_CONFIG_FILE"
@@ -60,15 +68,6 @@ BOSH_CLIENT='director'
 BOSH_CA_CERT='$EXTERNAL_SSL_FOLDER_RELATIVE/ca/$domain_name.crt'
 EOF
 fi
-
-# Sanity check
-[ -f "$PASSWORD_CONFIG_FILE" ] || FATAL "Password configuration file does not exist: '$PASSWORD_CONFIG_FILE'"
-
-INFO 'Loading password configuration'
-eval export `prefix_vars "$PASSWORD_CONFIG_FILE" "$ENV_PREFIX"`
-# We set BOSH_CLIENT_SECRET to this later on
-eval DIRECTOR_PASSWORD="\$${ENV_PREFIX}director_password"
-
 
 INFO 'Loading Bosh config'
 [ -f "$BOSH_CONFIG_FILE" ] || FATAL "Bosh configuration file does not exist: '$BOSH_CONFIG_FILE'"
