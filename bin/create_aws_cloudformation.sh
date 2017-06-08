@@ -56,7 +56,17 @@ INFO 'Copying templates to S3'
 STACK_MAIN_URL="$templates_bucket_http_url/$MAIN_TEMPLATE_STACK_NAME"
 
 INFO 'Validating Cloudformation templates: main template'
-"$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL"
+"$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL" || FAILED=$?
+
+if [ 0$FAILED -ne 0 ]; then
+	INFO 'Cleaning preamble S3 bucket'
+	"$AWS" s3 rm --recursive "s3://$templates_bucket_name"
+
+	INFO 'Deleting preamble stack'
+	"$AWS" --output table cloudformation delete-stack --stack-name "$DEPLOYMENT_NAME-preamble"
+
+	FATAL 'Problem validating template'
+fi
 
 INFO 'Generating Cloudformation parameters JSON file'
 cat >"$STACK_PARAMETERS" <<EOF
