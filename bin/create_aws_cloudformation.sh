@@ -23,12 +23,10 @@ INFO 'Checking for existing Cloudformation stack'
 "$AWS" --query "StackSummaries[?(StackName == '$DEPLOYMENT_NAME' || StackName == '$DEPLOYMENT_NAME-preamble' ) && StackStatus != 'DELETE_COMPLETE'].StackName" \
 	cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack exists'
 
-INFO 'Validating Cloudformation templates'
-INFO '. Preamble template'
+INFO 'Validating Cloudformation templates: preamble template'
 "$AWS" --output table cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
-INFO '. Main template'
-"$AWS" --output table cloudformation validate-template --template-body "$STACK_MAIN_URL"
 
+# The pre-amble must be kept smaller than 51200 as we use it to host templates
 INFO 'Creating Cloudformation stack preamble'
 INFO 'Stack details:'
 "$AWS" --output table cloudformation create-stack \
@@ -51,7 +49,14 @@ parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_O
 
 eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
 
+INFO 'Copying templates to S3'
 "$AWS" s3 sync "$STACK_TEMPLATES_DIR/" "s3://$templates_bucket_name"
+"$AWS" s3 cp "$STACK_MAIN_FILE" "s3://$templates_bucket_name/$MAIN_TEMPLATE_STACK_NAME"
+
+STACK_MAIN_URL="$templates_bucket_http_url/$MAIN_TEMPLATE_STACK_NAME"
+
+INFO 'Validating Cloudformation templates: main template'
+"$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL"
 
 INFO 'Generating Cloudformation parameters JSON file'
 cat >"$STACK_PARAMETERS" <<EOF
@@ -96,7 +101,7 @@ INFO 'Creating Cloudformation stack'
 INFO 'Stack details:'
 "$AWS" --output table cloudformation create-stack \
 	--stack-name "$DEPLOYMENT_NAME" \
-	--template-body "$STACK_MAIN_URL" \
+	--template-url "$STACK_MAIN_URL" \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
 	--parameters "file://$STACK_PARAMETERS"

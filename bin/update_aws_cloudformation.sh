@@ -15,6 +15,7 @@ aws_change_set(){
 	local stack_url="$2"
 	local stack_outputs="$3"
 	local stack_parameters="$4"
+	local template_option="${5:---template-body}"
 
 	[ -z "$stack_name" ] && FATAL 'No stack name provided'
 	[ -z "$stack_url" ] && FATAL 'No stack url provided'
@@ -34,14 +35,14 @@ aws_change_set(){
 	[ -z "$stack_arn" ] && FATAL "Stack no longer exists"
 
 	INFO "Validating Cloudformation template: $stack_name"
-	"$AWS" --output table cloudformation validate-template --template-body "$stack_url"
+	"$AWS" --output table cloudformation validate-template $template_option "$stack_url"
 
 	INFO 'Creating Cloudformation stack change set'
 	INFO 'Stack details:'
 	sh -c "'$AWS' --output table cloudformation create-change-set --stack-name '$stack_arn' --change-set-name '$change_set_name' \
 		--capabilities CAPABILITY_IAM \
 		--capabilities CAPABILITY_NAMED_IAM \
-		--template-body '$stack_url' \
+		$template_option '$stack_url' \
 		$aws_opts"
 
 
@@ -69,6 +70,15 @@ aws_change_set(){
 
 aws_change_set "$DEPLOYMENT_NAME-preamble" "$STACK_PREAMBLE_URL" "$STACK_PREAMBLE_OUTPUTS"
 
-aws_change_set "$DEPLOYMENT_NAME" "$STACK_MAIN_URL" "$STACK_MAIN_OUTPUTS" "file://$STACK_PARAMETERS"
+INFO 'Parsing preamble outputs'
+eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
+
+INFO 'Copying templates to S3'
+"$AWS" s3 sync "$STACK_TEMPLATES_DIR/" "s3://$templates_bucket_name"
+"$AWS" s3 cp "$STACK_MAIN_FILE" "s3://$templates_bucket_name/$MAIN_TEMPLATE_STACK_NAME"
+
+STACK_MAIN_URL="$templates_bucket_http_url/$MAIN_TEMPLATE_STACK_NAME"
+
+aws_change_set "$DEPLOYMENT_NAME" "$STACK_MAIN_URL" "$STACK_MAIN_OUTPUTS" "file://$STACK_PARAMETERS" --template-url
 
 calculate_vpc_dns_ip "$STACK_MAIN_OUTPUTS" >>"$STACK_MAIN_OUTPUTS"

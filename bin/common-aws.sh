@@ -119,6 +119,10 @@ AWS_REGION="${AWS_REGION:-$4}"
 AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-$5}"
 AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-$6}"
 
+# Maximum AWS Cloudformation stack size for --template-body
+TEMPLATE_MAX_SIZE='51200'
+MAIN_TEMPLATE_STACK_NAME='main-stack-template.json'
+
 if which aws >/dev/null 2>&1; then
 	AWS="`which aws`"
 
@@ -161,7 +165,6 @@ if [ -z "$IGNORE_MISSING_CONFIG" ]; then
 fi
 
 STACK_PREAMBLE_URL="file://$STACK_PREAMBLE_FILE"
-STACK_MAIN_URL="file://$STACK_MAIN_FILE"
 
 STACK_PREAMBLE_OUTPUTS="$DEPLOYMENT_FOLDER/outputs-preamble.sh"
 STACK_MAIN_OUTPUTS="$DEPLOYMENT_FOLDER/outputs.sh"
