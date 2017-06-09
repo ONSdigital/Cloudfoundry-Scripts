@@ -48,7 +48,6 @@ aws_change_set(){
 
 	INFO 'Waiting for Cloudformation changeset to be created'
 	if "$AWS" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"; then
-	#if "$AWS" --output json --query 'Changes' cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name" | grep -Eq '^\[\]$'; then
 		INFO 'Stack change set details:'
 		"$AWS" --output table cloudformation list-change-sets --stack-name "$stack_arn"
 		INFO 'Starting Cloudformation changeset'
