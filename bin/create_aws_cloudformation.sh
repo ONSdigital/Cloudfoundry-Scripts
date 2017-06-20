@@ -66,10 +66,6 @@ cat >"$STACK_PARAMETERS" <<EOF
 		"ParameterValue": "$DEPLOYMENT_NAME"
 	},
 	{
-		"ParameterKey": "AwsRegion",
-		"ParameterValue": "$AWS_REGION"
-	},
-	{
 		"ParameterKey": "Organisation",
 		"ParameterValue": "${ORGANISATION:-Unknown}"
 	},
