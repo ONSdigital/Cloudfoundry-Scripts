@@ -33,15 +33,17 @@ aws_change_set(){
 
 	[ -z "$stack_arn" ] && FATAL "Stack no longer exists"
 
+	echo "$stack_url" | grep -Eq '^file://' && TEMPLATE_OPT='--template-body' || TEMPLATE_OPT='--template-url'
+
 	INFO "Validating Cloudformation template: $stack_name"
-	"$AWS" --output table cloudformation validate-template --template-body "$stack_url"
+	"$AWS" --output table cloudformation validate-template $TEMPLATE_OPT "$stack_url"
 
 	INFO 'Creating Cloudformation stack change set'
 	INFO 'Stack details:'
 	sh -c "'$AWS' --output table cloudformation create-change-set --stack-name '$stack_arn' --change-set-name '$change_set_name' \
 		--capabilities CAPABILITY_IAM \
 		--capabilities CAPABILITY_NAMED_IAM \
-		--template-body '$stack_url' \
+		$TEMPLATE_OPT '$stack_url' \
 		$aws_opts"
 
 
@@ -70,7 +72,10 @@ aws_change_set "$DEPLOYMENT_NAME-preamble" "$STACK_PREAMBLE_URL" "$STACK_PREAMBL
 
 eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
 
-"$AWS" s3 sync "$STACK_TEMPLATES_DIR/" "s3://$templates_bucket_name"
+# Now we can set the main stack URL
+STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
+
+"$AWS" s3 sync --exclude .git --exclude LICENSE --exclude "$STACK_PREAMBLE_FILENAME" "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name"
 
 aws_change_set "$DEPLOYMENT_NAME" "$STACK_MAIN_URL" "$STACK_MAIN_OUTPUTS" "file://$STACK_PARAMETERS"
 
