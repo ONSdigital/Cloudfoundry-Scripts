@@ -23,11 +23,9 @@ INFO 'Checking for existing Cloudformation stack'
 "$AWS" --query "StackSummaries[?(StackName == '$DEPLOYMENT_NAME' || StackName == '$DEPLOYMENT_NAME-preamble' ) && StackStatus != 'DELETE_COMPLETE'].StackName" \
 	cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack exists'
 
-INFO 'Validating Cloudformation templates'
-INFO '. Preamble template'
+INFO 'Validating Cloudformation Preamble Template'
 "$AWS" --output table cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
-INFO '. Main template'
-"$AWS" --output table cloudformation validate-template --template-body "$STACK_MAIN_URL"
+
 
 INFO 'Creating Cloudformation stack preamble'
 INFO 'Stack details:'
@@ -51,7 +49,14 @@ parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_O
 
 eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
 
-"$AWS" s3 sync "$STACK_TEMPLATES_DIR/" "s3://$templates_bucket_name"
+# Now we can set the main stack URL
+STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
+
+"$AWS" s3 sync --exclude "$STACK_PREAMBLE_FILENAME" "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name"
+
+
+INFO 'Validating Cloudformation Template'
+"$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL"
 
 INFO 'Generating Cloudformation parameters JSON file'
 cat >"$STACK_PARAMETERS" <<EOF
@@ -88,6 +93,22 @@ cat >"$STACK_PARAMETERS" <<EOF
 		"ParameterKey": "ExternalCidr4",
 		"ParameterValue": "${EXTERNAL_CIDR4:-127.0.0.0/8}"
 	}
+	{
+		"ParameterKey": "ExternalCidr5",
+		"ParameterValue": "${EXTERNAL_CIDR5:-127.0.0.0/8}"
+	}
+	{
+		"ParameterKey": "ExternalCidr6",
+		"ParameterValue": "${EXTERNAL_CIDR6:-127.0.0.0/8}"
+	}
+	{
+		"ParameterKey": "ExternalCidr7",
+		"ParameterValue": "${EXTERNAL_CIDR7:-127.0.0.0/8}"
+	}
+	{
+		"ParameterKey": "ExternalCidr8",
+		"ParameterValue": "${EXTERNAL_CIDR8:-127.0.0.0/8}"
+	}
 ]
 EOF
 
@@ -96,7 +117,7 @@ INFO 'Creating Cloudformation stack'
 INFO 'Stack details:'
 "$AWS" --output table cloudformation create-stack \
 	--stack-name "$DEPLOYMENT_NAME" \
-	--template-body "$STACK_MAIN_URL" \
+	--template-url "$STACK_MAIN_URL" \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
 	--parameters "file://$STACK_PARAMETERS"
