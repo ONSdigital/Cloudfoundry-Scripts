@@ -92,19 +92,19 @@ cat >"$STACK_PARAMETERS" <<EOF
 	{
 		"ParameterKey": "ExternalCidr4",
 		"ParameterValue": "${EXTERNAL_CIDR4:-127.0.0.0/8}"
-	}
+	},
 	{
 		"ParameterKey": "ExternalCidr5",
 		"ParameterValue": "${EXTERNAL_CIDR5:-127.0.0.0/8}"
-	}
+	},
 	{
 		"ParameterKey": "ExternalCidr6",
 		"ParameterValue": "${EXTERNAL_CIDR6:-127.0.0.0/8}"
-	}
+	},
 	{
 		"ParameterKey": "ExternalCidr7",
 		"ParameterValue": "${EXTERNAL_CIDR7:-127.0.0.0/8}"
-	}
+	},
 	{
 		"ParameterKey": "ExternalCidr8",
 		"ParameterValue": "${EXTERNAL_CIDR8:-127.0.0.0/8}"
