@@ -26,7 +26,7 @@ EXTERNAL_SSL_NAMES='jwt'
 EXTERNAL_SSH_NAMES='cf-ssh'
 
 # Append $SERVICE_DOMAIN
-INTERNAL_SERVICE_SSL_NAMES='cloud-controller-ng uaa'
+INTERNAL_SERVICE_SSL_NAMES='cloud-controller-ng uaa blobstore'
 
 # Append $SERVICE_DOMAIN and prefix vars with consul_
 INTERNAL_CONSUL_SSL_NAMES='server.dc1 agent.dc1'
