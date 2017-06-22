@@ -76,7 +76,8 @@ INFO 'Copying templates to S3'
 "$AWS" s3 sync "$STACK_TEMPLATES_DIR/" "s3://$templates_bucket_name"
 "$AWS" s3 cp "$STACK_MAIN_FILE" "s3://$templates_bucket_name/$MAIN_TEMPLATE_STACK_NAME"
 
-STACK_MAIN_URL="$templates_bucket_http_url/$MAIN_TEMPLATE_STACK_NAME"
+# Now we can set the main stack URL
+STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
 aws_change_set "$DEPLOYMENT_NAME" "$STACK_MAIN_URL" "$STACK_MAIN_OUTPUTS" "file://$STACK_PARAMETERS" --template-url
 

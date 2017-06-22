@@ -23,7 +23,8 @@ INFO 'Checking for existing Cloudformation stack'
 "$AWS" --query "StackSummaries[?(StackName == '$DEPLOYMENT_NAME' || StackName == '$DEPLOYMENT_NAME-preamble' ) && StackStatus != 'DELETE_COMPLETE'].StackName" \
 	cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack exists'
 
-INFO 'Validating Cloudformation templates: preamble template'
+INFO 'Validating Cloudformation Preamble Template'
+"$AWS" --output table cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
 "$AWS" --output table cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
 
 # The pre-amble must be kept smaller than 51200 as we use it to host templates
@@ -50,10 +51,11 @@ parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_O
 eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
 
 INFO 'Copying templates to S3'
-"$AWS" s3 sync "$STACK_TEMPLATES_DIR/" "s3://$templates_bucket_name"
+"$AWS" s3 sync --exclude .git --exclude LICENSE --exclude "$STACK_PREAMBLE_FILENAME" "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name"
 "$AWS" s3 cp "$STACK_MAIN_FILE" "s3://$templates_bucket_name/$MAIN_TEMPLATE_STACK_NAME"
 
-STACK_MAIN_URL="$templates_bucket_http_url/$MAIN_TEMPLATE_STACK_NAME"
+# Now we can set the main stack URL
+STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
 INFO 'Validating Cloudformation templates: main template'
 "$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL" || FAILED=$?
@@ -68,16 +70,16 @@ if [ 0$FAILED -ne 0 ]; then
 	FATAL 'Problem validating template'
 fi
 
+
+INFO 'Validating Cloudformation Template'
+"$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL"
+
 INFO 'Generating Cloudformation parameters JSON file'
 cat >"$STACK_PARAMETERS" <<EOF
 [
 	{
 		"ParameterKey": "DeploymentName",
 		"ParameterValue": "$DEPLOYMENT_NAME"
-	},
-	{
-		"ParameterKey": "AwsRegion",
-		"ParameterValue": "$AWS_REGION"
 	},
 	{
 		"ParameterKey": "Organisation",
@@ -88,20 +90,36 @@ cat >"$STACK_PARAMETERS" <<EOF
 		"ParameterValue": "${HOSTED_ZONE:-localhost}"
 	},
 	{
-		"ParameterKey": "ExternalCidr1",
-		"ParameterValue": "${EXTERNAL_CIDR1:-127.0.0.0/8}"
+		"ParameterKey": "External1Cidr",
+		"ParameterValue": "${EXTERNAL1_CIDR:-127.0.0.0/8}"
 	},
 	{
-		"ParameterKey": "ExternalCidr2",
-		"ParameterValue": "${EXTERNAL_CIDR2:-127.0.0.0/8}"
+		"ParameterKey": "External2idr",
+		"ParameterValue": "${EXTERNAL2_CIDR:-127.0.0.0/8}"
 	},
 	{
-		"ParameterKey": "ExternalCidr3",
-		"ParameterValue": "${EXTERNAL_CIDR3:-127.0.0.0/8}"
+		"ParameterKey": "External3Cidr",
+		"ParameterValue": "${EXTERNAL3_CIDR:-127.0.0.0/8}"
 	},
 	{
-		"ParameterKey": "ExternalCidr4",
-		"ParameterValue": "${EXTERNAL_CIDR4:-127.0.0.0/8}"
+		"ParameterKey": "External4Cidr",
+		"ParameterValue": "${EXTERNAL4_CIDR:-127.0.0.0/8}"
+	},
+	{
+		"ParameterKey": "External5Cidr",
+		"ParameterValue": "${EXTERNAL5_CIDR:-127.0.0.0/8}"
+	},
+	{
+		"ParameterKey": "External6Cidr",
+		"ParameterValue": "${EXTERNAL6_CIDR:-127.0.0.0/8}"
+	},
+	{
+		"ParameterKey": "External7Cidr",
+		"ParameterValue": "${EXTERNAL7_CIDR:-127.0.0.0/8}"
+	},
+	{
+		"ParameterKey": "External8Cidr",
+		"ParameterValue": "${EXTERNAL8_CIDR:-127.0.0.0/8}"
 	}
 ]
 EOF

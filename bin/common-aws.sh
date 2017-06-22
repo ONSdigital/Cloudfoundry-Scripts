@@ -4,15 +4,18 @@
 # Quite long winded, but we need to ensure we don't trample over any customised config
 aws_region(){
 	local new_aws_region="$1"
-	local stack_outputs="$2"
+
+	local current_region="`\"$AWS\" configure get region`"
 
 	# Do we need to update the config?
-	if [ -n "$new_aws_region" ]; then
+	if [ -n "$new_aws_region" -a x"$current_region" = x"$new_aws_region" ]; then
 		if ! "$AWS" configure get region | grep -qE "^$new_aws_region"; then
 			INFO 'Updating AWS CLI region configuration'
 			"$AWS" configure set region "$new_aws_region"
 			"$AWS" configure set output text
 		fi
+	else
+		echo "$current_region"
 	fi
 }
 
@@ -20,7 +23,6 @@ aws_region(){
 aws_credentials(){
 	local new_aws_access_key_id="$1"
 	local new_aws_secret_access_key="$2"
-	local stack_outputs="$3"
 
 	if [ -n "$new_aws_access_key_id" ]; then
 		if ! "$AWS" configure get aws_access_key_id | grep -qE "^$new_aws_access_key_id"; then
@@ -104,8 +106,9 @@ EOF
 INFO 'Setting secure umask'
 umask 077
 
+CONFIGURED_AWS_REGION="`aws_region`"
 # Provide a default - these should come from a configuration/defaults file
-DEFAULT_AWS_REGION="${DEFAULT_AWS_REGION:-eu-central-1}"
+DEFAULT_AWS_REGION="${DEFAULT_AWS_REGION:-${CONFIGURED_AWS_REGION:-eu-central-1}}"
 EXTERNAL_CIDR1="${EXTERNAL_CIDR1:-127.0.0.0/8}"
 EXTERNAL_CIDR2="${EXTERNAL_CIDR2:-127.0.0.0/8}"
 EXTERNAL_CIDR3="${EXTERNAL_CIDR3:-127.0.0.0/8}"
@@ -149,9 +152,12 @@ grep -Eq '[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9]$' <<EOF || FATAL 'Invalid deployme
 $DEPLOYMENT_NAME
 EOF
 
-STACK_MAIN_FILE="$CLOUDFORMATION_DIR/$INSTALLATION_CONFIG.json"
-STACK_PREAMBLE_FILE="$CLOUDFORMATION_DIR/$INSTALLATION_CONFIG-preamble.json"
-STACK_TEMPLATES_DIR="$CLOUDFORMATION_DIR/Templates"
+STACK_MAIN_FILENAME="$INSTALLATION_CONFIG.json"
+STACK_MAIN_FILE="$CLOUDFORMATION_DIR/$STACK_MAIN_FILENAME"
+STACK_PREAMBLE_FILENAME="$INSTALLATION_CONFIG-preamble.json"
+STACK_PREAMBLE_FILE="$CLOUDFORMATION_DIR/$STACK_PREAMBLE_FILENAME"
+STACK_TEMPLATES_DIRNAME="Templates"
+STACK_TEMPLATES_DIR="$CLOUDFORMATION_DIR/$STACK_TEMPLATES_DIRNAME"
 
 [ -z "$CLOUDFORMATION_DIR" ] && FATAL 'No configuration directory supplied'
 [ -d "$CLOUDFORMATION_DIR" ] || FATAL 'Configuration directory does not exist'
@@ -171,7 +177,7 @@ STACK_MAIN_OUTPUTS="$DEPLOYMENT_FOLDER/outputs.sh"
 STACK_PARAMETERS="$DEPLOYMENT_FOLDER/aws-parameters.json"
 
 # Do we need to update the config?
-[ -n "$AWS_REGION" ] && aws_region "$AWS_REGION" "$STACK_MAIN_OUTPUTS"
+aws_region "$AWS_REGION" "$STACK_MAIN_OUTPUTS"
 
 # Do we need to update credentials?
 [ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ] && aws_credentials "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$STACK_MAIN_OUTPUTS"
