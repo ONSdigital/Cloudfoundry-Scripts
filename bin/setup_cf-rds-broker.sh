@@ -59,11 +59,11 @@ applications:
     # Should we create a special user just for this?
     AUTH_USER: $RDS_BROKER_USER
     AUTH_PASS: $RDS_BROKER_PASSWORD
-    DB_URL: $database_address
-    DB_PORT: $database_port
+    DB_URL: $rds_address
+    DB_PORT: $rds_port
     DB_NAME: $DB_NAME
-    DB_USER: $database_username
-    DB_PASS: $database_password
+    DB_USER: $rds_username
+    DB_PASS: $rds_password
     DB_TYPE: postgres
     #DB_SSLMODE:''
     ENC_KEY: $RDS_BROKER_ENC_KEY
@@ -71,8 +71,8 @@ applications:
     AWS_ACCESS_KEY_ID: $rds_broker_access_key_id
     AWS_SECRET_ACCESS_KEY: $rds_broker_access_key
     INSTANCE_TAGS: [ 'name','$deployment_name-Broker-Database' ]
-    AWS_SEC_GROUP: $database_security_group
-    AWS_DB_SUBNET_GROUP: $database_subnet_group
+    AWS_SEC_GROUP: $rds_security_group
+    AWS_DB_SUBNET_GROUP: $rds_subnet_group
 EOF
 
 if [ -f "$CONFIG_DIRECTORY/$SERVICE_NAME/catalog.yaml" ]; then
@@ -85,9 +85,9 @@ INFO "Ensuring space exists: $SERVICES_SPACE"
 INFO 'Creating inital RDS database'
 WARN "This won't work when we have an external RDS database backing CF - we'll need to install psql locally and connect to the RDS Postgres instance"
 "$BASE_DIR/bosh-ssh.sh" "$DEPLOYMENT_NAME" postgres <<EOF
-export PGPASSWORD="$database_password";
+export PGPASSWORD="$rds_password";
 PSQL="\`find -L /var/vcap/packages -name psql | sort -n | tail -n1\`";
-"\$PSQL" -h$database_address -U$database_username -c "CREATE DATABASE $DB_NAME" || :;
+"\$PSQL" -h$rds_address -U$rds_username -c "CREATE DATABASE $DB_NAME" || :;
 exit
 EOF
 
