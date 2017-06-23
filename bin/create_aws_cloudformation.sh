@@ -90,36 +90,36 @@ cat >"$STACK_PARAMETERS" <<EOF
 		"ParameterValue": "${HOSTED_ZONE:-localhost}"
 	},
 	{
-		"ParameterKey": "External1Cidr",
-		"ParameterValue": "${EXTERNAL1_CIDR:-127.0.0.0/8}"
+		"ParameterKey": "FullAccess1Cidr",
+		"ParameterValue": "${EXTERNAL_CIDR1:-127.0.0.0/8}"
 	},
 	{
-		"ParameterKey": "External2idr",
-		"ParameterValue": "${EXTERNAL2_CIDR:-127.0.0.0/8}"
+		"ParameterKey": "FullAccess2Cidr",
+		"ParameterValue": "${EXTERNAL_CIDR2:-127.0.0.0/8}"
 	},
 	{
-		"ParameterKey": "External3Cidr",
-		"ParameterValue": "${EXTERNAL3_CIDR:-127.0.0.0/8}"
+		"ParameterKey": "FullAccess3Cidr",
+		"ParameterValue": "${EXTERNAL_CIDR3:-127.0.0.0/8}"
 	},
 	{
-		"ParameterKey": "External4Cidr",
-		"ParameterValue": "${EXTERNAL4_CIDR:-127.0.0.0/8}"
+		"ParameterKey": "FullAccess4Cidr",
+		"ParameterValue": "${EXTERNAL_CIDR4:-127.0.0.0/8}"
 	},
 	{
-		"ParameterKey": "External5Cidr",
-		"ParameterValue": "${EXTERNAL5_CIDR:-127.0.0.0/8}"
+		"ParameterKey": "HttpAccess1Cidr",
+		"ParameterValue": "${EXTERNAL_CIDR5:-127.0.0.0/8}"
 	},
 	{
-		"ParameterKey": "External6Cidr",
-		"ParameterValue": "${EXTERNAL6_CIDR:-127.0.0.0/8}"
+		"ParameterKey": "HttpAccess2Cidr",
+		"ParameterValue": "${EXTERNAL_CIDR6:-127.0.0.0/8}"
 	},
 	{
-		"ParameterKey": "External7Cidr",
-		"ParameterValue": "${EXTERNAL7_CIDR:-127.0.0.0/8}"
+		"ParameterKey": "HttpAccess3Cidr",
+		"ParameterValue": "${EXTERNAL_CIDR7:-127.0.0.0/8}"
 	},
 	{
-		"ParameterKey": "External8Cidr",
-		"ParameterValue": "${EXTERNAL8_CIDR:-127.0.0.0/8}"
+		"ParameterKey": "HttpAccess4Cidr",
+		"ParameterValue": "${EXTERNAL_CIDR8:-127.0.0.0/8}"
 	}
 ]
 EOF
