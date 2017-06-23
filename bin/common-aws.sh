@@ -8,7 +8,7 @@ aws_region(){
 	local current_region="`\"$AWS\" configure get region`"
 
 	# Do we need to update the config?
-	if [ -n "$new_aws_region" -a x"$current_region" = x"$new_aws_region" ]; then
+	if [ -n "$new_aws_region" -a x"$current_region" != x"$new_aws_region" ]; then
 		if ! "$AWS" configure get region | grep -qE "^$new_aws_region"; then
 			INFO 'Updating AWS CLI region configuration'
 			"$AWS" configure set region "$new_aws_region"
@@ -106,6 +106,16 @@ EOF
 INFO 'Setting secure umask'
 umask 077
 
+if which aws >/dev/null 2>&1; then
+	AWS="`which aws`"
+
+elif [ -f "$BIN_DIRECTORY/aws" ]; then
+	AWS="$BIN_DIRECTORY/aws"
+
+else
+	FATAL "AWS cli is not installed - did you run '$BASE_DIR/install_deps.sh'?"
+fi
+
 CONFIGURED_AWS_REGION="`aws_region`"
 # Provide a default - these should come from a configuration/defaults file
 DEFAULT_AWS_REGION="${DEFAULT_AWS_REGION:-${CONFIGURED_AWS_REGION:-eu-central-1}}"
@@ -125,16 +135,6 @@ AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-$6}"
 # Maximum AWS Cloudformation stack size for --template-body
 TEMPLATE_MAX_SIZE='51200'
 MAIN_TEMPLATE_STACK_NAME='main-stack-template.json'
-
-if which aws >/dev/null 2>&1; then
-	AWS="`which aws`"
-
-elif [ -f "$BIN_DIRECTORY/aws" ]; then
-	AWS="$BIN_DIRECTORY/aws"
-
-else
-	FATAL "AWS cli is not installed - did you run '$BASE_DIR/install_deps.sh'?"
-fi
 
 CLOUDFORMATION_DIR="${CLOUDFORMATION_DIR:-AWS-Cloudformation}"
 
