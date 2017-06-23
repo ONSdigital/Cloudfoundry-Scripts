@@ -25,7 +25,6 @@ INFO 'Checking for existing Cloudformation stack'
 
 INFO 'Validating Cloudformation Preamble Template'
 "$AWS" --output table cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
-"$AWS" --output table cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
 
 # The pre-amble must be kept smaller than 51200 as we use it to host templates
 INFO 'Creating Cloudformation stack preamble'
