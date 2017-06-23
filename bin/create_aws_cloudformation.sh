@@ -139,7 +139,7 @@ INFO 'Waiting for Cloudformation stack to finish creation'
 
 parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME" >"$STACK_MAIN_OUTPUTS"
 
-calculate_vpc_dns_ip "$STACK_MAIN_OUTPUTS" >>"$STACK_MAIN_OUTPUTS"
+calculate_dns_ip "$STACK_MAIN_OUTPUTS" >>"$STACK_MAIN_OUTPUTS"
 
 # XXX
 # For bonus points we should really check the local SSH key fingerprint matches the AWS SSH key finger print

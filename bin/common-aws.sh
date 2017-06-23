@@ -68,7 +68,7 @@ check_cloudformation_stack(){
 	"$AWS" --output text --query "StackSummaries[?StackName == '$stack_name' && (StackStatus == 'CREATE_COMPLETE' || StackStatus == 'UPDATE_COMPLETE' || StackStatus == 'UPDATE_ROLLBACK_COMPLETE')].[StackName]" cloudformation list-stacks | grep -q "^$stack_name$" && INFO 'Stack found' || INFO 'Stack does not exist'
 }
 
-calculate_vpc_dns_ip(){
+calculate_dns_ip(){
 	local stack_outputs="$1"
 
 	[ -z "$stack_outputs" ] && FATAL 'No stack outputs provided'
@@ -100,7 +100,7 @@ calculate_vpc_dns_ip(){
 $ip
 EOF
 
-	echo "vpc_dns_ip='$ip'"
+	echo "dns_ip='$ip'"
 }
 
 INFO 'Setting secure umask'
