@@ -73,7 +73,7 @@ INFO 'Parsing preamble outputs'
 eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
 
 INFO 'Copying templates to S3'
-"$AWS" s3 sync "$STACK_TEMPLATES_DIR/" "s3://$templates_bucket_name"
+"$AWS" s3 sync "$STACK_TEMPLATES_DIR/" "s3://$templates_bucket_name" --exclude '*' --include '*.json' --include '*/*.json'
 "$AWS" s3 cp "$STACK_MAIN_FILE" "s3://$templates_bucket_name/$MAIN_TEMPLATE_STACK_NAME"
 
 # Now we can set the main stack URL
