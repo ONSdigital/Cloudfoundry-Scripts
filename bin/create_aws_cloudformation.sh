@@ -91,7 +91,11 @@ cat >"$STACK_PARAMETERS" <<EOF
 	{ "ParameterKey": "HttpAccess1Cidr", "ParameterValue": "${EXTERNAL_CIDR5:-127.0.0.0/8}" },
 	{ "ParameterKey": "HttpAccess2Cidr", "ParameterValue": "${EXTERNAL_CIDR6:-127.0.0.0/8}" },
 	{ "ParameterKey": "HttpAccess3Cidr", "ParameterValue": "${EXTERNAL_CIDR7:-127.0.0.0/8}" },
-	{ "ParameterKey": "HttpAccess4Cidr", "ParameterValue": "${EXTERNAL_CIDR8:-127.0.0.0/8}" }
+	{ "ParameterKey": "HttpAccess4Cidr", "ParameterValue": "${EXTERNAL_CIDR8:-127.0.0.0/8}" },
+
+	{ "ParameterKey": "StackProtectionGroup", "ParameterValue": "${STACK_PROTECTION_GROUP:-NONE}" },
+	{ "ParameterKey": "StackDeleteAllowDeny", "ParameterValue": "${STACKDELETEALLOWDENY:-Allow}" },
+	{ "ParameterKey": "StackUpdateAllowDeny", "ParameterValue": "${STACKUPDATEALLOWDENY:-Allow}" },
 ]
 EOF
 
