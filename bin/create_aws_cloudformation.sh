@@ -35,7 +35,6 @@ INFO 'Stack details:'
 	--stack-name "$DEPLOYMENT_NAME-preamble" \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
-	--on-failure DELETE \
 	--template-body "$STACK_PREAMBLE_URL"
 
 INFO 'Waiting for Cloudformation stack to finish creation'
