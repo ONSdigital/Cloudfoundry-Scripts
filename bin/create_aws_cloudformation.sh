@@ -95,7 +95,7 @@ cat >"$STACK_PARAMETERS" <<EOF
 
 	{ "ParameterKey": "StackProtectionGroup", "ParameterValue": "${STACK_PROTECTION_GROUP:-NONE}" },
 	{ "ParameterKey": "StackDeleteAllowDeny", "ParameterValue": "${STACKDELETEALLOWDENY:-Allow}" },
-	{ "ParameterKey": "StackUpdateAllowDeny", "ParameterValue": "${STACKUPDATEALLOWDENY:-Allow}" },
+	{ "ParameterKey": "StackUpdateAllowDeny", "ParameterValue": "${STACKUPDATEALLOWDENY:-Allow}" }
 ]
 EOF
 
