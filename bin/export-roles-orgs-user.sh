@@ -1,12 +1,10 @@
 #!/bin/sh
 
-for i in `01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh`; do
+for i in 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh; do
 	[ -f "$i" ] && rm -f "$i"
 done
 
 for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting|$)/'`; do
-	password="`head /dev/urandom | tr -dc '[:alnum:]' | head -c 16`"
-
 	echo "cf create-org \"$org\"" >>01_create-org.sh
 
 	cf target -o "$org" 2>&1 >/dev/null
@@ -16,8 +14,11 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting|$)/'`; do
 		printf("cf create-space \"%s\" -o \"%s\"\n",$1,org)
 	}' >>02_create-space.sh
 	
-	cf org-users -a "$org" | awk -v password="$password" '!/^(USERS|Getting|(ORG|BILLING) MANAGER|$)/{ gsub(" *",""); printf("cf create-user \"%s\" \"%s\"\n",$1,password)}' \
-		>>03_create-users.sh
+	cf org-users -a "$org" | awk '!/^(USERS|Getting|$)/{
+		gsub(" *","")
+		"head /dev/urandom | tr -dc \"[:alnum:]\" | head -c 16" | getline password
+		printf("cf create-user \"%s\" \"%s\"\n",$1,password)
+	}' >>03_create-users.sh
 
 
 	for space in `cf spaces | awk '!/^(name|Getting|No.*found|$)/'`; do
@@ -35,7 +36,7 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting|$)/'`; do
 		}' >>04_space-roles.sh
 	done
 
-	cf org-users -a "$org" | awk -v org="$org" '!/^(USERS|Getting|No.*found|$)/{
+	cf org-users "$org" | awk -v org="$org" '!/^(USERS|Getting|No.*found|$)/{
 		gsub("^ *","")
 		if($0 ~ /ORG MANAGER/){
 			role="OrgManager"
@@ -46,7 +47,7 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting|$)/'`; do
 		}else{
 			printf("cf set-org-role \"%s\" \"%s\" \"%s\"\n",$1,org,role)
 		}
-	}' >>05_org-roles.sh
+	}' #>>05_org-roles.sh
 done
 
 ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh
