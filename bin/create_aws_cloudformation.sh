@@ -103,6 +103,7 @@ INFO 'Stack details:'
 	--template-url "$STACK_MAIN_URL" \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
+	--on_failure DO_NOTHING \
 	--parameters "file://$STACK_PARAMETERS"
 
 INFO 'Waiting for Cloudformation stack to finish creation'
