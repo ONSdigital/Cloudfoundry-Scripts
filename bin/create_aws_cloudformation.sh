@@ -91,10 +91,7 @@ cat >"$STACK_PARAMETERS" <<EOF
 	{ "ParameterKey": "HttpAccess1Cidr", "ParameterValue": "${EXTERNAL_CIDR5:-127.0.0.0/8}" },
 	{ "ParameterKey": "HttpAccess2Cidr", "ParameterValue": "${EXTERNAL_CIDR6:-127.0.0.0/8}" },
 	{ "ParameterKey": "HttpAccess3Cidr", "ParameterValue": "${EXTERNAL_CIDR7:-127.0.0.0/8}" },
-	{ "ParameterKey": "HttpAccess4Cidr", "ParameterValue": "${EXTERNAL_CIDR8:-127.0.0.0/8}" },
-
-	{ "ParameterKey": "StackDeleteAllowDeny", "ParameterValue": "${STACKDELETEALLOWDENY:-Allow}" },
-	{ "ParameterKey": "StackUpdateAllowDeny", "ParameterValue": "${STACKUPDATEALLOWDENY:-Allow}" }
+	{ "ParameterKey": "HttpAccess4Cidr", "ParameterValue": "${EXTERNAL_CIDR8:-127.0.0.0/8}" }
 ]
 EOF
 
@@ -106,7 +103,6 @@ INFO 'Stack details:'
 	--template-url "$STACK_MAIN_URL" \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
-	--on-failure DELETE \
 	--parameters "file://$STACK_PARAMETERS"
 
 INFO 'Waiting for Cloudformation stack to finish creation'
