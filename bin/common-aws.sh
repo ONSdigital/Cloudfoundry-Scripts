@@ -38,6 +38,23 @@ aws_credentials(){
 	fi
 }
 
+update_parameter(){
+	local file="$1"
+	local parameter="$2"
+	local value="$3"
+
+	[ -f "$file" ] || FATAL "Parameter file does not exist: $file"
+	[ -z "$parameter" ] && FATAL 'No parameter to set'
+	[ -z "$value" ] && FATAL 'No value provided'
+
+	# A value containing @ will probably be an email address which should mean # is not used
+	# ...
+	echo "$value" | grep -E '#' && local separator='@' || local separator='#'
+
+	sed -i -re "s$separator\"(ParameterKey)\": \"($parameter)\", \"(ParameterValue)\": \"[^\"]+\"$separator\"\1\": \"\2\":, \"\3\": \"$value\"$separatorg" \
+		"$file"
+}
+
 parse_aws_cloudformation_outputs(){
 	# We parse the outputs and parameters to build a list of the stack variables - these are then used later on
 	# by the Cloudfondry deployment

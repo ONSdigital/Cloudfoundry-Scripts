@@ -35,6 +35,7 @@ INFO 'Stack details:'
 	--stack-name "$DEPLOYMENT_NAME-preamble" \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
+	--on-failure DELETE \
 	--template-body "$STACK_PREAMBLE_URL"
 
 INFO 'Waiting for Cloudformation stack to finish creation'
@@ -73,52 +74,27 @@ INFO 'Validating Cloudformation Template'
 "$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL"
 
 INFO 'Generating Cloudformation parameters JSON file'
+# The parameters file is specifically formatted to allow easier changing of parameters by another script
 cat >"$STACK_PARAMETERS" <<EOF
 [
-	{
-		"ParameterKey": "DeploymentName",
-		"ParameterValue": "$DEPLOYMENT_NAME"
-	},
-	{
-		"ParameterKey": "Organisation",
-		"ParameterValue": "${ORGANISATION:-Unknown}"
-	},
-	{
-		"ParameterKey": "HostedZone",
-		"ParameterValue": "${HOSTED_ZONE:-localhost}"
-	},
-	{
-		"ParameterKey": "FullAccess1Cidr",
-		"ParameterValue": "${EXTERNAL_CIDR1:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "FullAccess2Cidr",
-		"ParameterValue": "${EXTERNAL_CIDR2:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "FullAccess3Cidr",
-		"ParameterValue": "${EXTERNAL_CIDR3:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "FullAccess4Cidr",
-		"ParameterValue": "${EXTERNAL_CIDR4:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "HttpAccess1Cidr",
-		"ParameterValue": "${EXTERNAL_CIDR5:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "HttpAccess2Cidr",
-		"ParameterValue": "${EXTERNAL_CIDR6:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "HttpAccess3Cidr",
-		"ParameterValue": "${EXTERNAL_CIDR7:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "HttpAccess4Cidr",
-		"ParameterValue": "${EXTERNAL_CIDR8:-127.0.0.0/8}"
-	}
+	{ "ParameterKey": "DeploymentName", "ParameterValue": "$DEPLOYMENT_NAME" },
+
+	{ "ParameterKey": "Organisation", "ParameterValue": "${ORGANISATION:-Unknown}" },
+
+	{ "ParameterKey": "HostedZone", "ParameterValue": "${HOSTED_ZONE:-localhost}" },
+
+	{ "ParameterKey": "FullAccess1Cidr", "ParameterValue": "${EXTERNAL_CIDR1:-127.0.0.0/8}" },
+	{ "ParameterKey": "FullAccess2Cidr", "ParameterValue": "${EXTERNAL_CIDR2:-127.0.0.0/8}" },
+	{ "ParameterKey": "FullAccess3Cidr", "ParameterValue": "${EXTERNAL_CIDR3:-127.0.0.0/8}" },
+	{ "ParameterKey": "FullAccess4Cidr", "ParameterValue": "${EXTERNAL_CIDR4:-127.0.0.0/8}" },
+
+	{ "ParameterKey": "HttpAccess1Cidr", "ParameterValue": "${EXTERNAL_CIDR5:-127.0.0.0/8}" },
+	{ "ParameterKey": "HttpAccess2Cidr", "ParameterValue": "${EXTERNAL_CIDR6:-127.0.0.0/8}" },
+	{ "ParameterKey": "HttpAccess3Cidr", "ParameterValue": "${EXTERNAL_CIDR7:-127.0.0.0/8}" },
+	{ "ParameterKey": "HttpAccess4Cidr", "ParameterValue": "${EXTERNAL_CIDR8:-127.0.0.0/8}" },
+
+	{ "ParameterKey": "StackDeleteAllowDeny", "ParameterValue": "${STACKDELETEALLOWDENY:-Allow}" },
+	{ "ParameterKey": "StackUpdateAllowDeny", "ParameterValue": "${STACKUPDATEALLOWDENY:-Allow}" }
 ]
 EOF
 
@@ -130,6 +106,7 @@ INFO 'Stack details:'
 	--template-url "$STACK_MAIN_URL" \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
+	--on-failure DELETE \
 	--parameters "file://$STACK_PARAMETERS"
 
 INFO 'Waiting for Cloudformation stack to finish creation'

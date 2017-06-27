@@ -42,6 +42,7 @@ aws_change_set(){
 	sh -c "'$AWS' --output table cloudformation create-change-set --stack-name '$stack_arn' --change-set-name '$change_set_name' \
 		--capabilities CAPABILITY_IAM \
 		--capabilities CAPABILITY_NAMED_IAM \
+		--on_failure ROLLBACK \	
 		$template_option '$stack_url' \
 		$aws_opts"
 
@@ -66,6 +67,16 @@ aws_change_set(){
 }
 
 [ -d "$DEPLOYMENT_FOLDER" ] || FATAL "Existing stack does not exist: '$DEPLOYMENT_FOLDER'"
+
+INFO 'Checking if we need to update any parameters'
+for _p in `awk '/ParameterKey/{gsub("(\"|,)",""); print $3}' "$STACK_PARAMETERS"`; do
+	var_name="`echo \"$_p\" | tr '[:lower:]' '[:upper:]'`"
+	eval var="\$$var_name"
+
+	[ -n "$var" ] && update_parameter "$STACK_PARAMETERS" "$_p" "$var"
+
+	unset var_name var
+done
 
 aws_change_set "$DEPLOYMENT_NAME-preamble" "$STACK_PREAMBLE_URL" "$STACK_PREAMBLE_OUTPUTS"
 
