@@ -75,18 +75,19 @@ INFO 'Validating Cloudformation Template'
 
 INFO 'Generating Cloudformation parameters JSON file'
 # The parameters file is specifically formatted to allow easier changing of parameters by another script
+# XXX Update EXTERNAL_CIDR{1..8} to correctly named vars
 cat >"$STACK_PARAMETERS" <<EOF
 [
 	{ "ParameterKey": "DeploymentName", "ParameterValue": "$DEPLOYMENT_NAME" },
-
 	{ "ParameterKey": "Organisation", "ParameterValue": "${ORGANISATION:-Unknown}" },
-
 	{ "ParameterKey": "HostedZone", "ParameterValue": "${HOSTED_ZONE:-localhost}" },
 
 	{ "ParameterKey": "FullAccess1Cidr", "ParameterValue": "${EXTERNAL_CIDR1:-127.0.0.0/8}" },
 	{ "ParameterKey": "FullAccess2Cidr", "ParameterValue": "${EXTERNAL_CIDR2:-127.0.0.0/8}" },
 	{ "ParameterKey": "FullAccess3Cidr", "ParameterValue": "${EXTERNAL_CIDR3:-127.0.0.0/8}" },
 	{ "ParameterKey": "FullAccess4Cidr", "ParameterValue": "${EXTERNAL_CIDR4:-127.0.0.0/8}" },
+	{ "ParameterKey": "FullAccess5Cidr", "ParameterValue": "127.0.0.0/8" },
+	{ "ParameterKey": "FullAccess6Cidr", "ParameterValue": "127.0.0.0/8" },
 
 	{ "ParameterKey": "HttpAccess1Cidr", "ParameterValue": "${EXTERNAL_CIDR5:-127.0.0.0/8}" },
 	{ "ParameterKey": "HttpAccess2Cidr", "ParameterValue": "${EXTERNAL_CIDR6:-127.0.0.0/8}" },
