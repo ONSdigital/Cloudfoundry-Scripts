@@ -161,7 +161,6 @@ findpath CLOUDFORMATION_DIR "$CLOUDFORMATION_DIR"
 DEPLOYMENT_FOLDER="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME"
 DEPLOYMENT_FOLDER_RELATIVE="$DEPLOYMENT_DIRECTORY_RELATIVE/$DEPLOYMENT_NAME"
 
-[ -z "$AWS_REGION" ] && AWS_REGION="$DEFAULT_AWS_REGION"
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'No deployment name provided'
 
 # Not quite as strict as the Cloudformation check, but close enough
@@ -193,8 +192,12 @@ STACK_PREAMBLE_OUTPUTS="$DEPLOYMENT_FOLDER/outputs-preamble.sh"
 STACK_MAIN_OUTPUTS="$DEPLOYMENT_FOLDER/outputs.sh"
 STACK_PARAMETERS="$DEPLOYMENT_FOLDER/aws-parameters.json"
 
-# Do we need to update the config?
-aws_region "$AWS_REGION" "$STACK_MAIN_OUTPUTS"
+if [ -z "$AWS_REGION" ]; then
+	AWS_REGION="$DEFAULT_AWS_REGION"
+else
+	# Do we need to update the config?
+	aws_region "$AWS_REGION"
+fi
 
 # Do we need to update credentials?
 [ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ] && aws_credentials "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$STACK_MAIN_OUTPUTS"
