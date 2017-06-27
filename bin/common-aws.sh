@@ -14,7 +14,7 @@ aws_region(){
 			"$AWS" configure set region "$new_aws_region"
 			"$AWS" configure set output text
 		fi
-	else
+	elif [ -z "$new_aws_region" ]; then
 		echo "$current_region"
 	fi
 }
