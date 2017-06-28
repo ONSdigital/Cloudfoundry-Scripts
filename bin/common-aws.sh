@@ -51,7 +51,7 @@ update_parameter(){
 	# ...
 	echo "$value" | grep -E '#' && local separator='@' || local separator='#'
 
-	sed -i -re "s$separator\"(ParameterKey)\": \"($parameter)\", \"(ParameterValue)\": \"[^\"]+\"$separator\"\1\": \"\2\":, \"\3\": \"$value\"$separatorg" \
+	sed -i -re "s$separator\"(ParameterKey)\": \"($parameter)\", \"(ParameterValue)\": \"[^\"]+\"$separator\"\1\": \"\2\":, \"\3\": \"$value\"${separator}g" \
 		"$file"
 }
 
