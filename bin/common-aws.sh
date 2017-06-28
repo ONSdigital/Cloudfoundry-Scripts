@@ -51,8 +51,10 @@ update_parameter(){
 	# ...
 	echo "$value" | grep -E '#' && local separator='@' || local separator='#'
 
-	sed -i -re "s$separator\"(ParameterKey)\": \"($parameter)\", \"(ParameterValue)\": \"[^\"]+\"$separator\"\1\": \"\2\":, \"\3\": \"$value\"${separator}g" \
-		"$file"
+	if ! grep -Eq "ParameterValue\": \"$value\"" "$file"; then
+		sed -i -re "s$separator\"(ParameterKey)\": \"($parameter)\", \"(ParameterValue)\": \"[^\"]+\"$separator\"\1\": \"\2\", \"\3\": \"$value\"${separator}g" \
+			"$file"
+	fi
 }
 
 parse_aws_cloudformation_outputs(){
