@@ -69,7 +69,8 @@ aws_change_set(){
 
 INFO 'Checking if we need to update any parameters'
 for _p in `awk '/ParameterKey/{gsub("(\"|,)",""); print $3}' "$STACK_PARAMETERS"`; do
-	var_name="`echo \"$_p\" | tr '[:lower:]' '[:upper:]'`"
+	var_name="`echo \"$_p\" | camelcase_to_spaced_uppercase`"
+
 	eval var="\$$var_name"
 
 	[ -n "$var" ] && update_parameter "$STACK_PARAMETERS" "$_p" "$var"

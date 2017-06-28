@@ -70,11 +70,22 @@ parse_aws_cloudformation_outputs(){
 	#
 	# Basically we convert camelcase variable names to underscore seperated names (eg FooBar -> foo_bar)
 	"$AWS" --output text --query 'Stacks[*].[Parameters[*].[ParameterKey,ParameterValue],Outputs[*].[OutputKey,OutputValue]]' cloudformation describe-stacks --stack-name "$stack" | \
-		perl -a -F'\t' -ne 'defined($F[1]) || next;
-			chomp($F[1]);
-			$F[0] =~ s/([a-z0-9])([A-Z])/\1_\2/g;
-			$r{$F[0]} = sprintf("%s='\''%s'\''\n",lc($F[0]),$F[1]);
-			END{ print $r{$_} foreach(sort(keys(%r))) }'
+		camelcase_to_spaced_lowercase
+}
+
+camelcase_to_spaced_lowercase(){
+	perl -a -F'\t' -ne 'defined($F[1]) || next;
+		chomp($F[1]);
+		$F[0] =~ s/([a-z0-9])([A-Z])/\1_\2/g;
+		$r{$F[0]} = sprintf("%s='\''%s'\''\n",lc($F[0]),$F[1]);
+		END{ print $r{$_} foreach(sort(keys(%r))) }'
+}
+camelcase_to_spaced_uppercase(){
+	perl -a -F'\t' -ne 'defined($F[1]) || next;
+		chomp($F[1]);
+		$F[0] =~ s/([a-z0-9])([A-Z])/\1_\2/g;
+		$r{$F[0]} = sprintf("%s='\''%s'\''\n",uc($F[0]),$F[1]);
+		END{ print $r{$_} foreach(sort(keys(%r))) }'
 }
 
 check_cloudformation_stack(){
