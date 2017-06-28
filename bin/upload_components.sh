@@ -12,7 +12,7 @@ BASE_DIR="`dirname \"$0\"`"
 # See https://bosh.io/releases/github.com/cloudfoundry/cf-release and check 'Compatible Releases and Stemcells' for versions
 #
 # https://bosh.io/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY_VERSION="${1:-$STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY_VERSION}"
+BOSH_STEMCELL_URL="${1:-$BOSH_STEMCELL_URL}"
 
 # https://bosh.io/releases/github.com/cloudfoundry/cf-release
 RELEASE_CF_VERSION="${2:-$RELEASE_CFLINUXFS2_ROOTFS_VERSION}"
