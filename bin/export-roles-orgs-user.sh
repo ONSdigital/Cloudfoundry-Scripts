@@ -47,7 +47,7 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting|$)/'`; do
 		}else{
 			printf("cf set-org-role \"%s\" \"%s\" \"%s\"\n",$1,org,role)
 		}
-	}' #>>05_org-roles.sh
+	}' >>05_org-roles.sh
 done
 
 ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh
