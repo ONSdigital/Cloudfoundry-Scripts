@@ -69,11 +69,12 @@ aws_change_set(){
 
 INFO 'Checking if we need to update any parameters'
 for _p in `awk '/ParameterKey/{gsub("(\"|,)",""); print $3}' "$STACK_PARAMETERS"`; do
-	var_name="`echo \"$_p\" | camelcase_to_spaced_uppercase`"
+	var_name="`echo \"$_p\" | sed -re 's/([a-z0-9])([A-Z])/\1_\U\2/g' | tr '[:lower:]' '[:upper:]'`"
 
 	eval var="\$$var_name"
 
-	[ -n "$var" ] && update_parameter "$STACK_PARAMETERS" "$_p" "$var"
+	# We need to check we have a variable and its not just been set to '$'
+	[ -n "$var" -a x"$var" != x"\$" ] && update_parameter "$STACK_PARAMETERS" "$_p" "$var"
 
 	unset var_name var
 done
