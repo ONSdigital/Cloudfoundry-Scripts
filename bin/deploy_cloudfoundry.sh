@@ -95,7 +95,7 @@ if [ -z "$NON_AWS_DEPLOYMENT" ]; then
 	fi
 fi
 
-if [ -n "$DELETE_BOSH_ENV" -o x"$DELETE_BOSH_ENV" = x"true" ]; then
+if [ -n "$DELETE_BOSH_ENV" -a x"$DELETE_BOSH_ENV" = x"true" ]; then
 	[ -n "$NON_AWS_DEPLOYMENT" ] || check_aws_keys
 
 	INFO 'Removing existing Bosh bootstrap environment'
