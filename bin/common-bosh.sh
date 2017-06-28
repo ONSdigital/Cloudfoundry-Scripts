@@ -30,14 +30,7 @@ bosh_env(){
 		--state="$BOSH_LITE_STATE_FILE" \
 		--vars-env="$ENV_PREFIX_NAME" \
 		--vars-file="$SSL_YML" \
-		--vars-store="$BOSH_LITE_VARS_FILE" || failed=1
-
-	(
-		env
-		set
-	) | sort -u
-
-	return $failed
+		--vars-store="$BOSH_LITE_VARS_FILE"
 }
 
 # Set secure umask - the default permissions for ~/.bosh/config are wide open
