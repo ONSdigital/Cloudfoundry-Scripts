@@ -199,7 +199,8 @@ if [ -n "$NEW_CA" -o -n "$UPDATE_CA" ]; then
 	INFO "Generating $CA_NAME CA"
 	openssl req -new -out "ca/$CA_NAME.csr" -key "ca/$CA_NAME.key" -subj "/CN=$CA_NAME/" -extensions x509v3_ca -days "$VALID_DAYS"
 	# OPENSSL_CONF doesn't seem to work for x509
-	openssl x509 $TRUST_OPT -req -in "ca/$CA_NAME.csr" -out "ca/$CA_NAME.crt" -signkey "ca/$CA_NAME.key" -CAserial serial.txt -extensions x509v3_ca -extfile "$OPENSSL_CONF"
+	openssl x509 $TRUST_OPT -req -in "ca/$CA_NAME.csr" -out "ca/$CA_NAME.crt" -signkey "ca/$CA_NAME.key" -CAserial serial.txt -extensions x509v3_ca \
+		-extfile "$OPENSSL_CONF" -days "$VALID_DAYS"
 fi
 
 if [ -n "$NAME" ]; then
@@ -218,7 +219,8 @@ if [ -n "$NAME" ]; then
 
 	# Sign CSR
 	INFO "Signing $NAME CSR"
-	openssl x509 -req -in "client/$NAME.csr" -out "client/$NAME.crt" -CA "ca/$CA_NAME.crt" -CAkey "ca/$CA_NAME.key" -CAserial serial.txt -extensions $EXTENSIONS -extfile "$OPENSSL_CONF"
+	openssl x509 -req -in "client/$NAME.csr" -out "client/$NAME.crt" -CA "ca/$CA_NAME.crt" -CAkey "ca/$CA_NAME.key" -CAserial serial.txt -extensions $EXTENSIONS \
+		-extfile "$OPENSSL_CONF" -days "$VALID_DAYS"
 
 	# Generate file containing the metadata
 	INFO "Generating $NAME metadata file"
