@@ -79,6 +79,14 @@ for _p in `awk '/ParameterKey/{gsub("(\"|,)",""); print $3}' "$STACK_PARAMETERS"
 	unset var_name var
 done
 
+# We need to suck in the region from the existing outputs.sh
+INFO 'Obtaining current stack region'
+eval `awk '/^aws_region/{print $0}' "$STACK_MAIN_OUTPUTS"`
+[ -z "$aws_region" ] && FATAL "No AWS region has been set in $STACK_MAIN_OUTPUTS"
+
+INFO "Updating AWS region to $aws_region"
+aws_region "$aws_region"
+
 aws_change_set "$DEPLOYMENT_NAME-preamble" "$STACK_PREAMBLE_URL" "$STACK_PREAMBLE_OUTPUTS"
 
 INFO 'Parsing preamble outputs'
