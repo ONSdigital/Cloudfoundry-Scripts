@@ -12,7 +12,7 @@ BASE_DIR="`dirname \"$0\"`"
 # See https://bosh.io/releases/github.com/cloudfoundry/cf-release and check 'Compatible Releases and Stemcells' for versions
 #
 # https://bosh.io/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY_VERSION="${1:-$STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY_VERSION}"
+BOSH_STEMCELL_URL="${1:-$BOSH_STEMCELL_URL}"
 
 # https://bosh.io/releases/github.com/cloudfoundry/cf-release
 RELEASE_CF_VERSION="${2:-$RELEASE_CFLINUXFS2_ROOTFS_VERSION}"
@@ -24,21 +24,18 @@ RELEASE_GARDEN_RUNC_VERSION="${4:-$RELEASE_GARDEN_RUNC_VERSION}"
 RELEASE_CFLINUXFS2_ROOTFS_VERSION="${5:-$RELEASE_CFLINUXFS2_ROOTFS_VERSION}"
 # https://bosh.io/releases/github.com/pivotal-cf/cf-rabbitmq-release
 RELEASE_CF_RABBITMQ_VERSION="${6:-$RELEASE_CF_RABBITMQ_VERSION}"
-# https://bosh.io/releases/github.com/pivotal-cf/cf-redis-release 
-RELEASE_CF_REDIS_VERSION="${7:-$RELEASE_CF_REDIS_VERSION}"
 
 # Stemcells
-STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY_URL='https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent'
+BOSH_STEMCELL_URL="${BOSH_STEMCELL_URL:-https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent}"
 
 # Releases
-RELEASE_CF_URL='https://bosh.io/d/github.com/cloudfoundry/cf-release'
-RELEASE_DIEGO_URL='https://bosh.io/d/github.com/cloudfoundry/diego-release'
-RELEASE_GARDEN_RUNC_URL='https://bosh.io/d/github.com/cloudfoundry/garden-runc-release'
-RELEASE_CFLINUXFS2_ROOTFS_URL='https://bosh.io/d/github.com/cloudfoundry/cflinuxfs2-release'
-RELEASE_CF_RABBITMQ_URL='https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-release'
-RELEASE_CF_REDIS_URL='https://bosh.io/d/github.com/pivotal-cf/cf-redis-release'
+RELEASE_CF_URL="${RELEASE_CF_URL:-https://bosh.io/d/github.com/cloudfoundry/cf-release}"
+RELEASE_DIEGO_URL="${RELEASE_DIEGO_URL:-https://bosh.io/d/github.com/cloudfoundry/diego-release}"
+RELEASE_GARDEN_RUNC_URL="${RELEASE_GARDEN_RUNC_URL:-https://bosh.io/d/github.com/cloudfoundry/garden-runc-release}"
+RELEASE_CFLINUXFS2_ROOTFS_URL="${RELEASE_CFLINUXFS2_ROOTFS_URL:-https://bosh.io/d/github.com/cloudfoundry/cflinuxfs2-release}"
+RELEASE_CF_RABBITMQ_URL="${RELEASE_CF_RABBITMQ_URL:-https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-release}"
 
-BOSH_UPLOADS='STEMCELL_BOSH_AWS_XEN_HVM_UBUNTU_TRUSTY RELEASE_CF RELEASE_DIEGO RELEASE_GARDEN_RUNC RELEASE_CFLINUXFS2_ROOTFS RELEASE_CF_RABBITMQ RELEASE_CF_REDIS'
+BOSH_UPLOADS='BOSH_STEMCELL RELEASE_CF RELEASE_DIEGO RELEASE_GARDEN_RUNC RELEASE_CFLINUXFS2_ROOTFS RELEASE_CF_RABBITMQ'
 
 INFO 'Uploading Bosh release(s)'
 for i in $BOSH_UPLOADS; do

@@ -30,7 +30,7 @@ bosh_env(){
 		--state="$BOSH_LITE_STATE_FILE" \
 		--vars-env="$ENV_PREFIX_NAME" \
 		--vars-file="$SSL_YML" \
-		--vars-store="$BOSH_LITE_VARS_FILE" || bosh_rc=$?
+		--vars-store="$BOSH_LITE_VARS_FILE"
 }
 
 # Set secure umask - the default permissions for ~/.bosh/config are wide open
@@ -96,13 +96,15 @@ ENV_PREFIX="${ENV_PREFIX_NAME}_"
 # Without a TTY (eg within Jenkins) Bosh doesn't seem to output anything when deploying
 [ -n "$NO_FORCE_TTY" ] || BOSH_TTY_OPT="--tty"
 
-if [ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ]; then
-	INFO 'Attempting to set AWS credentials'
-	aws_access_key_id="$AWS_ACCESS_KEY_ID"
-	aws_secret_access_key="$AWS_SECRET_ACCESS_KEY"
-else
-	INFO 'Attempting to load AWS credentials'
-	eval export `parse_aws_credentials | prefix_vars -`
+if [ -z "$NON_AWS_DEPLOYMENT" ]; then
+	if [ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ]; then
+		INFO 'Attempting to set AWS credentials'
+		aws_access_key_id="$AWS_ACCESS_KEY_ID"
+		aws_secret_access_key="$AWS_SECRET_ACCESS_KEY"
+	else
+		INFO 'Attempting to load AWS credentials'
+		eval export `parse_aws_credentials | prefix_vars -`
+	fi
 fi
 
 # Check we have bosh installed

@@ -15,6 +15,7 @@ aws_change_set(){
 	local stack_url="$2"
 	local stack_outputs="$3"
 	local stack_parameters="$4"
+	local template_option="${5:---template-body}"
 
 	[ -z "$stack_name" ] && FATAL 'No stack name provided'
 	[ -z "$stack_url" ] && FATAL 'No stack url provided'
@@ -33,17 +34,15 @@ aws_change_set(){
 
 	[ -z "$stack_arn" ] && FATAL "Stack no longer exists"
 
-	echo "$stack_url" | grep -Eq '^file://' && TEMPLATE_OPT='--template-body' || TEMPLATE_OPT='--template-url'
-
 	INFO "Validating Cloudformation template: $stack_name"
-	"$AWS" --output table cloudformation validate-template $TEMPLATE_OPT "$stack_url"
+	"$AWS" --output table cloudformation validate-template $template_option "$stack_url"
 
 	INFO 'Creating Cloudformation stack change set'
 	INFO 'Stack details:'
 	sh -c "'$AWS' --output table cloudformation create-change-set --stack-name '$stack_arn' --change-set-name '$change_set_name' \
 		--capabilities CAPABILITY_IAM \
 		--capabilities CAPABILITY_NAMED_IAM \
-		$TEMPLATE_OPT '$stack_url' \
+		$template_option '$stack_url' \
 		$aws_opts"
 
 
@@ -68,15 +67,29 @@ aws_change_set(){
 
 [ -d "$DEPLOYMENT_FOLDER" ] || FATAL "Existing stack does not exist: '$DEPLOYMENT_FOLDER'"
 
+INFO 'Checking if we need to update any parameters'
+for _p in `awk '/ParameterKey/{gsub("(\"|,)",""); print $3}' "$STACK_PARAMETERS"`; do
+	var_name="`echo \"$_p\" | sed -re 's/([a-z0-9])([A-Z])/\1_\U\2/g' | tr '[:lower:]' '[:upper:]'`"
+
+	eval var="\$$var_name"
+
+	# We need to check we have a variable and its not just been set to '$'
+	[ -n "$var" -a x"$var" != x"\$" ] && update_parameter "$STACK_PARAMETERS" "$_p" "$var"
+
+	unset var_name var
+done
+
 aws_change_set "$DEPLOYMENT_NAME-preamble" "$STACK_PREAMBLE_URL" "$STACK_PREAMBLE_OUTPUTS"
 
+INFO 'Parsing preamble outputs'
 eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
+
+INFO 'Copying templates to S3'
+"$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include '*.json' --include '*/*.json'
 
 # Now we can set the main stack URL
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
-"$AWS" s3 sync --exclude .git --exclude LICENSE --exclude "$STACK_PREAMBLE_FILENAME" "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name"
+aws_change_set "$DEPLOYMENT_NAME" "$STACK_MAIN_URL" "$STACK_MAIN_OUTPUTS" "file://$STACK_PARAMETERS" --template-url
 
-aws_change_set "$DEPLOYMENT_NAME" "$STACK_MAIN_URL" "$STACK_MAIN_OUTPUTS" "file://$STACK_PARAMETERS"
-
-calculate_vpc_dns_ip "$STACK_MAIN_OUTPUTS" >>"$STACK_MAIN_OUTPUTS"
+calculate_dns_ip "$STACK_MAIN_OUTPUTS" >>"$STACK_MAIN_OUTPUTS"

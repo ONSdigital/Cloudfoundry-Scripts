@@ -95,7 +95,16 @@ if [ -z "$NON_AWS_DEPLOYMENT" ]; then
 	fi
 fi
 
-if [ -z "$SKIP_BOSH_CREATE_ENV" -o x"$SKIP_BOSH_CREATE_ENV" = x"false" -o x"$BOSH_DELETE_ENV" = x"true" -o ! -f "$BOSH_LITE_STATE_FILE" ]; then
+if [ -n "$DELETE_BOSH_ENV" -a x"$DELETE_BOSH_ENV" = x"true" ]; then
+	[ -n "$NON_AWS_DEPLOYMENT" ] || check_aws_keys
+
+	INFO 'Removing existing Bosh bootstrap environment'
+	bosh_env delete-env
+
+	rm -f "$BOSH_LITE_STATE_FILE"
+fi
+
+if [ -z "$SKIP_BOSH_CREATE_ENV" -o x"$SKIP_BOSH_CREATE_ENV" = x"false" -o ! -f "$BOSH_LITE_STATE_FILE" ]; then
 	# XXX This will need some future changes when vSphere/other support is completed
 	[ -n "$NON_AWS_DEPLOYMENT" ] || check_aws_keys
 
@@ -103,7 +112,7 @@ if [ -z "$SKIP_BOSH_CREATE_ENV" -o x"$SKIP_BOSH_CREATE_ENV" = x"false" -o x"$BOS
 	bosh_env create-env
 
 	# Do not keep any state file if things fail
-	if [ 0$?-ne 0 ]; then
+	if [ 0$? -ne 0 ]; then
 		rm -f "$BOSH_LITE_STATE_FILE"
 
 		FATAL 'Bosh lite deployment failed'

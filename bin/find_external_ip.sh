@@ -14,20 +14,18 @@ if [ -n "$VCAP_APPLICATION" ]; then
 	echo "$HOST" | grep -qE '^[a-z0-9.-]+$' || FATAL 'Unable to determine NAT hostname'
 
 	if which dig >/dev/null 2>&1; then
-		IP="`dig +short \"$HOST\"`"
+		IPS="`dig +short \"$HOST\"`"
 	elif which host >/dev/null 2>&1; then
-		IP="`host \"$HOST\" | awk '/ [0-9.]+$/{print $NF; exit}'`"
+		IPS="`host \"$HOST\" | awk '/ [0-9.]+$/{print $NF; exit}'`"
 	else
 		FATAL "Unable to perform a lookup on: '$HOST'"
 	fi
 
-	[ -z "$IP" ] && FATAL "Unable to determin external IP from \$VCAP_APPLICATION: $VCAP_APPLICATION"
+	[ -z "$IPS" ] && FATAL "Unable to determin external IP from \$VCAP_APPLICATION: $VCAP_APPLICATION & $HOST"
 
-	echo "$IP"
-
-elif which curl >/dev/null 2>&1; then
-	curl -sq 'http://bot.whatismyipaddress.com'
-
+	for ip in $IPS; do
+		echo $ip
+	done
 else
-	FATAL 'Unable to determine external IP'
+	FATAL 'Unable to determine external IP(s)'
 fi

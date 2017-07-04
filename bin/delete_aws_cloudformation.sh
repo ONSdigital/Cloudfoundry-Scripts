@@ -62,7 +62,7 @@ check_cloudformation_stack "$DEPLOYMENT_NAME"
 if [ -z "$KEEP_SSH_KEY" -o x"$KEEP_SSH_KEY" = x"false" ] && [ -n "$SSH_KEY_EXISTS" -a -n "$bosh_ssh_key_name" ] && \
 	"$AWS" ec2 describe-key-pairs --key-names "$bosh_ssh_key_name" >/dev/null 2>&1; then
 
-	INFO "Deleting SSH key: '$bosh_ssh_key_name"
+	INFO "Deleting SSH key: '$bosh_ssh_key_name'"
 	"$AWS" ec2 delete-key-pair --key-name "$bosh_ssh_key_name"
 fi
 

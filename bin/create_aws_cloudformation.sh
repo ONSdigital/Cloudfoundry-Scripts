@@ -26,7 +26,7 @@ INFO 'Checking for existing Cloudformation stack'
 INFO 'Validating Cloudformation Preamble Template'
 "$AWS" --output table cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
 
-
+# The pre-amble must be kept smaller than 51200 as we use it to host templates
 INFO 'Creating Cloudformation stack preamble'
 INFO 'Stack details:'
 "$AWS" --output table cloudformation create-stack \
@@ -49,62 +49,53 @@ parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_O
 
 eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
 
+INFO 'Copying templates to S3'
+"$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include '*.json' --include '*/*.json'
+
 # Now we can set the main stack URL
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
-"$AWS" s3 sync --exclude .git --exclude LICENSE --exclude "$STACK_PREAMBLE_FILENAME" "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name"
+INFO 'Validating Cloudformation templates: main template'
+"$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL" || FAILED=$?
+
+if [ 0$FAILED -ne 0 ]; then
+	INFO 'Cleaning preamble S3 bucket'
+	"$AWS" s3 rm --recursive "s3://$templates_bucket_name"
+
+	INFO 'Deleting preamble stack'
+	"$AWS" --output table cloudformation delete-stack --stack-name "$DEPLOYMENT_NAME-preamble"
+
+	FATAL 'Problem validating template'
+fi
 
 
 INFO 'Validating Cloudformation Template'
 "$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL"
 
 INFO 'Generating Cloudformation parameters JSON file'
+# The parameters file is specifically formatted to allow easier changing of parameters by another script
+# XXX Update EXTERNAL_CIDR{1..8} to correctly named vars
 cat >"$STACK_PARAMETERS" <<EOF
 [
-	{
-		"ParameterKey": "DeploymentName",
-		"ParameterValue": "$DEPLOYMENT_NAME"
-	},
-	{
-		"ParameterKey": "Organisation",
-		"ParameterValue": "${ORGANISATION:-Unknown}"
-	},
-	{
-		"ParameterKey": "HostedZone",
-		"ParameterValue": "${HOSTED_ZONE:-localhost}"
-	},
-	{
-		"ParameterKey": "ExternalCidr1",
-		"ParameterValue": "${EXTERNAL_CIDR1:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "ExternalCidr2",
-		"ParameterValue": "${EXTERNAL_CIDR2:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "ExternalCidr3",
-		"ParameterValue": "${EXTERNAL_CIDR3:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "ExternalCidr4",
-		"ParameterValue": "${EXTERNAL_CIDR4:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "ExternalCidr5",
-		"ParameterValue": "${EXTERNAL_CIDR5:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "ExternalCidr6",
-		"ParameterValue": "${EXTERNAL_CIDR6:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "ExternalCidr7",
-		"ParameterValue": "${EXTERNAL_CIDR7:-127.0.0.0/8}"
-	},
-	{
-		"ParameterKey": "ExternalCidr8",
-		"ParameterValue": "${EXTERNAL_CIDR8:-127.0.0.0/8}"
-	}
+	{ "ParameterKey": "DeploymentName", "ParameterValue": "$DEPLOYMENT_NAME" },
+	{ "ParameterKey": "Organisation", "ParameterValue": "${ORGANISATION:-Unknown}" },
+	{ "ParameterKey": "HostedZone", "ParameterValue": "${HOSTED_ZONE:-localhost}" },
+
+	{ "ParameterKey": "FullAccessCidr1", "ParameterValue": "${FULL_ACCESS_CIDR1:-127.0.0.0/8}" },
+	{ "ParameterKey": "FullAccessCidr2", "ParameterValue": "${FULL_ACCESS_CIDR2:-127.0.0.0/8}" },
+	{ "ParameterKey": "FullAccessCidr3", "ParameterValue": "${FULL_ACCESS_CIDR3:-127.0.0.0/8}" },
+	{ "ParameterKey": "FullAccessCidr4", "ParameterValue": "${FULL_ACCESS_CIDR4:-127.0.0.0/8}" },
+	{ "ParameterKey": "FullAccessCidr5", "ParameterValue": "${FULL_ACCESS_CIDR5:-127.0.0.0/8}" },
+	{ "ParameterKey": "FullAccessCidr6", "ParameterValue": "${FULL_ACCESS_CIDR6:-127.0.0.0/8}" },
+
+	{ "ParameterKey": "HttpAccessCidr1", "ParameterValue": "${HTTP_ACCESS_CIDR1:-127.0.0.0/8}" },
+	{ "ParameterKey": "HttpAccessCidr2", "ParameterValue": "${HTTP_ACCESS_CIDR2:-127.0.0.0/8}" },
+	{ "ParameterKey": "HttpAccessCidr3", "ParameterValue": "${HTTP_ACCESS_CIDR3:-127.0.0.0/8}" },
+	{ "ParameterKey": "HttpAccessCidr4", "ParameterValue": "${HTTP_ACCESS_CIDR4:-127.0.0.0/8}" },
+
+	{ "ParameterKey": "StackProtectionGroup", "ParameterValue": "${STACK_PROTECTION_GROUP:-NONE}" },
+	{ "ParameterKey": "StackDeleteAllowDeny", "ParameterValue": "${STACKDELETEALLOWDENY:-Allow}" },
+	{ "ParameterKey": "StackUpdateAllowDeny", "ParameterValue": "${STACKUPDATEALLOWDENY:-Allow}" }
 ]
 EOF
 
@@ -116,6 +107,7 @@ INFO 'Stack details:'
 	--template-url "$STACK_MAIN_URL" \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
+	--on-failure DO_NOTHING \
 	--parameters "file://$STACK_PARAMETERS"
 
 INFO 'Waiting for Cloudformation stack to finish creation'
@@ -123,7 +115,7 @@ INFO 'Waiting for Cloudformation stack to finish creation'
 
 parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME" >"$STACK_MAIN_OUTPUTS"
 
-calculate_vpc_dns_ip "$STACK_MAIN_OUTPUTS" >>"$STACK_MAIN_OUTPUTS"
+calculate_dns_ip "$STACK_MAIN_OUTPUTS" >>"$STACK_MAIN_OUTPUTS"
 
 # XXX
 # For bonus points we should really check the local SSH key fingerprint matches the AWS SSH key finger print

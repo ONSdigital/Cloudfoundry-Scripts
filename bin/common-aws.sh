@@ -8,13 +8,13 @@ aws_region(){
 	local current_region="`\"$AWS\" configure get region`"
 
 	# Do we need to update the config?
-	if [ -n "$new_aws_region" -a x"$current_region" = x"$new_aws_region" ]; then
+	if [ -n "$new_aws_region" -a x"$current_region" != x"$new_aws_region" ]; then
 		if ! "$AWS" configure get region | grep -qE "^$new_aws_region"; then
 			INFO 'Updating AWS CLI region configuration'
 			"$AWS" configure set region "$new_aws_region"
 			"$AWS" configure set output text
 		fi
-	else
+	elif [ -z "$new_aws_region" ]; then
 		echo "$current_region"
 	fi
 }
@@ -38,6 +38,25 @@ aws_credentials(){
 	fi
 }
 
+update_parameter(){
+	local file="$1"
+	local parameter="$2"
+	local value="$3"
+
+	[ -f "$file" ] || FATAL "Parameter file does not exist: $file"
+	[ -z "$parameter" ] && FATAL 'No parameter to set'
+	[ -z "$value" ] && FATAL 'No value provided'
+
+	# A value containing @ will probably be an email address which should mean # is not used
+	# ...
+	echo "$value" | grep -E '#' && local separator='@' || local separator='#'
+
+	if ! grep -Eq "ParameterValue\": \"$value\"" "$file"; then
+		sed -i -re "s$separator\"(ParameterKey)\": \"($parameter)\", \"(ParameterValue)\": \"[^\"]+\"$separator\"\1\": \"\2\", \"\3\": \"$value\"${separator}g" \
+			"$file"
+	fi
+}
+
 parse_aws_cloudformation_outputs(){
 	# We parse the outputs and parameters to build a list of the stack variables - these are then used later on
 	# by the Cloudfondry deployment
@@ -51,11 +70,11 @@ parse_aws_cloudformation_outputs(){
 	#
 	# Basically we convert camelcase variable names to underscore seperated names (eg FooBar -> foo_bar)
 	"$AWS" --output text --query 'Stacks[*].[Parameters[*].[ParameterKey,ParameterValue],Outputs[*].[OutputKey,OutputValue]]' cloudformation describe-stacks --stack-name "$stack" | \
-		perl -a -F'\t' -ne 'defined($F[1]) || next;
-			chomp($F[1]);
-			$F[0] =~ s/([a-z0-9])([A-Z])/\1_\2/g;
-			$r{$F[0]} = sprintf("%s='\''%s'\''\n",lc($F[0]),$F[1]);
-			END{ print $r{$_} foreach(sort(keys(%r))) }'
+	perl -a -F'\t' -ne 'defined($F[1]) || next;
+		chomp($F[1]);
+		$F[0] =~ s/([a-z0-9])([A-Z])/\1_\2/g;
+		$r{$F[0]} = sprintf("%s='\''%s'\''\n",lc($F[0]),$F[1]);
+		END{ print $r{$_} foreach(sort(keys(%r))) }'
 }
 
 check_cloudformation_stack(){
@@ -68,7 +87,7 @@ check_cloudformation_stack(){
 	"$AWS" --output text --query "StackSummaries[?StackName == '$stack_name' && (StackStatus == 'CREATE_COMPLETE' || StackStatus == 'UPDATE_COMPLETE' || StackStatus == 'UPDATE_ROLLBACK_COMPLETE')].[StackName]" cloudformation list-stacks | grep -q "^$stack_name$" && INFO 'Stack found' || INFO 'Stack does not exist'
 }
 
-calculate_vpc_dns_ip(){
+calculate_dns_ip(){
 	local stack_outputs="$1"
 
 	[ -z "$stack_outputs" ] && FATAL 'No stack outputs provided'
@@ -100,11 +119,21 @@ calculate_vpc_dns_ip(){
 $ip
 EOF
 
-	echo "vpc_dns_ip='$ip'"
+	echo "dns_ip='$ip'"
 }
 
 INFO 'Setting secure umask'
 umask 077
+
+if which aws >/dev/null 2>&1; then
+	AWS="`which aws`"
+
+elif [ -f "$BIN_DIRECTORY/aws" ]; then
+	AWS="$BIN_DIRECTORY/aws"
+
+else
+	FATAL "AWS cli is not installed - did you run '$BASE_DIR/install_deps.sh'?"
+fi
 
 CONFIGURED_AWS_REGION="`aws_region`"
 # Provide a default - these should come from a configuration/defaults file
@@ -122,15 +151,9 @@ AWS_REGION="${AWS_REGION:-$4}"
 AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-$5}"
 AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-$6}"
 
-if which aws >/dev/null 2>&1; then
-	AWS="`which aws`"
-
-elif [ -f "$BIN_DIRECTORY/aws" ]; then
-	AWS="$BIN_DIRECTORY/aws"
-
-else
-	FATAL "AWS cli is not installed - did you run '$BASE_DIR/install_deps.sh'?"
-fi
+# Maximum AWS Cloudformation stack size for --template-body
+TEMPLATE_MAX_SIZE='51200'
+MAIN_TEMPLATE_STACK_NAME='main-stack-template.json'
 
 CLOUDFORMATION_DIR="${CLOUDFORMATION_DIR:-AWS-Cloudformation}"
 
@@ -140,7 +163,6 @@ findpath CLOUDFORMATION_DIR "$CLOUDFORMATION_DIR"
 DEPLOYMENT_FOLDER="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME"
 DEPLOYMENT_FOLDER_RELATIVE="$DEPLOYMENT_DIRECTORY_RELATIVE/$DEPLOYMENT_NAME"
 
-[ -z "$AWS_REGION" ] && AWS_REGION="$DEFAULT_AWS_REGION"
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'No deployment name provided'
 
 # Not quite as strict as the Cloudformation check, but close enough
@@ -172,8 +194,12 @@ STACK_PREAMBLE_OUTPUTS="$DEPLOYMENT_FOLDER/outputs-preamble.sh"
 STACK_MAIN_OUTPUTS="$DEPLOYMENT_FOLDER/outputs.sh"
 STACK_PARAMETERS="$DEPLOYMENT_FOLDER/aws-parameters.json"
 
-# Do we need to update the config?
-aws_region "$AWS_REGION" "$STACK_MAIN_OUTPUTS"
+if [ -z "$AWS_REGION" ]; then
+	AWS_REGION="$DEFAULT_AWS_REGION"
+else
+	# Do we need to update the config?
+	aws_region "$AWS_REGION"
+fi
 
 # Do we need to update credentials?
 [ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ] && aws_credentials "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$STACK_MAIN_OUTPUTS"
