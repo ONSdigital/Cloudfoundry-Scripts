@@ -18,7 +18,7 @@ BASE_DIR="`dirname \"$0\"`"
 [ -d "$SSL_FOLDER" -a -n "$DELETE_SSL_CA" -a x"$DELETE_SSL_CA" != x"false" ] && rm -rf "$SSL_FOLDER"
 
 if [ -z "$SKIP_STATE_CHECK" -o x"$SKIP_STATE_CHECK" = x"false" ] && [ -f "$BOSH_LITE_STATE_FILE" ]; then
-	FATAL "Existing Bootstrap Bosh state file exists, please remove before continuing: $BOSH_LITE_STATE_FILE"
+	WARN "Existing Bootstrap Bosh state file exists: $BOSH_LITE_STATE_FILE"
 fi
 
 if [ -z "$SKIP_PASSWORD_GENERATION" -o x"$SKIP_PASSWORD_GENERATION" = x"false" -o ! -f "$PASSWORD_CONFIG_FILE" ]; then
