@@ -30,7 +30,7 @@ INFO 'Checking for existing Cloudformation stack'
 	cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack exists'
 
 INFO 'Validating Cloudformation Preamble Template'
-"$AWS" --output table cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
+"$AWS" --output table cloudformation "$AWS_DEBUG_OPTION" validate-template --template-body "$STACK_PREAMBLE_URL"
 
 # The pre-amble must be kept smaller than 51200 as we use it to host templates
 INFO 'Creating Cloudformation stack preamble'
@@ -64,7 +64,7 @@ INFO 'Copying templates to S3'
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
 INFO 'Validating Cloudformation templates: main template'
-"$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL" || FAILED=$?
+"$AWS" --output table "$AWS_DEBUG_OPTION" cloudformation validate-template --template-url "$STACK_MAIN_URL" || FAILED=$?
 
 if [ 0$FAILED -ne 0 ]; then
 	INFO 'Cleaning preamble S3 bucket'
