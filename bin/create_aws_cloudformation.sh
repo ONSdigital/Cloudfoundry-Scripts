@@ -30,7 +30,7 @@ INFO 'Checking for existing Cloudformation stack'
 	cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack exists'
 
 INFO 'Validating Cloudformation Preamble Template'
-"$AWS" --output table cloudformation "$AWS_DEBUG_OPTION" validate-template --template-body "$STACK_PREAMBLE_URL"
+"$AWS" --output table "$AWS_DEBUG_OPTION" cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
 
 # The pre-amble must be kept smaller than 51200 as we use it to host templates
 INFO 'Creating Cloudformation stack preamble'
