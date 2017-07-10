@@ -15,17 +15,22 @@ eval export `prefix_vars "$DEPLOYMENT_FOLDER/outputs.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/passwords.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
 
+[ -f "$DEPLOYMENT_FOLDER/cf-broker-rds-credentials.sh" ] && eval export `prefix_vars "$DEPLOYMENT_FOLDER/cf-broker-rds-credentials.sh"`
+
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"
 export BOSH_CA_CERT
 
-DB_NAME="${1:-rds_broker}"
-BROKER_NAME="${2:-rds-broker}"
+DEFAULT_RDS_BROKER_DB_NAME="${RDS_BROKER_DB_NAME:-rds_broker}"
+DEFAULT_RDS_BROKER_NAME="${RDS_BROKER_NAME:-rds_broker}"
+
+RDS_BROKER_DB_NAME="${1:-$DEFAULT_RDS_BROKER_DB_NAME}"
+RDS_BROKER_NAME="${2:-$DEFAULT_RDS_BROKER_NAME}"
 CF_ORG="${3:-$organisation}"
 
-RDS_BROKER_USER='rds_broker_user'
+RDS_BROKER_USER="${RDS_BROKER_USER:-rds_broker_user}"
 GOLANG_VERSION='1.8'
-RDS_BROKER_FOLDER="$TMP_DIRECTORY/$BROKER_NAME"
+RDS_BROKER_FOLDER="$TMP_DIRECTORY/$RDS_BROKER_NAME"
 RDS_BROKER_GIT_URL='https://github.com/cloudfoundry-community/rds-broker.git'
 
 SERVICE_NAME='RDS'
@@ -33,9 +38,9 @@ SERVICE_NAME='RDS'
 [ -d "$TMP_DIRECTORY" ] || mkdir -p "$TMP_DIRECTORY"
 [ -d "$RDS_BROKER_FOLDER" ] && rm -rf "$RDS_BROKER_FOLDER"
 
-RDS_BROKER_PASSWORD="`generate_password`"
+RDS_BROKER_PASSWORD="${RDS_BROKER_PASSWORD:-`generate_password`}"
 # Should be a multiple of something, probably 32, 16 or 8
-RDS_BROKER_ENC_KEY="`generate_password 32`"
+RDS_BROKER_ENC_KEY="${RDS_BROKER_ENC_KEY:-`generate_password 32`}"
 
 if "$CF" service-brokers | grep -Eq "^$SERVICE_NAME\s*http"; then
 	[ -n "$IGNORE_EXISTING" ] && LOG_LEVEL='WARN' || LOG_LEVEL='FATAL'
@@ -52,7 +57,7 @@ INFO 'Creating RDS Broker Manifest'
 cat >"$RDS_BROKER_FOLDER/manifest.yml" <<EOF
 ---
 applications:
-- name: "$BROKER_NAME"
+- name: "$RDS_BROKER_NAME"
   memory: 256M
   env:
     GOVERSION: go$GOLANG_VERSION
@@ -61,7 +66,7 @@ applications:
     AUTH_PASS: $RDS_BROKER_PASSWORD
     DB_URL: $rds_apps_instance_address
     DB_PORT: $rds_apps_instance_port
-    DB_NAME: $DB_NAME
+    DB_NAME: $RDS_BROKER_DB_NAME
     DB_USER: $rds_apps_instance_username
     DB_PASS: $rds_apps_instance_password
     DB_TYPE: postgres
@@ -87,9 +92,28 @@ WARN "This won't work when we have an external RDS database backing CF - we'll n
 "$BASE_DIR/bosh-ssh.sh" "$DEPLOYMENT_NAME" postgres <<EOF
 export PGPASSWORD="$rds_password";
 PSQL="\`find -L /var/vcap/packages -name psql | sort -n | tail -n1\`";
-"\$PSQL" -h$rds_address -U$rds_username -c "CREATE DATABASE $DB_NAME" || :;
+"\$PSQL" -h$rds_address -U$rds_username -c "CREATE DATABASE $RDS_BROKER_DB_NAME" || :;
 exit
 EOF
+
+cat >"$DEPLOYMENT_FOLDER/cf-broker-rds-credentials.sh.new" <<EOF
+# RDS Broker configuration
+RDS_BROKER_DB_NAME="$RDS_BROKER_DB_NAME"
+RDS_BROKER_NAME="$RDS_BROKER_NAME"
+RDS_BROKER_USER="$RDS_BROKER_USER"
+RDS_BROKER_PASSWORD="$RDS_BROKER_PASSWORD"
+RDS_BROKER_ENC_KEY="$RDS_BROKER_ENC_KEY"
+EOF
+
+if diff -q "$DEPLOYMENT_FOLDER/cf-broker-rds-credentials.sh" "$DEPLOYMENT_FOLDER/cf-broker-rds-credentials.sh.new"; then
+	rm -f "$DEPLOYMENT_FOLDER/cf-broker-rds-credentials.sh"
+
+	INFO "Updating '$DEPLOYMENT_FOLDER/cf-broker-rds-credentials.sh'"
+	mv "$DEPLOYMENT_FOLDER/cf-broker-rds-credentials.sh.new" "$DEPLOYMENT_FOLDER/cf-broker-rds-credentials.sh"
+else
+	INFO "Not updating '$DEPLOYMENT_FOLDER/cf-broker-rds-credentials.sh'"
+	rm -f "$DEPLOYMENT_FOLDER/cf-broker-rds-credentials.sh"
+fi
 
 cd "$RDS_BROKER_FOLDER"
 

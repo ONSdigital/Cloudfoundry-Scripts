@@ -158,7 +158,7 @@ for i in BOSH CF; do
 	[ -z "$version" ] && FATAL "Unable to determine $i version"
 
 	if [ -h "$file" -o -f "$file" ]; then
-		diff "$file" "$file-$version" || rm -f "$file"
+		diff -q "$file" "$file-$version" || rm -f "$file"
 	fi
 
 	if [ ! -h "$file" -a ! -f "$file" ]; then
