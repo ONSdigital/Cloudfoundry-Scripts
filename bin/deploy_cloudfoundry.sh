@@ -13,15 +13,13 @@ BASE_DIR="`dirname \"$0\"`"
 . "$BASE_DIR/common-bosh.sh"
 
 # Behaviour modifications
-# Other options include: SKIP_SSL_GENERATION, SKIP_PASSWORD_GENERATION, SKIP_BOSH_CREATE_ENV, SKIP_COMPONENT_UPLOAD
-[ -f "$BOSH_LITE_STATE_FILE" -a -n "$DELETE_BOSH_STATE" -a x"$DELETE_BOSH_STATE" != x"false" ] && rm -f "$BOSH_LITE_STATE_FILE"
-[ -d "$SSL_FOLDER" -a -n "$DELETE_SSL_CA" -a x"$DELETE_SSL_CA" != x"false" ] && rm -rf "$SSL_FOLDER"
-
 if [ -z "$SKIP_STATE_CHECK" -o x"$SKIP_STATE_CHECK" = x"false" ] && [ -f "$BOSH_LITE_STATE_FILE" ]; then
+	[ x"$DELETE_BOSH_STATE" != x"true" ] && rm -f "$BOSH_LITE_STATE_FILE"
+
 	WARN "Existing Bootstrap Bosh state file exists: $BOSH_LITE_STATE_FILE"
 fi
 
-if [ -z "$SKIP_PASSWORD_GENERATION" -o x"$SKIP_PASSWORD_GENERATION" = x"false" -o ! -f "$PASSWORD_CONFIG_FILE" ]; then
+if [ ! -f "$PASSWORD_CONFIG_FILE" -o x"$REGENERATE_PASSWORDS" = x"true" ]; then
 	# Environmental variables are insecure
 	INFO 'Generating password config'
 	echo '# Cloudfoundry passwords' >"$PASSWORD_CONFIG_FILE"
@@ -40,7 +38,9 @@ eval export `prefix_vars "$PASSWORD_CONFIG_FILE" "$ENV_PREFIX"`
 # We set BOSH_CLIENT_SECRET to this later on
 eval DIRECTOR_PASSWORD="\$${ENV_PREFIX}director_password"
 
-if [ -z "$SKIP_SSL_GENERATION" -o x"$SKIP_SSL_GENERATION" = x"false" -o ! -f "$SSL_YML"  ]; then
+if [ ! -d "$SSL_FOLDER" -o ! -f "$SSL_YML" -o x"$REGENERATE_SSL" = x"true" -o x"$DELETE_SSL_CA" = x"true" ]; then
+	[ -d "$SSL_FOLDER" ] && rm -rf "$SSL_FOLDER"
+
 	INFO 'Generating SSL CAs and keypairs'
 	mkdir -p "$SSL_FOLDER"
 	cd "$SSL_FOLDER"
@@ -56,8 +56,7 @@ if [ ! -f "$EXTERNAL_SSL_FOLDER/client/director.$domain_name.key" -o ! -f "$EXTE
 	FATAL 'No director SSL keypair available'
 fi
 
-if [ -z "$SKIP_BOSH_CONFIG_CREATION" -o x"$SKIP_BOSH_CONFIG_CREATION" != x"false" ]; then
-	# Cheat and generate both the LITE and FULL configs
+if [ ! -f "$BOSH_CONFIG_FILE" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ]; then
 	INFO 'Generating Bosh configurations'
 	cat <<EOF >"$BOSH_CONFIG_FILE"
 # Bosh deployment config
@@ -83,18 +82,6 @@ export BOSH_CA_CERT
 eval bosh_ssh_key_file="\$${ENV_PREFIX}bosh_ssh_key_file"
 findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 
-# XXX This will need some future changes when vSphere/other support is completed
-if [ -z "$NON_AWS_DEPLOYMENT" ]; then
-	if [ -z "$AWS_ACCESS_KEY_ID" -o -z "$AWS_SECRET_ACCESS_KEY" ]; then
-		INFO 'Loading AWS credentials'
-		eval export `parse_aws_credentials | prefix_vars -`
-	else
-		INFO 'Setting AWS credentials'
-		aws_access_key_id="$AWS_ACCESS_KEY_ID"
-		aws_secret_access_key="$AWS_SECRET_ACCESS_KEY"
-	fi
-fi
-
 if [ -n "$DELETE_BOSH_ENV" -a x"$DELETE_BOSH_ENV" = x"true" ]; then
 	[ -n "$NON_AWS_DEPLOYMENT" ] || check_aws_keys
 
@@ -104,9 +91,20 @@ if [ -n "$DELETE_BOSH_ENV" -a x"$DELETE_BOSH_ENV" = x"true" ]; then
 	rm -f "$BOSH_LITE_STATE_FILE"
 fi
 
-if [ -z "$SKIP_BOSH_CREATE_ENV" -o x"$SKIP_BOSH_CREATE_ENV" = x"false" -o ! -f "$BOSH_LITE_STATE_FILE" ]; then
+if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 	# XXX This will need some future changes when vSphere/other support is completed
-	[ -n "$NON_AWS_DEPLOYMENT" ] || check_aws_keys
+	if [ -z "$NON_AWS_DEPLOYMENT" ]; then
+		if [ -z "$AWS_ACCESS_KEY_ID" -o -z "$AWS_SECRET_ACCESS_KEY" ]; then
+			INFO 'Loading AWS credentials'
+			eval export `parse_aws_credentials | prefix_vars -`
+		else
+			INFO 'Setting AWS credentials'
+			aws_access_key_id="$AWS_ACCESS_KEY_ID"
+			aws_secret_access_key="$AWS_SECRET_ACCESS_KEY"
+		fi
+
+		check_aws_keys
+	fi
 
 	INFO 'Creating Bosh bootstrap environment'
 	bosh_env create-env
@@ -117,6 +115,8 @@ if [ -z "$SKIP_BOSH_CREATE_ENV" -o x"$SKIP_BOSH_CREATE_ENV" = x"false" -o ! -f "
 
 		FATAL 'Bosh lite deployment failed'
 	fi
+
+	NEW_BOSH_ENV='true'
 fi
 
 INFO 'Pointing Bosh at newly deployed Bosh'
@@ -126,7 +126,7 @@ INFO 'Attempting to login'
 "$BOSH" log-in $BOSH_TTY_OPT
 
 # Upload Stemcells & releases
-[ -z "$SKIP_COMPONENT_UPLOAD" -o x"$SKIP_COMPONENT_UPLOAD" = x"false" ] && "$BASE_DIR/upload_components.sh"
+[ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ] && "$BASE_DIR/upload_components.sh"
 
 INFO 'Setting CloudConfig'
 "$BOSH" update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE" \
