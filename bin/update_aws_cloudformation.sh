@@ -35,12 +35,11 @@ aws_change_set(){
 	[ -z "$stack_arn" ] && FATAL "Stack no longer exists"
 
 	INFO "Validating Cloudformation template: $stack_name"
-	"$AWS" --output table "$AWS_DEBUG_OPTION"  cloudformation validate-template $template_option "$stack_url"
+	"$AWS" --output table cloudformation validate-template $template_option "$stack_url"
 
 	INFO 'Creating Cloudformation stack change set'
 	INFO 'Stack details:'
 	sh -c "'$AWS' --output table \
-		"$AWS_DEBUG_OPTION" \
 		cloudformation create-change-set \
 		--stack-name '$stack_arn' \
 		--change-set-name '$change_set_name' \
