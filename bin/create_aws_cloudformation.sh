@@ -10,8 +10,12 @@ BASE_DIR="`dirname \"$0\"`"
 # Run common AWS Cloudformation parts
 . "$BASE_DIR/common-aws.sh"
 
-if [ -d "$DEPLOYMENT_FOLDER" ] && [ -z "$SKIP_STACK_FOLDER_CHECK" -o x"$SKIP_STACK_FOLDER_CHECK" = "false" ]; then
-	 FATAL "Existing stack exists: '$DEPLOYMENT_FOLDER', do you need to run\n\t$BASE_DIR/update_aws_cloudformation.sh instead?"
+if [ -f "$STACK_PREAMBLE_OUTPUTS" ] && [ -z "$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK" -o x"$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK" = "false" ]; then
+	 FATAL "Existing stack outputs exists: '$STACK_PREAMBLE_OUTPUTS', do you need to run\n\t$BASE_DIR/update_aws_cloudformation.sh instead?"
+fi
+
+if [ -f "$STACK_MAIN_OUTPUTS" ] && [ -z "$SKIP_STACK_MAIN_OUTPUTS_CHECK" -o x"$SKIP_STACK_MAIN_OUTPUTS_CHECK" = "false" ]; then
+	 FATAL "Existing stack outputs exists: '$STACK_MAIN_OUTPUTS', do you need to run\n\t$BASE_DIR/update_aws_cloudformation.sh instead?"
 fi
 
 BOSH_SSH_KEY_NAME="$DEPLOYMENT_NAME-key"

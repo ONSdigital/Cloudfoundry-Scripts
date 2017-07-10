@@ -65,7 +65,13 @@ aws_change_set(){
 	fi
 }
 
-[ -d "$DEPLOYMENT_FOLDER" ] || FATAL "Existing stack does not exist: '$DEPLOYMENT_FOLDER'"
+if [ -f "$STACK_PREAMBLE_OUTPUTS" ] && [ -z "$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK" -o x"$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK" = x"false" ]: then
+	[ -f "$STACK_PREAMBLE_OUTPUTS" ] || FATAL "Existing stack preamble outputs do exist: '$STACK_PREAMBLE_OUTPUTS'"
+fi
+
+if [ -f "$STACK_MAIN_OUTPUTS" ] && [ -z "$SKIP_STACK_MAIN_OUTPUTS_CHECK" -o x"$SKIP_STACK_MAIN_OUTPUTS_CHECK" = x"false" ]: then
+	[ -f "$STACK_MAIN_OUTPUTS" ] || FATAL "Existing stack main outputs do exist: '$STACK_MAIN_OUTPUTS'"
+fi
 
 INFO 'Checking if we need to update any parameters'
 for _p in `awk '/ParameterKey/{gsub("(\"|,)",""); print $3}' "$STACK_PARAMETERS"`; do
