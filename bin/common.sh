@@ -119,6 +119,7 @@ fi
 [ -d "$BASE_DIR" ] || FATAL "$BASE_DIR does not exist"
 
 # Add ability to debug commands
+AWS_DEBUG="${AWS_DEBUG:-false}"
 [ -n "$DEBUG" -a x"$DEBUG" != x"false" ] && set -x
 
 CACHE_DIRECTORY="$BASE_DIR/../../work"

@@ -35,7 +35,9 @@ INFO 'Validating Cloudformation Preamble Template'
 # The pre-amble must be kept smaller than 51200 as we use it to host templates
 INFO 'Creating Cloudformation stack preamble'
 INFO 'Stack details:'
-"$AWS" --output table cloudformation create-stack \
+"$AWS" --output table \
+	--debug "$AWS_DEBUG" \
+ 	cloudformation create-stack \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
 	--stack-name "$DEPLOYMENT_NAME-preamble" \
@@ -108,7 +110,9 @@ EOF
 
 INFO 'Creating Cloudformation stack'
 INFO 'Stack details:'
-"$AWS" --output table cloudformation create-stack \
+"$AWS" --output table \
+	--debug "$AWS_DEBUG" \
+	cloudformation create-stack \
 	--stack-name "$DEPLOYMENT_NAME" \
 	--template-url "$STACK_MAIN_URL" \
 	--capabilities CAPABILITY_IAM \

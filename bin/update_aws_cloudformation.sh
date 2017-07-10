@@ -39,7 +39,11 @@ aws_change_set(){
 
 	INFO 'Creating Cloudformation stack change set'
 	INFO 'Stack details:'
-	sh -c "'$AWS' --output table cloudformation create-change-set --stack-name '$stack_arn' --change-set-name '$change_set_name' \
+	sh -c "'$AWS' --output table \
+		--debug "$AWS_DEBUG" \
+		cloudformation create-change-set \
+		--stack-name '$stack_arn' \
+		--change-set-name '$change_set_name' \
 		--capabilities CAPABILITY_IAM \
 		--capabilities CAPABILITY_NAMED_IAM \
 		$template_option '$stack_url' \
