@@ -40,7 +40,7 @@ aws_change_set(){
 	INFO 'Creating Cloudformation stack change set'
 	INFO 'Stack details:'
 	sh -c "'$AWS' --output table \
-		--debug "$AWS_DEBUG" \
+		"$AWS_DEBUG_OPTION" \
 		cloudformation create-change-set \
 		--stack-name '$stack_arn' \
 		--change-set-name '$change_set_name' \

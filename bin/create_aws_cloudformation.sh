@@ -36,7 +36,7 @@ INFO 'Validating Cloudformation Preamble Template'
 INFO 'Creating Cloudformation stack preamble'
 INFO 'Stack details:'
 "$AWS" --output table \
-	--debug "$AWS_DEBUG" \
+	"$AWS_DEBUG_OPTION" \
  	cloudformation create-stack \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
@@ -111,7 +111,7 @@ EOF
 INFO 'Creating Cloudformation stack'
 INFO 'Stack details:'
 "$AWS" --output table \
-	--debug "$AWS_DEBUG" \
+	"$AWS_DEBUG_OPTION" \
 	cloudformation create-stack \
 	--stack-name "$DEPLOYMENT_NAME" \
 	--template-url "$STACK_MAIN_URL" \

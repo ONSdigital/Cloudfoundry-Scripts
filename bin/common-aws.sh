@@ -135,6 +135,8 @@ else
 	FATAL "AWS cli is not installed - did you run '$BASE_DIR/install_deps.sh'?"
 fi
 
+[ x"$AWS_DEBUG" = x"true" ] && AWS_DEBUG_OPTION='--debug'
+
 CONFIGURED_AWS_REGION="`aws_region`"
 # Provide a default - these should come from a configuration/defaults file
 DEFAULT_AWS_REGION="${DEFAULT_AWS_REGION:-${CONFIGURED_AWS_REGION:-eu-central-1}}"
