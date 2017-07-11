@@ -77,6 +77,28 @@ parse_aws_cloudformation_outputs(){
 		END{ print $r{$_} foreach(sort(keys(%r))) }'
 }
 
+generate_parameters_file(){
+	local stack_json="$1"
+
+	[ -n "$stack_json" ] || FATAL 'No Cloudformation stack JSON file provided'
+	[ -f "$stack_json" ] || FATAL "Cloudformation stack JSON file does not exist: '$stack_json'"
+
+	echo '['
+	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"\{:]","",$1); print $1} }' "$stack_json"`; do
+		var_name="`echo $_key | perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'`"
+		eval _param="\$$var_name"
+
+		[ -z "$_param" -o x"$_param" = x'$' ] && continue
+
+		# Correctly indented, Two tabs indentation for HEREDOC
+		cat <<EOF
+	{ "ParameterKey": "$_key", "ParameterValue": "$_param" }
+EOF
+		unset var var_name
+	done | awk '{line[++i]=$0}END{ for(l in line){ if(i <= l){printf("%s,\n",line[l]) }else{ print line[l] } } }'
+	echo ']'
+}
+
 check_cloudformation_stack(){
 	local stack_name="$1"
 
