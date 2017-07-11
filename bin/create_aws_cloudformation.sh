@@ -10,12 +10,8 @@ BASE_DIR="`dirname \"$0\"`"
 # Run common AWS Cloudformation parts
 . "$BASE_DIR/common-aws.sh"
 
-if [ -f "$STACK_PREAMBLE_OUTPUTS" ] && [ -z "$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK" -o x"$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK" = "false" ]; then
-	 FATAL "Existing stack outputs exists: '$STACK_PREAMBLE_OUTPUTS', do you need to run\n\t$BASE_DIR/update_aws_cloudformation.sh instead?"
-fi
-
-if [ -f "$STACK_MAIN_OUTPUTS" ] && [ -z "$SKIP_STACK_MAIN_OUTPUTS_CHECK" -o x"$SKIP_STACK_MAIN_OUTPUTS_CHECK" = "false" ]; then
-	 FATAL "Existing stack outputs exists: '$STACK_MAIN_OUTPUTS', do you need to run\n\t$BASE_DIR/update_aws_cloudformation.sh instead?"
+if [ -d "$STACK_OUTPUTS_DIR" ] && [ -z "$SKIP_STACK_OUTPUTS_DIR" -o x"$SKIP_STACK_OUTPUTS_DIR" = "false" ]; then
+	 FATAL "Existing stack outputs directory: '$STACK_OUTPUTS_DIR', do you need to run\n\t$BASE_DIR/update_aws_cloudformation.sh instead?"
 fi
 
 BOSH_SSH_KEY_NAME="$DEPLOYMENT_NAME-key"
@@ -26,13 +22,13 @@ BOSH_SSH_KEY_FILENAME="$DEPLOYMENT_FOLDER/ssh-key"
 BOSH_SSH_KEY_FILENAME_RELATIVE="$DEPLOYMENT_FOLDER_RELATIVE/ssh-key"
 
 INFO 'Checking for existing Cloudformation stack'
-"$AWS" --query "StackSummaries[?(StackName == '$DEPLOYMENT_NAME' || StackName == '$DEPLOYMENT_NAME-preamble' ) && StackStatus != 'DELETE_COMPLETE'].StackName" \
-	cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack exists'
+"$AWS" --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') &&  StackStatus != 'DELETE_COMPLETE'].StackName" \
+	cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack(s) exists'
 
 INFO 'Validating Cloudformation Preamble Template'
 "$AWS" --output table cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
 
-# The pre-amble must be kept smaller than 51200 as we use it to host templates
+# The preamble must be kept smaller than 51200 as we use it to host templates
 INFO 'Creating Cloudformation stack preamble'
 INFO 'Stack details:'
 "$AWS" --output table \
@@ -47,8 +43,12 @@ INFO 'Stack details:'
 INFO 'Waiting for Cloudformation stack to finish creation'
 "$AWS" cloudformation wait stack-create-complete --stack-name "$DEPLOYMENT_NAME-preamble" || FATAL 'Failed to create Cloudformation preamble stack'
 
-INFO "Creating '$DEPLOYMENT_FOLDER' to hold stack outputs"
-mkdir -p "$DEPLOYMENT_FOLDER"
+CREATED_STACKS="$STACK_NAME-preamble"
+
+if [ ! -d "$STACK_OUTPUTS_DIR" ]; then
+	INFO "Creating '$STACK_OUTPUTS_DIR' to hold stack outputs"
+	mkdir -p "$STACK_OUTPUTS_DIR"
+fi
 
 parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_OUTPUTS"
 
@@ -59,71 +59,56 @@ eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
 INFO 'Copying templates to S3'
 "$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include '*.json' --include '*/*.json'
 
-# Now we can set the main stack URL
-STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
+# We use older options in find due to possible lack of -printf and/or -regex options
+for stack_file in `find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F '!/preamble/{print $NF}' | sort`; do
+	# Now we can set the main stack URL
 
-INFO 'Validating Cloudformation templates: main template'
-"$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL" || FAILED=$?
+	STACK_NAME="$DEPLOYMENT_NAME-`echo $stack_file | sed -re "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
+	STACK_URL="$templates_bucket_http_url/$stack_file"
+	STACK_PARAMETERS="$DEPLOYMENT_FOLDER/$STACK_PARAMETERS_PREFIX-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
+	STACK_OUTPUTS="$DEPLOYMENT_FOLDER/$STACK_OUTPUT_PREFIX-$STACK_NAME.$STACK_OUTPUT_SUFFIX"
 
-if [ 0$FAILED -ne 0 ]; then
-	INFO 'Cleaning preamble S3 bucket'
-	"$AWS" s3 rm --recursive "s3://$templates_bucket_name"
+	INFO "Validating Cloudformation template: '$stack_file'"
+	"$AWS" --output table cloudformation validate-template --template-url "$STACK_URL" || FAILED=$?
 
-	INFO 'Deleting preamble stack'
-	"$AWS" --output table cloudformation delete-stack --stack-name "$DEPLOYMENT_NAME-preamble"
+	if [ 0$FAILED -ne 0 ]; then
+		INFO 'Cleaning preamble S3 bucket'
+		"$AWS" s3 rm --recursive "s3://$templates_bucket_name"
 
-	FATAL 'Problem validating template'
-fi
+		for _s in $CREATED_STACKS; do
+			INFO "Deleting stack: '$_s'"
+			"$AWS" --output table cloudformation delete-stack --stack-name "$_d"
 
+			INFO "Waiting for Cloudformation stack deletion to finish creation: '$_s'"
+			"$AWS" cloudformation wait stack-delete-complete --stack-name "$_s" || FATAL 'Failed to delete Cloudformation stack'
+		done
 
-INFO 'Validating Cloudformation Template'
-"$AWS" --output table cloudformation validate-template --template-url "$STACK_MAIN_URL"
+		FATAL 'Problem validating template'
+	fi
 
-INFO 'Generating Cloudformation parameters JSON file'
-# The parameters file is specifically formatted to allow easier changing of parameters by another script
-# XXX Update EXTERNAL_CIDR{1..8} to correctly named vars
-cat >"$STACK_PARAMETERS" <<EOF
-[
-	{ "ParameterKey": "DeploymentName", "ParameterValue": "$DEPLOYMENT_NAME" },
-	{ "ParameterKey": "Organisation", "ParameterValue": "${ORGANISATION:-Unknown}" },
-	{ "ParameterKey": "HostedZone", "ParameterValue": "${HOSTED_ZONE:-localhost}" },
+	INFO 'Generating Cloudformation parameters JSON file'
+	generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
 
-	{ "ParameterKey": "FullAccessCidr1", "ParameterValue": "${FULL_ACCESS_CIDR1:-127.0.0.0/8}" },
-	{ "ParameterKey": "FullAccessCidr2", "ParameterValue": "${FULL_ACCESS_CIDR2:-127.0.0.0/8}" },
-	{ "ParameterKey": "FullAccessCidr3", "ParameterValue": "${FULL_ACCESS_CIDR3:-127.0.0.0/8}" },
-	{ "ParameterKey": "FullAccessCidr4", "ParameterValue": "${FULL_ACCESS_CIDR4:-127.0.0.0/8}" },
-	{ "ParameterKey": "FullAccessCidr5", "ParameterValue": "${FULL_ACCESS_CIDR5:-127.0.0.0/8}" },
-	{ "ParameterKey": "FullAccessCidr6", "ParameterValue": "${FULL_ACCESS_CIDR6:-127.0.0.0/8}" },
+	INFO "Creating Cloudformation stack: '$stack_file'"
+	INFO 'Stack details:'
+	"$AWS" --output table \
+		cloudformation create-stack \
+		--stack-name "$STACK_NAME" \
+		--template-url "$STACK_URL" \
+		--capabilities CAPABILITY_IAM \
+		--capabilities CAPABILITY_NAMED_IAM \
+		--on-failure DO_NOTHING \
+		--parameters "file://$STACK_PARAMETERS"
 
-	{ "ParameterKey": "HttpAccessCidr1", "ParameterValue": "${HTTP_ACCESS_CIDR1:-127.0.0.0/8}" },
-	{ "ParameterKey": "HttpAccessCidr2", "ParameterValue": "${HTTP_ACCESS_CIDR2:-127.0.0.0/8}" },
-	{ "ParameterKey": "HttpAccessCidr3", "ParameterValue": "${HTTP_ACCESS_CIDR3:-127.0.0.0/8}" },
-	{ "ParameterKey": "HttpAccessCidr4", "ParameterValue": "${HTTP_ACCESS_CIDR4:-127.0.0.0/8}" },
+	INFO "Waiting for Cloudformation stack to finish creation: '$stack_file'"
+	"$AWS" cloudformation wait stack-create-complete --stack-name "$STACK_NAME" || FATAL 'Failed to create Cloudformation stack'
 
-	{ "ParameterKey": "StackProtectionGroup", "ParameterValue": "${STACK_PROTECTION_GROUP:-NONE}" },
-	{ "ParameterKey": "StackDeleteAllowDeny", "ParameterValue": "${STACKDELETEALLOWDENY:-Allow}" },
-	{ "ParameterKey": "StackUpdateAllowDeny", "ParameterValue": "${STACKUPDATEALLOWDENY:-Allow}" }
-]
-EOF
+	parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
 
+	#calculate_dns_ip "$STACK_OUTPUTS" >"$DEPLOYMENT_FOLDER/$STACK_OUTPUT_PREFIX
 
-INFO 'Creating Cloudformation stack'
-INFO 'Stack details:'
-"$AWS" --output table \
-	cloudformation create-stack \
-	--stack-name "$DEPLOYMENT_NAME" \
-	--template-url "$STACK_MAIN_URL" \
-	--capabilities CAPABILITY_IAM \
-	--capabilities CAPABILITY_NAMED_IAM \
-	--on-failure DO_NOTHING \
-	--parameters "file://$STACK_PARAMETERS"
-
-INFO 'Waiting for Cloudformation stack to finish creation'
-"$AWS" cloudformation wait stack-create-complete --stack-name "$DEPLOYMENT_NAME" || FATAL 'Failed to create Cloudformation stack'
-
-parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME" >"$STACK_MAIN_OUTPUTS"
-
-calculate_dns_ip "$STACK_MAIN_OUTPUTS" >>"$STACK_MAIN_OUTPUTS"
+	CREATED_STACKS="$CREATED_STACKS $STACK_NAME"
+done
 
 # XXX
 # For bonus points we should really check the local SSH key fingerprint matches the AWS SSH key finger print
