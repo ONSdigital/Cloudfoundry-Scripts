@@ -84,7 +84,7 @@ for stack_file in $STACK_FILES; do
 		"$AWS" --output table cloudformation delete-stack --stack-name "$STACK_NAME"
 
 		INFO "Waiting for Cloudformation stack deletion to finish creation: '$STACK_NAME'"
-		"$AWS" cloudformation wait stack-delete-complete --stack-name "$_s" || FATAL 'Failed to delete Cloudformation stack'
+		"$AWS" cloudformation wait stack-delete-complete --stack-name "$STACK_NAME" || FATAL 'Failed to delete Cloudformation stack'
 
 		FATAL "Problem validating template: '$stack_file'"
 	fi
