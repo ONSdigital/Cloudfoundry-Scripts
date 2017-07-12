@@ -84,7 +84,7 @@ generate_parameters_file(){
 	[ -f "$stack_json" ] || FATAL "Cloudformation stack JSON file does not exist: '$stack_json'"
 
 	echo '['
-	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"\{:]","",$1); print $1} }' "$stack_json"`; do
+	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1} }' "$stack_json"`; do
 		var_name="`echo $_key | perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'`"
 		eval _param="\$$var_name"
 
@@ -95,7 +95,7 @@ generate_parameters_file(){
 	{ "ParameterKey": "$_key", "ParameterValue": "$_param" }
 EOF
 		unset var var_name
-	done | awk '{line[++i]=$0}END{ for(l in line){ if(i <= l){printf("%s,\n",line[l]) }else{ print line[l] } } }'
+	done | awk '{line[++i]=$0}END{ for(l in line){ if(i < l){printf("%s,\n",line[l]) }else{ print line[l] } } }'
 	echo ']'
 }
 
@@ -191,8 +191,6 @@ grep -Eq '[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9]$' <<EOF || FATAL 'Invalid deployme
 $DEPLOYMENT_NAME
 EOF
 
-STACK_MAIN_FILENAME="$INSTALLATION_CONFIG.json"
-STACK_MAIN_FILE="$CLOUDFORMATION_DIR/$STACK_MAIN_FILENAME"
 STACK_PREAMBLE_FILENAME="$AWS_CONFIG_PREFIX-preamble.json"
 STACK_PREAMBLE_FILE="$CLOUDFORMATION_DIR/$STACK_PREAMBLE_FILENAME"
 STACK_TEMPLATES_DIRNAME="Templates"
@@ -202,9 +200,8 @@ STACK_TEMPLATES_DIR="$CLOUDFORMATION_DIR/$STACK_TEMPLATES_DIRNAME"
 [ -d "$CLOUDFORMATION_DIR" ] || FATAL 'Configuration directory does not exist'
 
 if [ -z "$IGNORE_MISSING_CONFIG" ]; then
-	[ -z "$INSTALLATION_CONFIG" ] && FATAL 'No installation configuration provided'
+	[ -z "$AWS_CONFIG_PREFIX" ] && FATAL 'No installation configuration provided'
 
-	[ -f "$STACK_MAIN_FILE" ] || FATAL "Cloudformation stack file '$STACK_MAIN_FILE' does not exist"
 	[ -f "$STACK_PREAMBLE_FILE" ] || FATAL "Cloudformation stack preamble '$STACK_PREAMBLE_FILE' does not exist"
 	[ -d "$STACK_TEMPLATES_DIR" ] || FATAL "Cloudformation stack template directory '$STACK_TEMPLATES_DIR' does not exist"
 fi
@@ -212,7 +209,8 @@ fi
 STACK_OUTPUTS_DIR="$DEPLOYMENT_FOLDER/outputs"
 STACK_OUTPUTS_PREFIX="outputs-"
 STACK_OUTPUTS_SUFFIX='sh'
-STACK_PARAMETERS_PREFIX="aws-parameters-"
+STACK_PARAMETERS_DIR="$DEPLOYMENT_FOLDER/parameters"
+STACK_PARAMETERS_PREFIX="aws-parameters"
 STACK_PARAMETERS_SUFFIX='json'
 
 
