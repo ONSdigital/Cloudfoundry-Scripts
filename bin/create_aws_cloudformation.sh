@@ -32,7 +32,7 @@ INFO 'Validating Cloudformation Preamble Template'
 INFO 'Creating Cloudformation stack preamble'
 INFO 'Stack details:'
 "$AWS" --output table \
- 	cloudformation create-stack \
+	cloudformation create-stack \
 	--capabilities CAPABILITY_IAM \
 	--capabilities CAPABILITY_NAMED_IAM \
 	--stack-name "$DEPLOYMENT_NAME-preamble" \
@@ -43,11 +43,16 @@ INFO 'Stack details:'
 INFO 'Waiting for Cloudformation stack to finish creation'
 "$AWS" cloudformation wait stack-create-complete --stack-name "$DEPLOYMENT_NAME-preamble" || FATAL 'Failed to create Cloudformation preamble stack'
 
-CREATED_STACKS="$STACK_NAME-preamble"
+CREATED_STACKS="$DEPLOYMENT_NAME-preamble"
 
 if [ ! -d "$STACK_OUTPUTS_DIR" ]; then
 	INFO "Creating '$STACK_OUTPUTS_DIR' to hold stack outputs"
 	mkdir -p "$STACK_OUTPUTS_DIR"
+fi
+
+if [ ! -d "$STACK_PARAMETERS_DIR" ]; then
+	INFO "Creating '$STACK_PARAMETERS_DIR' to hold stack parameters"
+	mkdir -p "$STACK_PARAMETERS_DIR"
 fi
 
 parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_OUTPUTS"
@@ -60,13 +65,11 @@ INFO 'Copying templates to S3'
 "$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include '*.json' --include '*/*.json'
 
 # We use older options in find due to possible lack of -printf and/or -regex options
-for stack_file in `find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F '!/preamble/{print $NF}' | sort`; do
-	# Now we can set the main stack URL
-
+for stack_file in `find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`; do
 	STACK_NAME="$DEPLOYMENT_NAME-`echo $stack_file | sed -re "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
 	STACK_URL="$templates_bucket_http_url/$stack_file"
-	STACK_PARAMETERS="$DEPLOYMENT_FOLDER/$STACK_PARAMETERS_PREFIX-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
-	STACK_OUTPUTS="$DEPLOYMENT_FOLDER/$STACK_OUTPUT_PREFIX-$STACK_NAME.$STACK_OUTPUT_SUFFIX"
+	STACK_PARAMETERS="$STACK_PARAMETERS_DIR/$STACK_PARAMETERS_PREFIX-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
+	STACK_OUTPUTS="$STACK_OUTPUTS_DIR/$STACK_OUTPUT_PREFIX-$STACK_NAME.$STACK_OUTPUT_SUFFIX"
 
 	INFO "Validating Cloudformation template: '$stack_file'"
 	"$AWS" --output table cloudformation validate-template --template-url "$STACK_URL" || FAILED=$?
@@ -105,10 +108,13 @@ for stack_file in `find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_C
 
 	parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
 
-	#calculate_dns_ip "$STACK_OUTPUTS" >"$DEPLOYMENT_FOLDER/$STACK_OUTPUT_PREFIX
 
 	CREATED_STACKS="$CREATED_STACKS $STACK_NAME"
 done
+	
+
+exit
+#calculate_dns_ip "$STACK_OUTPUTS" >"$DEPLOYMENT_FOLDER/$STACK_OUTPUT_PREFIX
 
 # XXX
 # For bonus points we should really check the local SSH key fingerprint matches the AWS SSH key finger print
