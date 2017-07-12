@@ -21,6 +21,9 @@ BOSH_SSH_FILE="$DEPLOYMENT_FOLDER/bosh-ssh.sh"
 BOSH_SSH_KEY_FILENAME="$DEPLOYMENT_FOLDER/ssh-key"
 BOSH_SSH_KEY_FILENAME_RELATIVE="$DEPLOYMENT_FOLDER_RELATIVE/ssh-key"
 
+# We use older options in find due to possible lack of -printf and/or -regex options
+STACK_FILES="`find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
+
 INFO 'Checking for existing Cloudformation stack'
 "$AWS" --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') &&  StackStatus != 'DELETE_COMPLETE'].StackName" \
 	cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack(s) exists'
@@ -64,8 +67,7 @@ eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
 INFO 'Copying templates to S3'
 "$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include '*.json' --include '*/*.json'
 
-# We use older options in find due to possible lack of -printf and/or -regex options
-for stack_file in `find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`; do
+for stack_file in $STACK_FILES; do
 	STACK_NAME="$DEPLOYMENT_NAME-`echo $stack_file | sed -re "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
 	STACK_URL="$templates_bucket_http_url/$stack_file"
 	STACK_PARAMETERS="$STACK_PARAMETERS_DIR/$STACK_PARAMETERS_PREFIX-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
@@ -78,16 +80,21 @@ for stack_file in `find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_C
 		INFO 'Cleaning preamble S3 bucket'
 		"$AWS" s3 rm --recursive "s3://$templates_bucket_name"
 
-		for _s in $CREATED_STACKS; do
-			INFO "Deleting stack: '$_s'"
-			"$AWS" --output table cloudformation delete-stack --stack-name "$_s"
+		INFO "Deleting stack: '$STACK_NAME'"
+		"$AWS" --output table cloudformation delete-stack --stack-name "$STACK_NAME"
 
-			INFO "Waiting for Cloudformation stack deletion to finish creation: '$_s'"
-			"$AWS" cloudformation wait stack-delete-complete --stack-name "$_s" || FATAL 'Failed to delete Cloudformation stack'
-		done
+		INFO "Waiting for Cloudformation stack deletion to finish creation: '$STACK_NAME'"
+		"$AWS" cloudformation wait stack-delete-complete --stack-name "$_s" || FATAL 'Failed to delete Cloudformation stack'
 
-		FATAL 'Problem validating template'
+		FATAL "Problem validating template: '$stack_file'"
 	fi
+done
+
+for stack_file in $STACK_FILES; do
+	STACK_NAME="$DEPLOYMENT_NAME-`echo $stack_file | sed -re "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
+	STACK_URL="$templates_bucket_http_url/$stack_file"
+	STACK_PARAMETERS="$STACK_PARAMETERS_DIR/$STACK_PARAMETERS_PREFIX-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
+	STACK_OUTPUTS="$STACK_OUTPUTS_DIR/$STACK_OUTPUT_PREFIX-$STACK_NAME.$STACK_OUTPUT_SUFFIX"
 
 	INFO 'Generating Cloudformation parameters JSON file'
 	generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
@@ -107,11 +114,8 @@ for stack_file in `find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_C
 	"$AWS" cloudformation wait stack-create-complete --stack-name "$STACK_NAME" || FATAL 'Failed to create Cloudformation stack'
 
 	parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
-
-
-	CREATED_STACKS="$CREATED_STACKS $STACK_NAME"
 done
-	
+
 
 exit
 #calculate_dns_ip "$STACK_OUTPUTS" >"$DEPLOYMENT_FOLDER/$STACK_OUTPUT_PREFIX
