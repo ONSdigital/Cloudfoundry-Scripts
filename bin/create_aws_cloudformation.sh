@@ -80,7 +80,7 @@ for stack_file in `find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_C
 
 		for _s in $CREATED_STACKS; do
 			INFO "Deleting stack: '$_s'"
-			"$AWS" --output table cloudformation delete-stack --stack-name "$_d"
+			"$AWS" --output table cloudformation delete-stack --stack-name "$_s"
 
 			INFO "Waiting for Cloudformation stack deletion to finish creation: '$_s'"
 			"$AWS" cloudformation wait stack-delete-complete --stack-name "$_s" || FATAL 'Failed to delete Cloudformation stack'
