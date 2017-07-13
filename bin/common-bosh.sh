@@ -61,6 +61,9 @@ findpath MANIFESTS_DIR "$MANIFESTS_DIR"
 DEPLOYMENT_FOLDER="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME"
 DEPLOYMENT_FOLDER_RELATIVE="$DEPLOYMENT_DIRECTORY_RELATIVE/$DEPLOYMENT_NAME"
 
+# This is also present in common-aws.sh
+STACK_OUTPUTS_DIR="$DEPLOYMENT_FOLDER/outputs"
+
 #
 BOSH_LITE_STATE_FILE="$DEPLOYMENT_FOLDER/$BOSH_LITE_MANIFEST_NAME-Lite-state.json"
 BOSH_LITE_VARS_FILE="$DEPLOYMENT_FOLDER/$BOSH_LITE_MANIFEST_NAME-Lite-vars.yml"
@@ -110,7 +113,8 @@ fi
 # Check we have bosh installed
 installed_bin bosh
 
-INFO "Loading '$DEPLOYMENT_NAME' config"
+INFO "Loading '$DEPLOYMENT_NAME' outputs"
+for i in `find "$STACK_OUTPUTS_DIR/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")"
 eval export `prefix_vars "$CLOUD_OUTPUTS_CONFIG_FILE" "$ENV_PREFIX"`
 
 INFO 'Setting additional variables'

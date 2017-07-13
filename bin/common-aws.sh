@@ -212,13 +212,12 @@ if [ -z "$IGNORE_MISSING_CONFIG" ]; then
 	[ -d "$STACK_TEMPLATES_DIR" ] || FATAL "Cloudformation stack template directory '$STACK_TEMPLATES_DIR' does not exist"
 fi
 
-STACK_OUTPUTS_DIR="$DEPLOYMENT_FOLDER/outputs"
-STACK_OUTPUTS_PREFIX="outputs-"
-STACK_OUTPUTS_SUFFIX='sh'
 STACK_PARAMETERS_DIR="$DEPLOYMENT_FOLDER/parameters"
 STACK_PARAMETERS_PREFIX="aws-parameters"
 STACK_PARAMETERS_SUFFIX='json'
 
+# This is also present in common-bosh.sh
+STACK_OUTPUTS_DIR="$DEPLOYMENT_FOLDER/outputs"
 
 STACK_PREAMBLE_URL="file://$STACK_PREAMBLE_FILE"
 STACK_PREAMBLE_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-preamble.sh"
