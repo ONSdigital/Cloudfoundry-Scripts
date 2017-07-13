@@ -156,6 +156,12 @@ EOF
 	echo "dns_ip='$ip'"
 }
 
+show_duplicate_output_names(){
+	local outputs_dir="$1"
+
+	awk -F= '!/^#/{ a[$1]++ }END{ for(i in a){ if(a[i] > 1) printf("%s=%d\n",i,a[i])}}' "$outputs_dir"/outputs-*.sh
+}
+
 INFO 'Setting secure umask'
 umask 077
 
