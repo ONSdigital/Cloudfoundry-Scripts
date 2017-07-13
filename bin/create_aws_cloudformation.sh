@@ -69,7 +69,7 @@ parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_O
 eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
 
 INFO 'Copying templates to S3'
-"$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include '*.json' --include '*/*.json'
+"$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
 
 for stack_file in $STACK_FILES; do
 	STACK_NAME="$DEPLOYMENT_NAME-`echo $stack_file | sed -re "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
