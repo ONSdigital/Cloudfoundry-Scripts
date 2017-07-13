@@ -106,7 +106,7 @@ generate_parameters_file(){
 	{ "ParameterKey": "$_key", "ParameterValue": "$_param" }
 EOF
 		unset var var_name
-	done | awk '{line[++i]=$0}END{ for(l in line){ if(i < l){printf("%s,\n",line[l]) }else{ print line[l] } } }'
+	done | awk '{ line[++i]=$0 }END{ for(l in line){ if(i <= l){ print line[l] }else{ printf("%s,\n",line[l]) } } }'
 	echo ']'
 }
 
