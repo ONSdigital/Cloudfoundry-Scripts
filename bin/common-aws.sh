@@ -57,6 +57,17 @@ update_parameter(){
 	fi
 }
 
+validate_json_files(){
+	local failure=0
+
+	for _j in $@; do
+		[ -f "$_j" ] || FATAL "File does not exist: '$_j'"
+
+		INFO "Validating JSON: '$_j'"
+		python -m json.tool "$_j" >/dev/null || FATAL 'JSON failed to validate'
+	done
+}
+
 parse_aws_cloudformation_outputs(){
 	# We parse the outputs and parameters to build a list of the stack variables - these are then used later on
 	# by the Cloudfondry deployment

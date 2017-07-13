@@ -24,6 +24,10 @@ BOSH_SSH_KEY_FILENAME_RELATIVE="$DEPLOYMENT_FOLDER_RELATIVE/ssh-key"
 # We use older options in find due to possible lack of -printf and/or -regex options
 STACK_FILES="`find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
 
+pushd "$CLOUDFORMATION_DIR"
+validate_json_files "$STACK_PREAMBLE_FILE" $STACK_FILES
+popd
+
 INFO 'Checking for existing Cloudformation stack'
 "$AWS" --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') &&  StackStatus != 'DELETE_COMPLETE'].StackName" \
 	cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack(s) exists'
