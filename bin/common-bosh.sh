@@ -114,8 +114,9 @@ fi
 installed_bin bosh
 
 INFO "Loading '$DEPLOYMENT_NAME' outputs"
-for i in `find "$STACK_OUTPUTS_DIR/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")"
-eval export `prefix_vars "$CLOUD_OUTPUTS_CONFIG_FILE" "$ENV_PREFIX"`
+for _o in `find "$STACK_OUTPUTS_DIR/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ") | awk -F/ '{print $NF}'"`; do
+	eval export `prefix_vars "$STACK_OUTPUTS_DIR/$_o" "$ENV_PREFIX"`
+done
 
 INFO 'Setting additional variables'
 export ${ENV_PREFIX}internal_domain="$INTERNAL_DOMAIN"
