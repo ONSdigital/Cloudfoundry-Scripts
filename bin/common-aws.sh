@@ -95,7 +95,7 @@ generate_parameters_file(){
 	[ -f "$stack_json" ] || FATAL "Cloudformation stack JSON file does not exist: '$stack_json'"
 
 	echo '['
-	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1} }' "$stack_json"`; do
+	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1 } }' "$stack_json"`; do
 		var_name="`echo $_key | perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'`"
 		eval _param="\$$var_name"
 
@@ -106,8 +106,9 @@ generate_parameters_file(){
 	{ "ParameterKey": "$_key", "ParameterValue": "$_param" }
 EOF
 		unset var var_name
-	done | awk '{ line[++i]=$0 }END{ for(l in line){ if(i <= l){ print line[l] }else{ printf("%s,\n",line[l]) } } }'
+	done | awk '{ line[++i]=$0 }END{ for(l=1; l<=i; l++){ if(i == l){ print line[l] }else{ printf("%s,\n",line[l]) } } }'
 	echo ']'
+
 }
 
 check_cloudformation_stack(){

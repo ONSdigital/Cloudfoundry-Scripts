@@ -24,9 +24,9 @@ BOSH_SSH_KEY_FILENAME_RELATIVE="$DEPLOYMENT_FOLDER_RELATIVE/ssh-key"
 # We use older options in find due to possible lack of -printf and/or -regex options
 STACK_FILES="`find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
 
-pushd "$CLOUDFORMATION_DIR"
-validate_json_files "$STACK_PREAMBLE_FILE" $STACK_FILES
-popd
+pushd "$CLOUDFORMATION_DIR" >/dev/null
+validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES
+popd >/dev/null
 
 INFO 'Checking for existing Cloudformation stack'
 "$AWS" --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') &&  StackStatus != 'DELETE_COMPLETE'].StackName" \
@@ -92,6 +92,9 @@ for stack_file in $STACK_FILES; do
 
 		FATAL "Problem validating template: '$stack_file'"
 	fi
+
+	INFO "Generating Cloudformation parameters JSON file: '$stack_file'"
+	generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
 done
 
 for stack_file in $STACK_FILES; do
@@ -100,10 +103,7 @@ for stack_file in $STACK_FILES; do
 	STACK_PARAMETERS="$STACK_PARAMETERS_DIR/$STACK_PARAMETERS_PREFIX-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 	STACK_OUTPUTS="$STACK_OUTPUTS_DIR/$STACK_OUTPUT_PREFIX-$STACK_NAME.$STACK_OUTPUT_SUFFIX"
 
-	INFO 'Generating Cloudformation parameters JSON file'
-	generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
-
-	INFO "Creating Cloudformation stack: '$stack_file'"
+	INFO "Creating Cloudformation stack: '$STACK_NAME'"
 	INFO 'Stack details:'
 	"$AWS" --output table \
 		cloudformation create-stack \
