@@ -80,11 +80,11 @@ for stack_file in $STACK_FILES; do
 		INFO 'Cleaning preamble S3 bucket'
 		"$AWS" s3 rm --recursive "s3://$templates_bucket_name"
 
-		INFO "Deleting stack: '$STACK_NAME'"
-		"$AWS" --output table cloudformation delete-stack --stack-name "$STACK_NAME"
+		INFO "Deleting stack: '$CREATED_STACKS'"
+		"$AWS" --output table cloudformation delete-stack --stack-name "$CREATED_STACKS"
 
-		INFO "Waiting for Cloudformation stack deletion to finish creation: '$STACK_NAME'"
-		"$AWS" cloudformation wait stack-delete-complete --stack-name "$STACK_NAME" || FATAL 'Failed to delete Cloudformation stack'
+		INFO "Waiting for Cloudformation stack deletion to finish creation: '$CREATED_STACKS'"
+		"$AWS" cloudformation wait stack-delete-complete --stack-name "$CREATED_STACKS" || FATAL 'Failed to delete Cloudformation stack'
 
 		FATAL "Problem validating template: '$stack_file'"
 	fi
