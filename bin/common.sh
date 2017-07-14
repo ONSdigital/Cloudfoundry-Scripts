@@ -102,20 +102,33 @@ generate_password(){
 }
 
 load_outputs(){
-	local deployment_name="$1"
-	local deployment_dir="$2"
-	local stack_outputs_dir="$3"
-	local env_prefix="$4"
+	local stack_outputs_dir="$1"
+	local env_prefix="$2"
 
-	[ -z "$deployment_name" ] && FATAL 'No deployment name provided'
-	[ -d "$deployment_dir" ] || FATAL "Deployment directory does not exist: '$deployment_dir'"	
 	[ -z "$stack_outputs_dir" ] && FATAL 'No stack outputs directory provided'
 	[ -d "$stack_outputs_dir" ] || FATAL "Stack outputs directory does not exist: '$stack_outputs_dir'"	
 
-	INFO "Loading '$deployment_name' outputs"
+	INFO "Loading outputs"
 	for _o in `find "$stack_outputs_dir/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")" | awk -F/ '{print $NF}'`; do
 		INFO "Loading '$_o'"
 		eval export `prefix_vars "$stack_outputs_dir/$_o" "$env_prefix"`
+	done
+}
+
+load_output_vars(){
+	local stack_outputs_dir="$1"
+	local env_prefix="$2"
+
+	[ -n "$3" ] || FATAL 'Not enough parameters'
+
+	[ -z "$stack_outputs_dir" ] && FATAL 'No stack outputs directory provided'
+	[ -d "$stack_outputs_dir" ] || FATAL "Stack outputs directory does not exist: '$stack_outputs_dir'"
+
+	[ x"$env_prefix" = x"NONE" ] && unset env_prefix
+	shift 2
+
+	for _i in $@; do
+		eval `grep -E "^$i=" "$stack_outputs_dir"/* | prefix_vars - "$env_prefix"`
 	done
 }
 

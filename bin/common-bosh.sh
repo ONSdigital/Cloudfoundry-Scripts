@@ -113,7 +113,7 @@ fi
 # Check we have bosh installed
 installed_bin bosh
 
-load_outputs "$DEPLOYMENT_NAME" "$DEPLOYMENT_BASE_DIR_RELATIVE" "$STACK_OUTPUTS_DIR_RELATIVE" "$ENV_PREFIX"
+load_outputs "$STACK_OUTPUTS_DIR_RELATIVE" "$ENV_PREFIX"
 
 INFO 'Setting additional variables'
 export ${ENV_PREFIX}internal_domain="$INTERNAL_DOMAIN"
