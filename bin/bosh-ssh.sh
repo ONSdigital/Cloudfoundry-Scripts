@@ -15,6 +15,7 @@ GATEWAY_HOST="$4"
 
 DEPLOYMENT_FOLDER="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME"
 STACK_OUTPUTS_DIR="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME/outputs"
+STACK_OUTPUTS_DIR_RELATIVE="$DEPLOYMENT_DIRECTORY_RELATIVE/$DEPLOYMENT_NAME/outputs"
 
 [ -z "$SSH_HOST" ] && FATAL 'No host to ssh onto'
 
@@ -23,7 +24,7 @@ STACK_OUTPUTS_DIR="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME/outputs"
 [ -f "$DEPLOYMENT_FOLDER/bosh-ssh.sh" ] || FATAL "Bosh SSH config does not exist: $DEPLOYMENT_FOLDER/bosh-ssh.sh"
 [ -f "$DEPLOYMENT_FOLDER/bosh-config.sh" ] || FATAL "Bosh config does not exist: $DEPLOYMENT_FOLDER/bosh-config.sh"
 
-load_outputs "$DEPLOYMENT_NAME" "$STACK_OUTPUTS_DIR"
+load_outputs "$DEPLOYMENT_NAME" "$DEPLOYMENT_DIRECTORY_RELATIVE" "$STACK_OUTPUTS_DIR_RELATIVE"
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/bosh-ssh.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/bosh-config.sh"`
 

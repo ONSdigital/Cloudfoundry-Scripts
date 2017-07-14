@@ -103,11 +103,12 @@ generate_password(){
 
 load_outputs(){
 	local deployment_name="$1"
-	local stack_outputs_dir="$2"
-	local env_prefix="$3"
+	local deployment_folder="$2"
+	local stack_outputs_dir="$3"
+	local env_prefix="$4"
 
 	[ -z "$deployment_name" ] && FATAL 'No deployment name provided'
-	[ -d "$deployment_name" ] || FATAL "Deployment folder does not exist: '$deployment_name'"	
+	[ -d "$deployment_folder" ] || FATAL "Deployment folder does not exist: '$deployment_folder'"	
 	[ -z "$stack_outputs_dir" ] && FATAL 'No stack outputs folder provided'
 	[ -d "$stack_outputs_dir" ] || FATAL "Stack outputs folder does not exist: '$stack_outputs_dir'"	
 
