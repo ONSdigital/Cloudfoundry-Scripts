@@ -14,6 +14,7 @@ GATEWAY_USER="${3:-vcap}"
 GATEWAY_HOST="$4"
 
 DEPLOYMENT_FOLDER="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME"
+STACK_OUTPUTS_DIR="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME/outputs"
 
 [ -z "$SSH_HOST" ] && FATAL 'No host to ssh onto'
 
@@ -21,11 +22,10 @@ DEPLOYMENT_FOLDER="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME"
 [ -d "$DEPLOYMENT_FOLDER" ] || FATAL "Deployment does not exist '$DEPLOYMENT_FOLDER'"
 [ -f "$DEPLOYMENT_FOLDER/bosh-ssh.sh" ] || FATAL "Bosh SSH config does not exist: $DEPLOYMENT_FOLDER/bosh-ssh.sh"
 [ -f "$DEPLOYMENT_FOLDER/bosh-config.sh" ] || FATAL "Bosh config does not exist: $DEPLOYMENT_FOLDER/bosh-config.sh"
-[ -f "$DEPLOYMENT_FOLDER/outputs.sh" ] || FATAL "AWS config does not exist: $DEPLOYMENT_FOLDER/output.sh"
 
+load_outputs "$DEPLOYMENT_NAME" "$STACK_OUTPUTS_DIR"
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/bosh-ssh.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/bosh-config.sh"`
-eval `grep "^director_dns" "$DEPLOYMENT_FOLDER/outputs.sh" | prefix_vars`
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"

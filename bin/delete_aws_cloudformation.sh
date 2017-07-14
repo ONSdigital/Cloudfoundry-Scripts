@@ -3,6 +3,9 @@
 # See common-aws.sh for inputs
 #
 
+echo NEEDS REWORKING
+exit
+
 set -e
 
 BASE_DIR="`dirname \"$0\"`"
@@ -26,7 +29,8 @@ empty_bucket(){
 }
 
 # Load outputs if we have one
-[ -f "$DEPLOYMENT_FOLDER/outputs.sh" ] && eval `prefix_vars "$DEPLOYMENT_FOLDER/outputs.sh"`
+STACK_OUTPUTS_DIR="$DEPLOYMENT_FOLDER/$DEPLOYMENT_NAME/outputs"
+load_outputs "$DEPLOYMENT_NAME" "$STACK_OUTPUTS_DIR"
 
 if [ -f "$DEPLOYMENT_FOLDER/bosh-ssh.sh" ]; then
 	SSH_KEY_EXISTS=1

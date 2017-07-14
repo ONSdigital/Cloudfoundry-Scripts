@@ -77,7 +77,6 @@ SSL_FOLDER="$DEPLOYMENT_FOLDER/ssl"
 SSL_FOLDER_RELATIVE="$DEPLOYMENT_FOLDER_RELATIVE/ssl"
 SSL_YML="$SSL_FOLDER/ssl_config.yml"
 #
-CLOUD_OUTPUTS_CONFIG_FILE="$DEPLOYMENT_FOLDER/outputs.sh"
 PASSWORD_CONFIG_FILE="$DEPLOYMENT_FOLDER/passwords.sh"
 #
 BOSH_SSH_CONFIG_FILE="$DEPLOYMENT_FOLDER/bosh-ssh.sh"
@@ -113,11 +112,7 @@ fi
 # Check we have bosh installed
 installed_bin bosh
 
-INFO "Loading '$DEPLOYMENT_NAME' outputs"
-for _o in `find "$STACK_OUTPUTS_DIR/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")" | awk -F/ '{print $NF}'`; do
-	INFO "Loading '$_o'"
-	eval export `prefix_vars "$STACK_OUTPUTS_DIR/$_o" "$ENV_PREFIX"`
-done
+load_outputs "$DEPLOYMENT_NAME" "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
 
 INFO 'Setting additional variables'
 export ${ENV_PREFIX}internal_domain="$INTERNAL_DOMAIN"

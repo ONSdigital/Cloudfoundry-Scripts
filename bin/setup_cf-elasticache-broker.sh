@@ -10,7 +10,6 @@ BASE_DIR="`dirname \"$0\"`"
 . "$BASE_DIR/common-cf.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/outputs.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/passwords.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
 

@@ -16,7 +16,6 @@ BASE_DIR="`dirname \"$0\"`"
 . "$BASE_DIR/bosh-env.sh"
 
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/bosh-config.sh"`
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/outputs.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
 
 SERVICE_NAME="${1:-$SERVICE_NAME}"

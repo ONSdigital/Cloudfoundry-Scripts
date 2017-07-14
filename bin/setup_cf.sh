@@ -9,7 +9,6 @@ BASE_DIR="`dirname \"$0\"`"
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/outputs.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/passwords.sh"`
 
 EMAIL_ADDRESS="${1:-NONE}"
@@ -22,7 +21,7 @@ export NO_LOGIN=1
 
 [ -z "$EMAIL_ADDRESS" ] && FATAL 'No email address has been supplied'
 [ -n "$DONT_SKIP_SSL_VALIDATION" ] || CF_EXTRA_OPTS='--skip-ssl-validation'
-[ -z "$ORG_NAME" ] && FATAL 'No organisation has been set.  Did outputs.sh set an organisation correctly?'
+[ -z "$ORG_NAME" ] && FATAL 'No organisation has been set'
 
 findpath TEST_APPS "$BASE_DIR/../test-apps"
 
