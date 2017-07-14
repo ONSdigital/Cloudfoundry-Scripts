@@ -118,10 +118,6 @@ for stack_file in $STACK_FILES; do
 	parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
 done
 
-
-exit
-#calculate_dns_ip "$STACK_OUTPUTS" >"$DEPLOYMENT_FOLDER/$STACK_OUTPUT_PREFIX
-
 # XXX
 # For bonus points we should really check the local SSH key fingerprint matches the AWS SSH key finger print
 #
@@ -166,7 +162,7 @@ fi
 if [ ! -f "$BOSH_SSH_KEY_FILENAME" ]; then
 	# This will need silencing
 	INFO 'Generating SSH key'
-	[ -n "$INSECURE_SSH_KEY" ] && ssh-keygen -f "$BOSH_SSH_KEY_FILENAME" -P '' || ssh-keygen -f "$BOSH_SSH_KEY_FILENAME"
+	[ -n "$INSECURE_SSH_KEY" ] && ssh-keygen -f "$BOSH_SSH_KEY_FILENAME" -p '' || ssh-keygen -f "$BOSH_SSH_KEY_FILENAME"
 fi
 
 [ -f "$BOSH_SSH_KEY_FILENAME" ] || FATAL "SSH key does not exist '$BOSH_SSH_KEY_FILENAME'"
