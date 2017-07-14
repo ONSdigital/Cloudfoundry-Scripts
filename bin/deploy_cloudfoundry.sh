@@ -128,9 +128,6 @@ INFO 'Pointing Bosh at newly deployed Bosh'
 INFO 'Attempting to login'
 "$BOSH" log-in $BOSH_TTY_OPT
 
-# Upload Stemcells & releases
-[ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ] && "$BASE_DIR/upload_components.sh"
-
 INFO 'Setting CloudConfig'
 "$BOSH" update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE" \
 	$BOSH_INTERACTIVE_OPT \
@@ -141,6 +138,9 @@ INFO 'Setting CloudConfig'
 	--vars-file="$SSL_YML" \
 	--vars-env="$ENV_PREFIX_NAME" \
 	--vars-store="$BOSH_FULL_VARS_FILE"
+
+# Upload Stemcells & releases
+[ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ] && "$BASE_DIR/upload_components.sh"
 
 INFO 'Checking Bosh deployment dry-run'
 "$BOSH" deploy "$BOSH_FULL_MANIFEST_FILE" \
