@@ -20,7 +20,7 @@ STACK_OUTPUTS_DIR_RELATIVE="$DEPLOYMENT_BASE_DIR_RELATIVE/$DEPLOYMENT_NAME/outpu
 
 shift
 
-load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" "$director_dns"
+load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" NONE director_dns
 eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-config.sh"`
 
 # Convert from relative to an absolute path

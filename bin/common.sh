@@ -119,8 +119,7 @@ load_output_vars(){
 	local stack_outputs_dir="$1"
 	local env_prefix="$2"
 
-	[ -n "$3" ] || FATAL 'Not enough parameters'
-
+	[ -z "$3" ] && FATAL 'Not enough parameters'
 	[ -z "$stack_outputs_dir" ] && FATAL 'No stack outputs directory provided'
 	[ -d "$stack_outputs_dir" ] || FATAL "Stack outputs directory does not exist: '$stack_outputs_dir'"
 
@@ -128,7 +127,7 @@ load_output_vars(){
 	shift 2
 
 	for _i in $@; do
-		eval `grep -E "^$i=" "$stack_outputs_dir"/* | prefix_vars - "$env_prefix"`
+		eval `grep -hE "^$_i=" "$stack_outputs_dir"/* | prefix_vars - "$env_prefix"`
 	done
 }
 
