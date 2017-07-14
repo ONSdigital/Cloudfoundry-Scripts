@@ -29,6 +29,8 @@ if [ ! -f "$PASSWORD_CONFIG_FILE" -o x"$REGENERATE_PASSWORDS" = x"true" ]; then
 $i='`generate_password`'
 EOF
 	done >>"$PASSWORD_CONFIG_FILE"
+
+	[ -f "$BOSH_CONFIG_FILE" ] && rm -f "$BOSH_CONFIG_FILE"
 fi
 
 # Sanity check
