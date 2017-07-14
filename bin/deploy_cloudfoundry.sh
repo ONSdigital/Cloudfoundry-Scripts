@@ -12,7 +12,7 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common-bosh.sh"
 
-[ x"$DELETE_BOSH_STATE" != x"true" ] && rm -f "$BOSH_LITE_STATE_FILE"
+[ x"$DELETE_BOSH_STATE" = x"true" ] && rm -f "$BOSH_LITE_STATE_FILE"
 
 # Behaviour modifications
 if [ -z "$SKIP_STATE_CHECK" -o x"$SKIP_STATE_CHECK" = x"false" ] && [ -f "$BOSH_LITE_STATE_FILE" ]; then
