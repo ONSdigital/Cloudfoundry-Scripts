@@ -33,7 +33,7 @@ GOLANG_VERSION='1.8'
 RDS_BROKER_FOLDER="$TMP_DIRECTORY/$RDS_BROKER_NAME"
 RDS_BROKER_GIT_URL='https://github.com/cloudfoundry-community/rds-broker.git'
 
-SERVICE_NAME='RDS'
+SERVICE_NAME='rds'
 
 [ -d "$TMP_DIRECTORY" ] || mkdir -p "$TMP_DIRECTORY"
 [ -d "$RDS_BROKER_FOLDER" ] && rm -rf "$RDS_BROKER_FOLDER"

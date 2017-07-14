@@ -14,7 +14,7 @@ eval export `prefix_vars "$DEPLOYMENT_FOLDER/outputs.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/passwords.sh"`
 eval export `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
 
-BROKER_NAME="${1:-elasticache-broker}"
+BROKER_NAME="${1:-elasticache}"
 BROKER_FOLDER="$TMP_DIRECTORY/$BROKER_NAME"
 BROKER_GIT_URL='https://github.com/cloudfoundry-community/elasticache-broker'
 
