@@ -12,9 +12,8 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common-bosh.sh"
 
-# Behaviour modifications
-if [ -z "$SKIP_STATE_CHECK" -o x"$SKIP_STATE_CHECK" = x"false" ] && [ -f "$BOSH_LITE_STATE_FILE" ]; then
-	[ x"$DELETE_BOSH_STATE" != x"true" ] && rm -f "$BOSH_LITE_STATE_FILE"
+if [ -f "$BOSH_LITE_STATE_FILE" ]; then
+	[ x"$DELETE_BOSH_STATE" = x"true" ] && rm -f "$BOSH_LITE_STATE_FILE"
 
 	WARN "Existing Bootstrap Bosh state file exists: $BOSH_LITE_STATE_FILE"
 fi
