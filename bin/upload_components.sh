@@ -24,7 +24,8 @@ RELEASE_GARDEN_RUNC_VERSION="${4:-$RELEASE_GARDEN_RUNC_VERSION}"
 RELEASE_CFLINUXFS2_ROOTFS_VERSION="${5:-$RELEASE_CFLINUXFS2_ROOTFS_VERSION}"
 # https://bosh.io/releases/github.com/pivotal-cf/cf-rabbitmq-release
 RELEASE_CF_RABBITMQ_VERSION="${6:-$RELEASE_CF_RABBITMQ_VERSION}"
-
+# Release v228 seems to be missing the rabbitmq-broker and its not, yet, available on https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-broker
+RELEASE_CF_RABBITMQ_VERSION="226"
 # Stemcells
 BOSH_STEMCELL_URL="${BOSH_STEMCELL_URL:-https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent}"
 
@@ -34,6 +35,7 @@ RELEASE_DIEGO_URL="${RELEASE_DIEGO_URL:-https://bosh.io/d/github.com/cloudfoundr
 RELEASE_GARDEN_RUNC_URL="${RELEASE_GARDEN_RUNC_URL:-https://bosh.io/d/github.com/cloudfoundry/garden-runc-release}"
 RELEASE_CFLINUXFS2_ROOTFS_URL="${RELEASE_CFLINUXFS2_ROOTFS_URL:-https://bosh.io/d/github.com/cloudfoundry/cflinuxfs2-release}"
 RELEASE_CF_RABBITMQ_URL="${RELEASE_CF_RABBITMQ_URL:-https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-release}"
+#RELEASE_CF_RABBITMQ_BROKER_URL="${RELEASE_CF_RABBITMQ_URL:-https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-broker}"
 
 BOSH_UPLOADS='BOSH_STEMCELL RELEASE_CF RELEASE_DIEGO RELEASE_GARDEN_RUNC RELEASE_CFLINUXFS2_ROOTFS RELEASE_CF_RABBITMQ'
 
