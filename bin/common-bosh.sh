@@ -89,7 +89,7 @@ ENV_PREFIX="${ENV_PREFIX_NAME}_"
 
 # Check for required config
 [ -d "$MANIFESTS_DIR" ] || FATAL "$MANIFESTS_DIR directory does not exist"
-[ -f "$CLOUD_OUTPUTS_CONFIG_FILE" ] || FATAL "Cloud outputs file '$CLOUD_OUTPUTS_CONFIG_FILE' does not exist"
+[ -d "$STACK_OUTPUTS_DIR" ] || FATAL "Cloud outputs directory '$STACK_OUTPUTS_DIR' does not exist"
 [ -f "$BOSH_LITE_MANIFEST_FILE" ] || FATAL "Bosh lite manifest file '$BOSH_LITE_MANIFEST_FILE' does not exist"
 [ -f "$BOSH_FULL_MANIFEST_FILE" ] || FATAL "Bosh manifest file '$BOSH_FULL_MANIFEST_FILE' does not exist"
 
@@ -114,7 +114,8 @@ fi
 installed_bin bosh
 
 INFO "Loading '$DEPLOYMENT_NAME' outputs"
-for _o in `find "$STACK_OUTPUTS_DIR/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ") | awk -F/ '{print $NF}'"`; do
+for _o in `find "$STACK_OUTPUTS_DIR/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")" | awk -F/ '{print $NF}'`; do
+	INFO "Loading '$_o'"
 	eval export `prefix_vars "$STACK_OUTPUTS_DIR/$_o" "$ENV_PREFIX"`
 done
 
