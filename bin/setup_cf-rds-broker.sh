@@ -65,6 +65,7 @@ applications:
     AUTH_USER: $RDS_BROKER_USER
     AUTH_PASS: $RDS_BROKER_PASSWORD
     DB_URL: $rds_apps_instance_address
+    #DB_URL: $rds_apps_instance_dns
     DB_PORT: $rds_apps_instance_port
     DB_NAME: $RDS_BROKER_DB_NAME
     DB_USER: $rds_apps_instance_username
