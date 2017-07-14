@@ -20,12 +20,12 @@ installed_bin(){
 
 	[ -z "$bin" ] && FATAL 'No binary to check'
 
-	[ -f "$BIN_DIRECTORY/$bin" ] || FATAL "$bin has not been installed, did you run $BASE_DIR/install_deps.sh?"
+	[ -f "$BIN_DIR/$bin" ] || FATAL "$bin has not been installed, did you run $BASE_DIR/install_deps.sh?"
 
-	if [ ! -x "$BIN_DIRECTORY/$bin" ]; then
+	if [ ! -x "$BIN_DIR/$bin" ]; then
 		WARN "$bin is not executable - fixing permissions"
 
-		chmod u+x "$BIN_DIRECTORY/$bin"
+		chmod u+x "$BIN_DIR/$bin"
 	fi
 }
 
@@ -103,14 +103,14 @@ generate_password(){
 
 load_outputs(){
 	local deployment_name="$1"
-	local deployment_folder="$2"
+	local deployment_dir="$2"
 	local stack_outputs_dir="$3"
 	local env_prefix="$4"
 
 	[ -z "$deployment_name" ] && FATAL 'No deployment name provided'
-	[ -d "$deployment_folder" ] || FATAL "Deployment folder does not exist: '$deployment_folder'"	
-	[ -z "$stack_outputs_dir" ] && FATAL 'No stack outputs folder provided'
-	[ -d "$stack_outputs_dir" ] || FATAL "Stack outputs folder does not exist: '$stack_outputs_dir'"	
+	[ -d "$deployment_dir" ] || FATAL "Deployment directory does not exist: '$deployment_dir'"	
+	[ -z "$stack_outputs_dir" ] && FATAL 'No stack outputs directory provided'
+	[ -d "$stack_outputs_dir" ] || FATAL "Stack outputs directory does not exist: '$stack_outputs_dir'"	
 
 	INFO "Loading '$deployment_name' outputs"
 	for _o in `find "$stack_outputs_dir/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")" | awk -F/ '{print $NF}'`; do
@@ -139,26 +139,26 @@ fi
 # Add ability to debug commands
 [ -n "$DEBUG" -a x"$DEBUG" != x"false" ] && set -x
 
-CACHE_DIRECTORY="$BASE_DIR/../../work"
-DEPLOYMENT_DIRECTORY="$BASE_DIR/../../deployment"
-DEPLOYMENT_DIRECTORY_RELATIVE='deployment'
-CONFIG_DIRECTORY="$BASE_DIR/../../configs"
+CACHE_DIR="$BASE_DIR/../../work"
+DEPLOYMENT_BASE_DIR="$BASE_DIR/../../deployment"
+DEPLOYMENT_BASE_DIR_RELATIVE='deployment'
+CONFIG_DIR="$BASE_DIR/../../configs"
 
 # These need to exist for findpath() to work
-[ -d "$CACHE_DIRECTORY" ] || mkdir -p "$CACHE_DIRECTORY"
-[ -d "$DEPLOYMENT_DIRECTORY" ] || mkdir -p "$DEPLOYMENT_DIRECTORY"
+[ -d "$CACHE_DIR" ] || mkdir -p "$CACHE_DIR"
+[ -d "$DEPLOYMENT_BASE_DIR" ] || mkdir -p "$DEPLOYMENT_BASE_DIR"
 
 findpath BASE_DIR "$BASE_DIR"
-findpath CACHE_DIRECTORY "$CACHE_DIRECTORY"
-findpath DEPLOYMENT_DIRECTORY "$DEPLOYMENT_DIRECTORY"
-[ -d "$CONFIG_DIRECTORY" ] && findpath CONFIG_DIRECTORY "$CONFIG_DIRECTORY"
+findpath CACHE_DIR "$CACHE_DIR"
+findpath DEPLOYMENT_BASE_DIR "$DEPLOYMENT_BASE_DIR"
+[ -d "$CONFIG_DIR" ] && findpath CONFIG_DIR "$CONFIG_DIR"
 
-TMP_DIRECTORY="$CACHE_DIRECTORY/tmp"
-BIN_DIRECTORY="$CACHE_DIRECTORY/bin"
+TMP_DIR="$CACHE_DIR/tmp"
+BIN_DIR="$CACHE_DIR/bin"
 
 STACK_OUTPUTS_PREFIX="outputs-"
 STACK_OUTPUTS_SUFFIX='sh'
 
-BOSH="$BIN_DIRECTORY/bosh"
-CF="$BIN_DIRECTORY/cf"
+BOSH="$BIN_DIR/bosh"
+CF="$BIN_DIR/cf"
 CA_TOOL="$BASE_DIR/ca-tool.sh"

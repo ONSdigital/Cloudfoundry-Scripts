@@ -9,7 +9,7 @@ BASE_DIR="`dirname \"$0\"`"
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/passwords.sh"`
+eval export `prefix_vars "$DEPLOYMENT_DIR/passwords.sh"`
 
 EMAIL_ADDRESS="${1:-NONE}"
 ORG_NAME="${2:-$organisation}"
@@ -31,10 +31,10 @@ installed_bin cf
 # We may not always want to update the admin user
 [ x"$EMAIL_ADDRESS" != x"NONE" ] && "$BASE_DIR/setup_cf-admin.sh" "$DEPLOYMENT_NAME" cf_admin "$EMAIL_ADDRESS"
 
-[ -f "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh" ] || FATAL "Cannot find CF admin credentials: $DEPLOYMENT_FOLDER/cf-credentials-admin.sh. Has an admin user been created"
+[ -f "$DEPLOYMENT_DIR/cf-credentials-admin.sh" ] || FATAL "Cannot find CF admin credentials: $DEPLOYMENT_DIR/cf-credentials-admin.sh. Has an admin user been created"
 
 # Pull in newly generated credentials
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
+eval export `prefix_vars "$DEPLOYMENT_DIR/cf-credentials-admin.sh"`
 
 INFO "Setting API target as $api_dns"
 "$CF" api "$api_dns" "$CF_EXTRA_OPTS"

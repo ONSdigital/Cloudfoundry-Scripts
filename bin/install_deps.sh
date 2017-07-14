@@ -25,13 +25,13 @@ GET_PIP_URL='https://bootstrap.pypa.io/get-pip.py'
 for i in $CLOUD_TYPES; do
 	case "$i" in
 		aws*)
-			if ! which aws >/dev/null 2>&1 && [ ! -f "$BIN_DIRECTORY/aws" ]; then
+			if ! which aws >/dev/null 2>&1 && [ ! -f "$BIN_DIR/aws" ]; then
 				[ -n "$CLIS" ] && CLIS="$CLIS aws" || CLIS='aws'
 				[ -n "$PIPS" ] && PIPS="$PIPS awscli" || PIPS='awscli'
 			fi
 			;;
 		azure*)
-			if ! which az >/dev/null 2>&1 || [ ! -f "$BIN_DIRECTORY/az" ]; then
+			if ! which az >/dev/null 2>&1 || [ ! -f "$BIN_DIR/az" ]; then
 				[ -n "$CLIS" ] && CLIS="$CLIS az" || CLIS='az'
 				[ -n "$PIPS" ] && PIPS="$PIPS azure-cli" || PIPS='azure-cli'
 
@@ -87,8 +87,8 @@ if [ x"$USER" != x"root" ]; then
 fi
 
 # Create dirs
-[ -d "$BIN_DIRECTORY" ] || mkdir -p "$BIN_DIRECTORY"
-[ -d "$TMP_DIRECTORY" ] || mkdir -p "$TMP_DIRECTORY"
+[ -d "$BIN_DIR" ] || mkdir -p "$BIN_DIR"
+[ -d "$TMP_DIR" ] || mkdir -p "$TMP_DIR"
 
 # If running via Jenkins we install cf-uaac via rbenv
 if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
@@ -109,13 +109,13 @@ if [ -n "$PIPS" ]; then
 	for i in $CLIS; do
 		[ -f ~/.local/bin/"$i" ] || FATAL "$i cli failed to install"
 
-		cd "$BIN_DIRECTORY"
+		cd "$BIN_DIR"
 
 		ln -s ~/.local/bin/"$i"
 
 		cd -
 
-		[ -n "$INSTALLED_EXTRAS" ] && INSTALLED_EXTRAS="$INSTALLED_EXTRAS,$BIN_DIRECTORY/$i" || INSTALLED_EXTRAS="$BIN_DIRECTORY/$i"
+		[ -n "$INSTALLED_EXTRAS" ] && INSTALLED_EXTRAS="$INSTALLED_EXTRAS,$BIN_DIR/$i" || INSTALLED_EXTRAS="$BIN_DIR/$i"
 	done
 
 	if [ -n "$AZ_INSTALL" ]; then
@@ -135,17 +135,17 @@ fi
 
 
 if [ ! -f "$CF-$CF_CLI_VERSION" ]; then
-	if [ ! -f "$TMP_DIRECTORY/$CF_CLI_ARCHIVE" ]; then
+	if [ ! -f "$TMP_DIR/$CF_CLI_ARCHIVE" ]; then
 		INFO "Downloading CF $CF_CLI_VERSION"
-		curl -SLo "$TMP_DIRECTORY/$CF_CLI_ARCHIVE" "$CF_CLI_URL"
+		curl -SLo "$TMP_DIR/$CF_CLI_ARCHIVE" "$CF_CLI_URL"
 	fi
 
-	[ -f "$TMP_DIRECTORY/cf" ] && rm -f "$TMP_DIRECTORY/cf"
+	[ -f "$TMP_DIR/cf" ] && rm -f "$TMP_DIR/cf"
 
 	INFO 'Extracting CF CLI'
-	tar -zxf "$TMP_DIRECTORY/$CF_CLI_ARCHIVE" -C "$TMP_DIRECTORY" cf || FATAL "Unable to extract $TMP_DIRECTORY/$CF_CLI_ARCHIVE"
+	tar -zxf "$TMP_DIR/$CF_CLI_ARCHIVE" -C "$TMP_DIR" cf || FATAL "Unable to extract $TMP_DIR/$CF_CLI_ARCHIVE"
 
-	mv "$TMP_DIRECTORY/cf" "$CF-$CF_CLI_VERSION"
+	mv "$TMP_DIR/cf" "$CF-$CF_CLI_VERSION"
 fi
 
 for i in BOSH CF; do
@@ -162,7 +162,7 @@ for i in BOSH CF; do
 	fi
 
 	if [ ! -h "$file" -a ! -f "$file" ]; then
-		cd "$BIN_DIRECTORY"
+		cd "$BIN_DIR"
 
 		ln -s "$file_name-$version" "$file_name"
 

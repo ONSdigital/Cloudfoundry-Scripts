@@ -10,19 +10,19 @@ BASE_DIR="`dirname \"$0\"`"
 
 DEPLOYMENT_NAME="$1"
 
-DEPLOYMENT_FOLDER="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME"
-STACK_OUTPUTS_DIR="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME/outputs"
-STACK_OUTPUTS_DIR_RELATIVE="$DEPLOYMENT_DIRECTORY_RELATIVE/$DEPLOYMENT_NAME/outputs"
+DEPLOYMENT_DIR="$DEPLOYMENT_BASE_DIR/$DEPLOYMENT_NAME"
+STACK_OUTPUTS_DIR="$DEPLOYMENT_BASE_DIR/$DEPLOYMENT_NAME/outputs"
+STACK_OUTPUTS_DIR_RELATIVE="$DEPLOYMENT_BASE_DIR_RELATIVE/$DEPLOYMENT_NAME/outputs"
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
-[ -d "$DEPLOYMENT_FOLDER" ] || FATAL "Deployment does not exist '$DEPLOYMENT_FOLDER'"
-[ -f "$DEPLOYMENT_FOLDER/bosh-ssh.sh" ] || FATAL "Bosh SSH config does not exist: $DEPLOYMENT_FOLDER/bosh-ssh.sh"
-[ -f "$DEPLOYMENT_FOLDER/bosh-config.sh" ] || FATAL "Bosh config does not exist: $DEPLOYMENT_FOLDER/bosh-config.sh"
+[ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"
+[ -f "$DEPLOYMENT_DIR/bosh-ssh.sh" ] || FATAL "Bosh SSH config does not exist: $DEPLOYMENT_DIR/bosh-ssh.sh"
+[ -f "$DEPLOYMENT_DIR/bosh-config.sh" ] || FATAL "Bosh config does not exist: $DEPLOYMENT_DIR/bosh-config.sh"
 
 shift
 
-load_outputs "$DEPLOYMENT_NAME" "$DEPLOYMENT_DIRECTORY_RELATIVE" "$STACK_OUTPUTS_DIR_RELATIVE"
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/bosh-config.sh"`
+load_outputs "$DEPLOYMENT_NAME" "$DEPLOYMENT_BASE_DIR_RELATIVE" "$STACK_OUTPUTS_DIR_RELATIVE"
+eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-config.sh"`
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"

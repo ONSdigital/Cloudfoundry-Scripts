@@ -37,12 +37,12 @@ eval export `prefix_vars "$PASSWORD_CONFIG_FILE" "$ENV_PREFIX"`
 # We set BOSH_CLIENT_SECRET to this later on
 eval DIRECTOR_PASSWORD="\$${ENV_PREFIX}director_password"
 
-if [ ! -d "$SSL_FOLDER" -o ! -f "$SSL_YML" -o x"$REGENERATE_SSL" = x"true" -o x"$DELETE_SSL_CA" = x"true" ]; then
-	[ -d "$SSL_FOLDER" ] && rm -rf "$SSL_FOLDER"
+if [ ! -d "$SSL_DIR" -o ! -f "$SSL_YML" -o x"$REGENERATE_SSL" = x"true" -o x"$DELETE_SSL_CA" = x"true" ]; then
+	[ -d "$SSL_DIR" ] && rm -rf "$SSL_DIR"
 
 	INFO 'Generating SSL CAs and keypairs'
-	mkdir -p "$SSL_FOLDER"
-	cd "$SSL_FOLDER"
+	mkdir -p "$SSL_DIR"
+	cd "$SSL_DIR"
 
 	# $SSL_YML may contain spaces
 	OUTPUT_YML="$SSL_YML" "$BASE_DIR/generate-ssl.sh" "$domain_name" "$INTERNAL_DOMAIN"
@@ -51,7 +51,7 @@ if [ ! -d "$SSL_FOLDER" -o ! -f "$SSL_YML" -o x"$REGENERATE_SSL" = x"true" -o x"
 fi
 
 # Just in case
-if [ ! -f "$EXTERNAL_SSL_FOLDER/client/director.$domain_name.key" -o ! -f "$EXTERNAL_SSL_FOLDER/client/director.$domain_name.crt" ]; then
+if [ ! -f "$EXTERNAL_SSL_DIR/client/director.$domain_name.key" -o ! -f "$EXTERNAL_SSL_DIR/client/director.$domain_name.crt" ]; then
 	FATAL 'No director SSL keypair available'
 fi
 
@@ -63,7 +63,7 @@ BOSH_ENVIRONMENT='$director_dns'
 BOSH_DEPLOYMENT='$DEPLOYMENT_NAME'
 BOSH_CLIENT_SECRET='$DIRECTOR_PASSWORD'
 BOSH_CLIENT='director'
-BOSH_CA_CERT='$EXTERNAL_SSL_FOLDER_RELATIVE/ca/$domain_name.crt'
+BOSH_CA_CERT='$EXTERNAL_SSL_DIR_RELATIVE/ca/$domain_name.crt'
 EOF
 fi
 

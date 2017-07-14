@@ -10,9 +10,9 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/bosh-config.sh"`
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/passwords.sh"`
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
+eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-config.sh"`
+eval export `prefix_vars "$DEPLOYMENT_DIR/passwords.sh"`
+eval export `prefix_vars "$DEPLOYMENT_DIR/cf-credentials-admin.sh"`
 
 ORG_NAME="${1:-$organisation}"
 SPACE_NAME="${2:-Test}"

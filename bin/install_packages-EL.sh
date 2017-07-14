@@ -15,7 +15,7 @@ REDHAT_VERSION="`rpm --eval %rhel`"
 
 # Downloads
 EPEL_RELEASE_RPM_NAME="epel-release-latest-$REDHAT_VERSION.noarch.rpm"
-EPEL_RELEASE_RPM_FILE="$DEPLOYMENT_DIRECTORY/$EPEL_RELEASE_RPM_NAME"
+EPEL_RELEASE_RPM_FILE="$TMP_DIR/$EPEL_RELEASE_RPM_NAME"
 
 install_packages(){
 	[ -z "$1" ] && return 0

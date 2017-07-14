@@ -3,9 +3,6 @@
 # See common-aws.sh for inputs
 #
 
-echo NEEDS REWORKING
-exit
-
 set -e
 
 BASE_DIR="`dirname \"$0\"`"
@@ -28,20 +25,19 @@ empty_bucket(){
 	fi
 }
 
-# Load outputs if we have one
-STACK_OUTPUTS_DIR="$DEPLOYMENT_FOLDER/$DEPLOYMENT_NAME/outputs"
-load_outputs "$DEPLOYMENT_NAME" "$STACK_OUTPUTS_DIR"
+STACK_OUTPUTS_DIR_RELATIVE="$DEPLOYMENT_BASE_DIR_RELATIVE/$DEPLOYMENT_NAME/outputs"
+load_outputs "$DEPLOYMENT_NAME" "$DEPLOYMENT_BASE_DIR_RELATIVE" "$STACK_OUTPUTS_DIR_RELATIVE"
 
-if [ -f "$DEPLOYMENT_FOLDER/bosh-ssh.sh" ]; then
+if [ -f "$DEPLOYMENT_DIR/bosh-ssh.sh" ]; then
 	SSH_KEY_EXISTS=1
 
-	eval export `prefix_vars "$DEPLOYMENT_FOLDER/bosh-ssh.sh"`
+	eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-ssh.sh"`
 fi
 
-if [ -f "$DEPLOYMENT_FOLDER/outputs-preamble.sh" ]; then
+if [ -f "$STACK_OUTPUTS_DIR/outputs-preamble.sh" ]; then
 	STACKS="$DEPLOYMENT_NAME $DEPLOYMENT_NAME-preamble"
 
-	eval `prefix_vars "$DEPLOYMENT_FOLDER/outputs-preamble.sh"`
+	eval `prefix_vars "$STACK_OUTPUTS_DIR/outputs-preamble.sh"`
 
 	empty_bucket "$templates_bucket_name"
 
@@ -58,7 +54,7 @@ if [ -n "$s3_buckets" ]; then
 	IFS="$OLDIFS"
 fi
 
-eval `prefix_vars "$DEPLOYMENT_FOLDER/bosh-ssh.sh"`
+eval `prefix_vars "$DEPLOYMENT_DIR/bosh-ssh.sh"`
 
 check_cloudformation_stack "$DEPLOYMENT_NAME"
 

@@ -168,8 +168,8 @@ umask 077
 if which aws >/dev/null 2>&1; then
 	AWS="`which aws`"
 
-elif [ -f "$BIN_DIRECTORY/aws" ]; then
-	AWS="$BIN_DIRECTORY/aws"
+elif [ -f "$BIN_DIR/aws" ]; then
+	AWS="$BIN_DIR/aws"
 
 else
 	FATAL "AWS cli is not installed - did you run '$BASE_DIR/install_deps.sh'?"
@@ -193,8 +193,8 @@ AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-$6}"
 # CLOUDFORMATION_DIR may be given as a relative directory
 findpath CLOUDFORMATION_DIR "${CLOUDFORMATION_DIR:-AWS-Cloudformation}"
 
-DEPLOYMENT_FOLDER="$DEPLOYMENT_DIRECTORY/$DEPLOYMENT_NAME"
-DEPLOYMENT_FOLDER_RELATIVE="$DEPLOYMENT_DIRECTORY_RELATIVE/$DEPLOYMENT_NAME"
+DEPLOYMENT_DIR="$DEPLOYMENT_BASE_DIR/$DEPLOYMENT_NAME"
+DEPLOYMENT_DIR_RELATIVE="$DEPLOYMENT_BASE_DIR_RELATIVE/$DEPLOYMENT_NAME"
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'No deployment name provided'
 
@@ -218,12 +218,12 @@ if [ -z "$IGNORE_MISSING_CONFIG" ]; then
 	[ -d "$STACK_TEMPLATES_DIR" ] || FATAL "Cloudformation stack template directory '$STACK_TEMPLATES_DIR' does not exist"
 fi
 
-STACK_PARAMETERS_DIR="$DEPLOYMENT_FOLDER/parameters"
+STACK_PARAMETERS_DIR="$DEPLOYMENT_DIR/parameters"
 STACK_PARAMETERS_PREFIX="aws-parameters"
 STACK_PARAMETERS_SUFFIX='json'
 
 # This is also present in common-bosh.sh
-STACK_OUTPUTS_DIR="$DEPLOYMENT_FOLDER/outputs"
+STACK_OUTPUTS_DIR="$DEPLOYMENT_DIR/outputs"
 
 STACK_PREAMBLE_URL="file://$STACK_PREAMBLE_FILE"
 STACK_PREAMBLE_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-preamble.sh"

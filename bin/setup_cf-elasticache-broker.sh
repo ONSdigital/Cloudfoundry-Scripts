@@ -10,11 +10,11 @@ BASE_DIR="`dirname \"$0\"`"
 . "$BASE_DIR/common-cf.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/passwords.sh"`
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
+eval export `prefix_vars "$DEPLOYMENT_DIR/passwords.sh"`
+eval export `prefix_vars "$DEPLOYMENT_DIR/cf-credentials-admin.sh"`
 
 BROKER_NAME="${1:-elasticache}"
-BROKER_FOLDER="$TMP_DIRECTORY/$BROKER_NAME"
+BROKER_DIR="$TMP_DIR/$BROKER_NAME"
 BROKER_GIT_URL='https://github.com/cloudfoundry-community/elasticache-broker'
 
 BROKER_USERNAME='elasticache-broker'
@@ -22,8 +22,8 @@ BROKER_PASSWORD="`generate_password`"
 
 GOLANG_VERSION='1.6.3'
 
-[ -d "$TMP_DIRECTORY" ] || mkdir -p "$TMP_DIRECTORY"
-[ -d "$BROKER_FOLDER" ] && rm -rf "$BROKER_FOLDER"
+[ -d "$TMP_DIR" ] || mkdir -p "$TMP_DIR"
+[ -d "$BROKER_DIR" ] && rm -rf "$BROKER_DIR"
 
 if "$CF" service-brokers | grep -Eq "^$BROKER_NAME\s*http"; then
 	[ -n "$IGNORE_EXISTING" ] && LOG_LEVEL='WARN' || LOG_LEVEL='FATAL'
@@ -34,10 +34,10 @@ if "$CF" service-brokers | grep -Eq "^$BROKER_NAME\s*http"; then
 fi
 
 INFO 'Cloning Git ElastiCache repository'
-git clone "$BROKER_GIT_URL" "$BROKER_FOLDER"
+git clone "$BROKER_GIT_URL" "$BROKER_DIR"
 
 INFO 'Creating ElastiCache Broker Manifest'
-cat >"$BROKER_FOLDER/manifest.yml" <<EOF
+cat >"$BROKER_DIR/manifest.yml" <<EOF
 ---
 applications:
   - name: elasticache-broker
@@ -50,7 +50,7 @@ applications:
       GO15VENDOREXPERIMENT: 0
 EOF
 
-[ -f "$CONFIG_DIRECTORY/$BROKER_NAME/config.json" ] && JSON_CONFIG="$CONFIG_DIRECTORY/$BROKER_NAME/config.json" || JSON_CONFIG="$BROKER_FOLDER/config-sample.json"
+[ -f "$CONFIG_DIR/$BROKER_NAME/config.json" ] && JSON_CONFIG="$CONFIG_DIR/$BROKER_NAME/config.json" || JSON_CONFIG="$BROKER_DIR/config-sample.json"
 
 INFO 'Adjusting ElastiCache configuration'
 sed -re "s/(\"username\"): \"[^\"]+\"/\1: \"$BROKER_USERNAME\"/g" \
@@ -59,12 +59,12 @@ sed -re "s/(\"username\"): \"[^\"]+\"/\1: \"$BROKER_USERNAME\"/g" \
 	-e "s/(\"cache_subnet_group_name\"): \"[^\"]+\"/\1: \"$elasti_cache_subnet_group\"/g" \
 	-e "s/\"default\"/\"$elasti_cache_security_group\"/g" \
 	-e "s/(\"name\"): \"awselasticache-redis\"/\1: \"$BROKER_NAME\"/g" \
-	"$JSON_CONFIG" >"$BROKER_FOLDER/config.json"
+	"$JSON_CONFIG" >"$BROKER_DIR/config.json"
 
 INFO "Ensuring space exists: $SERVICES_SPACE"
 "$BASE_DIR/setup_cf-orgspace.sh" "$DEPLOYMENT_NAME" "$ORG_NAME" "$SERVICES_SPACE"
 
-cd "$BROKER_FOLDER"
+cd "$BROKER_DIR"
 
 INFO "Pushing $BROKER_NAME broker to Cloudfoundry"
 "$BASE_DIR/cf_push.sh" "$DEPLOYMENT_NAME" "$BROKER_NAME" "$ORG_NAME" "$SERVICES_SPACE"

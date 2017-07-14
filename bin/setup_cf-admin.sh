@@ -9,9 +9,9 @@ BASE_DIR="`dirname \"$0\"`"
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$DEPLOYMENT_FOLDER/passwords.sh"`
+eval export `prefix_vars "$DEPLOYMENT_DIR/passwords.sh"`
 
-[ -f "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh" ] && eval `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
+[ -f "$DEPLOYMENT_DIR/cf-credentials-admin.sh" ] && eval `prefix_vars "$DEPLOYMENT_DIR/cf-credentials-admin.sh"`
 
 USERNAME="$1"
 EMAIL="$2"
@@ -25,7 +25,7 @@ UAA_ADMIN_USERNAME="${UAA_ADMIN_USERNAME:-admin}"
 
 
 # Generate config if it doesn't exist, or if any of the values have changed
-if [ ! -f "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh" ] ||
+if [ ! -f "$DEPLOYMENT_DIR/cf-credentials-admin.sh" ] ||
 	[ -n "$USERNAME" -a -n "$CF_ADMIN_USERNAME" -a x"$CF_ADMIN_USERNAME" != x"$USERNAME" ] ||
 	[ -n "$EMAIL" -a -n "$CF_ADMIN_EMAIL" -a x"$CF_ADMIN_EMAIL" != x"$EMAIL" ] ||
 	[ -n "$PASSWORD" -a -n "$CF_ADMIN_PASSWORD" -a x"$CF_ADMIN_PASSWORD" != x"$PASSWORD" ]; then
@@ -34,7 +34,7 @@ if [ ! -f "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh" ] ||
 	[ -z "$PASSWORD" -o -z "$CF_ADMIN_PASSWORD" ] && NEW_PASSWORD="`generate_password`" ||  NEW_PASSWORD="${PASSWORD:-$CF_ADMIN_PASSWORD}"
 
 	# We shouldn't generate this if it alread
-	cat >"$DEPLOYMENT_FOLDER/cf-credentials-admin.sh" <<EOF
+	cat >"$DEPLOYMENT_DIR/cf-credentials-admin.sh" <<EOF
 # Cloudfoundry credentials
 CF_ADMIN_EMAIL='$EMAIL'
 CF_ADMIN_USERNAME='$USERNAME'
@@ -44,7 +44,7 @@ EOF
 	CHANGES=1
 
 	# Re-parse CF admin credentials
-	eval `prefix_vars "$DEPLOYMENT_FOLDER/cf-credentials-admin.sh"`
+	eval `prefix_vars "$DEPLOYMENT_DIR/cf-credentials-admin.sh"`
 fi
 
 [ -n "$DONT_SKIP_SSL_VALIDATION" ] || UAA_EXTRA_OPTS='--skip-ssl-validation'

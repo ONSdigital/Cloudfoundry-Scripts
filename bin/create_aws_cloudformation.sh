@@ -15,11 +15,11 @@ if [ -d "$STACK_OUTPUTS_DIR" ] && [ -z "$SKIP_STACK_OUTPUTS_DIR" -o x"$SKIP_STAC
 fi
 
 BOSH_SSH_KEY_NAME="$DEPLOYMENT_NAME-key"
-BOSH_SSH_FILE="$DEPLOYMENT_FOLDER/bosh-ssh.sh"
+BOSH_SSH_FILE="$DEPLOYMENT_DIR/bosh-ssh.sh"
 
 # We don't want to store the full path when we add the ssh-key location, so we use a relative one - but we use the absolute one for our checks
-BOSH_SSH_KEY_FILENAME="$DEPLOYMENT_FOLDER/ssh-key"
-BOSH_SSH_KEY_FILENAME_RELATIVE="$DEPLOYMENT_FOLDER_RELATIVE/ssh-key"
+BOSH_SSH_KEY_FILENAME="$DEPLOYMENT_DIR/ssh-key"
+BOSH_SSH_KEY_FILENAME_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssh-key"
 
 # We use older options in find due to possible lack of -printf and/or -regex options
 STACK_FILES="`find AWS-Cloudformation -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
