@@ -109,7 +109,7 @@ load_outputs(){
 	[ -d "$stack_outputs_dir" ] || FATAL "Stack outputs directory does not exist: '$stack_outputs_dir'"	
 
 	INFO "Loading outputs"
-	for _o in `find "$stack_outputs_dir/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")" | awk -F/ '{print $NF}'`; do
+	for _o in `find "$stack_outputs_dir/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")" | awk -F/ '{print $NF}' | sort`; do
 		INFO "Loading '$_o'"
 		eval export `prefix_vars "$stack_outputs_dir/$_o" "$env_prefix"`
 	done
