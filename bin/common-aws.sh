@@ -5,14 +5,14 @@
 aws_region(){
 	local new_aws_region="$1"
 
-	local current_region="`\"$AWS\" configure get region`"
+	local current_region="`\"$AWS\" --profile \"$AWS_PROFILE\" configure get region`"
 
 	# Do we need to update the config?
 	if [ -n "$new_aws_region" -a x"$current_region" != x"$new_aws_region" ]; then
-		if ! "$AWS" configure get region | grep -qE "^$new_aws_region"; then
+		if ! "$AWS" --profile "$AWS_PROFILE" configure get region | grep -qE "^$new_aws_region"; then
 			INFO 'Updating AWS CLI region configuration'
-			"$AWS" configure set region "$new_aws_region"
-			"$AWS" configure set output text
+			"$AWS" --profile "$AWS_PROFILE" configure set region "$new_aws_region"
+			"$AWS" --profile "$AWS_PROFILE" configure set output text
 		fi
 	elif [ -z "$new_aws_region" ]; then
 		echo "$current_region"
@@ -25,17 +25,26 @@ aws_credentials(){
 	local new_aws_secret_access_key="$2"
 
 	if [ -n "$new_aws_access_key_id" ]; then
-		if ! "$AWS" configure get aws_access_key_id | grep -qE "^$new_aws_access_key_id"; then
+		if ! "$AWS" --profile "$AWS_PROFILE" configure get aws_access_key_id | grep -qE "^$new_aws_access_key_id"; then
 			INFO 'Updating AWS CLI Access Key ID configuration'
-			"$AWS" configure set aws_access_key_id "$new_aws_access_key_id"
+			"$AWS" --profile "$AWS_PROFILE" configure set aws_access_key_id "$new_aws_access_key_id"
 		fi
 	fi
 	if [ -n "$new_aws_secret_access_key" ]; then
-		if ! "$AWS" configure get aws_secret_access_key | grep -qE "^$new_aws_secret_access_key"; then
+		if ! "$AWS" --profile "$AWS_PROFILE" configure get aws_secret_access_key | grep -qE "^$new_aws_secret_access_key"; then
 			INFO 'Updating AWS CLI Secret Access Key configuration'
-			"$AWS" configure set aws_secret_access_key "$new_aws_secret_access_key"
+			"$AWS" --profile "$AWS_PROFILE" configure set aws_secret_access_key "$new_aws_secret_access_key"
 		fi
 	fi
+}
+
+stack_exists(){
+	local stack_name="$1"
+
+	[ -z "$stack_name" ] && FATAL 'No stack name provided'
+
+	"$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name' &&  StackStatus != 'DELETE_COMPLETE'].StackName" \
+		cloudformation list-stacks | grep -Eq "^$stack_name"
 }
 
 update_parameter(){
@@ -80,8 +89,8 @@ parse_aws_cloudformation_outputs(){
 	# Debian's Awk (mawk) doesn't have gensub(), so we can't do this easily/cleanly
 	#
 	# Basically we convert camelcase variable names to underscore seperated names (eg FooBar -> foo_bar)
-	"$AWS" --output text --query 'Stacks[*].[Parameters[*].[ParameterKey,ParameterValue],Outputs[*].[OutputKey,OutputValue]]' cloudformation describe-stacks --stack-name "$stack" | \
-	perl -a -F'\t' -ne 'defined($F[1]) || next;
+	"$AWS" --profile "$AWS_PROFILE" --output text --query 'Stacks[*].[Parameters[*].[ParameterKey,ParameterValue],Outputs[*].[OutputKey,OutputValue]]' \
+		cloudformation describe-stacks --stack-name "$stack" | perl -a -F'\t' -ne 'defined($F[1]) || next;
 		chomp($F[1]);
 		$F[0] =~ s/([a-z0-9])([A-Z])/\1_\2/g;
 		$r{$F[0]} = sprintf("%s='\''%s'\''\n",lc($F[0]),$F[1]);
@@ -118,7 +127,9 @@ check_cloudformation_stack(){
 
 	INFO 'Checking for existing Cloudformation stack'
 	# Is there a better way to query?
-	"$AWS" --output text --query "StackSummaries[?StackName == '$stack_name' && (StackStatus == 'CREATE_COMPLETE' || StackStatus == 'UPDATE_COMPLETE' || StackStatus == 'UPDATE_ROLLBACK_COMPLETE')].[StackName]" cloudformation list-stacks | grep -q "^$stack_name$" && INFO 'Stack found' || INFO 'Stack does not exist'
+	"$AWS" --profile "$AWS_PROFILE" --output text --query \
+		"StackSummaries[?StackName == '$stack_name' && (StackStatus == 'CREATE_COMPLETE' || StackStatus == 'UPDATE_COMPLETE' || StackStatus == 'UPDATE_ROLLBACK_COMPLETE')].[StackName]" \
+		cloudformation list-stacks | grep -q "^$stack_name$" && INFO 'Stack found' || INFO 'Stack does not exist'
 }
 
 calculate_dns_ip(){
@@ -177,6 +188,8 @@ fi
 
 [ x"$AWS_DEBUG" = x"true" ] && AWS_DEBUG_OPTION='--debug'
 
+AWS_PROFILE="${AWS_PROFILE:-default}"
+
 CONFIGURED_AWS_REGION="`aws_region`"
 # Provide a default - these should come from a configuration/defaults file
 DEFAULT_AWS_REGION="${DEFAULT_AWS_REGION:-${CONFIGURED_AWS_REGION:-eu-central-1}}"
@@ -189,6 +202,7 @@ HOSTED_ZONE="${HOSTED_ZONE:-$3}"
 AWS_REGION="${AWS_REGION:-$4}"
 AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-$5}"
 AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-$6}"
+
 
 # CLOUDFORMATION_DIR may be given as a relative directory
 findpath CLOUDFORMATION_DIR "${CLOUDFORMATION_DIR:-AWS-Cloudformation}"

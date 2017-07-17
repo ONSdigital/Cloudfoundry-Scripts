@@ -30,16 +30,17 @@ aws_change_set(){
 
 	check_cloudformation_stack "$stack_name"
 
-	local stack_arn="`\"$AWS\" --output text --query \"StackSummaries[?StackName == '$stack_name'].StackId\" cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE`"
+	local stack_arn="`\"$AWS\" --profile \"$AWS_PROFILE\" --output text --query \"StackSummaries[?StackName == '$stack_name'].StackId\" cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE`"
 
 	[ -z "$stack_arn" ] && FATAL "Stack no longer exists"
 
 	INFO "Validating Cloudformation template: $stack_name"
-	"$AWS" --output table cloudformation validate-template $template_option "$stack_url"
+	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation validate-template $template_option "$stack_url"
 
 	INFO 'Creating Cloudformation stack change set'
 	INFO 'Stack details:'
-	sh -c "'$AWS' --output table \
+	sh -c "'$AWS' --profile "$AWS_PROFILE" \
+		--output table \
 		cloudformation create-change-set \
 		--stack-name '$stack_arn' \
 		--change-set-name '$change_set_name' \
@@ -50,21 +51,21 @@ aws_change_set(){
 
 
 	INFO 'Waiting for Cloudformation changeset to be created'
-	if "$AWS" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"; then
+	if "$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"; then
 		INFO 'Stack change set details:'
-		"$AWS" --output table cloudformation list-change-sets --stack-name "$stack_arn"
+		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation list-change-sets --stack-name "$stack_arn"
 		INFO 'Starting Cloudformation changeset'
-		"$AWS" --output table cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
 		INFO 'Waiting for Cloudformation stack to finish creation'
-		"$AWS" --output table cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
+		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
 
 		parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
 	else
 		WARN 'Change set did not contain any changes'
 
 		WARN 'Deleting empty change set'
-		"$AWS" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 	fi
 }
 
@@ -94,7 +95,7 @@ INFO 'Parsing preamble outputs'
 eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
 
 INFO 'Copying templates to S3'
-"$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-.json" --include 'Templates/*.json'
+"$AWS" --profile "$AWS_PROFILE" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-.json" --include 'Templates/*.json'
 
 # Now we can set the main stack URL
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"

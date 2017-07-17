@@ -19,9 +19,9 @@ empty_bucket(){
 
 	[ -n "$1" ] || FATAL 'No bucket name provided'
 
-	if "$AWS" --output text --query "Buckets[?Name == '$bucket_name'].Name" s3api list-buckets | grep -Eq "^$bucket_name$"; then
+	if "$AWS" --profile "$AWS_PROFILE" --output text --query "Buckets[?Name == '$bucket_name'].Name" s3api list-buckets | grep -Eq "^$bucket_name$"; then
 		INFO "Emptying bucket: $bucket_name"
-		"$AWS" s3 rm --recursive "s3://$bucket_name"
+		"$AWS" --profile "$AWS_PROFILE" s3 rm --recursive "s3://$bucket_name"
 	fi
 }
 
@@ -60,16 +60,16 @@ check_cloudformation_stack "$DEPLOYMENT_NAME"
 
 # Provide the ability to optionally delete existing AWS SSH key
 if [ -z "$KEEP_SSH_KEY" -o x"$KEEP_SSH_KEY" = x"false" ] && [ -n "$SSH_KEY_EXISTS" -a -n "$bosh_ssh_key_name" ] && \
-	"$AWS" ec2 describe-key-pairs --key-names "$bosh_ssh_key_name" >/dev/null 2>&1; then
+	"$AWS" --profile "$AWS_PROFILE" ec2 describe-key-pairs --key-names "$bosh_ssh_key_name" >/dev/null 2>&1; then
 
 	INFO "Deleting SSH key: '$bosh_ssh_key_name'"
-	"$AWS" ec2 delete-key-pair --key-name "$bosh_ssh_key_name"
+	"$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$bosh_ssh_key_name"
 fi
 
 for s in $STACKS; do
 	INFO "Deleting stack: $s"
-	"$AWS" --output table cloudformation delete-stack --stack-name "$s"
+	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-stack --stack-name "$s"
 
 	INFO 'Waiting for Cloudformation stack to be deleted'
-	"$AWS" --output table cloudformation wait stack-delete-complete --stack-name "$s"
+	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-delete-complete --stack-name "$s"
 done
