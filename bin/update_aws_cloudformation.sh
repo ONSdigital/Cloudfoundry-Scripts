@@ -73,7 +73,7 @@ if [ -f "$STACK_PREAMBLE_OUTPUTS" ] && [ -z "$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK"
 	[ -f "$STACK_PREAMBLE_OUTPUTS" ] || FATAL "Existing stack preamble outputs do exist: '$STACK_PREAMBLE_OUTPUTS'"
 fi
 
-if [ -f "$STACK_MAIN_OUTPUTS" ] && [ -z "$SKIP_STACK_MAIN_OUTPUTS_CHECK" -o x"$SKIP_STACK_MAIN_OUTPUTS_CHECK" = x"false" ]: then
+if [ -f "$STACK_MAIN_OUTPUTS" ] && [ -z "$SKIP_STACK_MAIN_OUTPUTS_CHECK" -o x"$SKIP_STACK_MAIN_OUTPUTS_CHECK" = x"false" ]; then
 	[ -f "$STACK_MAIN_OUTPUTS" ] || FATAL "Existing stack main outputs do exist: '$STACK_MAIN_OUTPUTS'"
 fi
 
