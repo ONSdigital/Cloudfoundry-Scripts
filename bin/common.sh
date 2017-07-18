@@ -1,17 +1,17 @@
 FATAL(){
 	# RHEL echo allows -e (interpret escape sequences).
 	# Debian/Ubuntu/et al doesn't as it uses 'dash' as its default shell
-	/bin/echo -e "${FATAL_COLOUR}FATAL $@$NORMAL_COLOUR" >&2
+	"$ECHO" -e "${FATAL_COLOUR}FATAL $@$NORMAL_COLOUR" >&2
 
 	exit 1
 }
 
 WARN(){
-	/bin/echo -e "${WARN_COLOUR}WARN $@$NORMAL_COLOUR" >&2
+	"$ECHO" -e "${WARN_COLOUR}WARN $@$NORMAL_COLOUR" >&2
 }
 
 INFO(){
-	/bin/echo -e "${INFO_COLOUR}INFO $@$NORMAL_COLOUR" >&2
+	"$ECHO" -e "${INFO_COLOUR}INFO $@$NORMAL_COLOUR" >&2
 }
 
 
@@ -131,6 +131,17 @@ load_output_vars(){
 	done
 }
 
+case `uname -s` in
+	Darwin)
+		ECHO='echo'
+		SED_EXTENDED='-E'
+		;;
+	Linux)
+		# Debian & Ubuntu use 'dash' as their shell, which is less than feature complete compared to other shells
+		ECHO='/bin/sh'
+		SED_EXTENDED='-r'
+		;;
+esac
 
 # Check if we support colours
 [ -n "$TERM" ] && COLOURS="`tput colors`"
