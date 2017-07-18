@@ -38,7 +38,7 @@ aws_change_set(){
 	INFO "Validating Cloudformation template: $stack_name"
 	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation validate-template $template_option "$stack_url"
 
-	[ x"$create_validate" = x"validate" ] && return
+	[ x"$create_validate" = x"validate" ] && return $?
 
 	INFO 'Creating Cloudformation stack change set'
 	INFO 'Stack details:'
@@ -100,13 +100,13 @@ STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
 for _action in validate create; do
 	for _file in $STACK_FILES; do
-		STACK_NAME="$DEPLOYMENT_NAME-`echo $_file| sed -re "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
+		STACK_NAME="$DEPLOYMENT_NAME-`echo $_file| sed $SED_EXTENDED -e "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
 		STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 		STACK_URL="$templates_bucket_http_url/$_file"
 		STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
 
 		[ "$_action" = x"create" ] && update_parameters_file "$CLOUDFORMATION_DIR/$_file" "$STACK_PARAMETERS"
 
-		aws_change_set "$STACK_NAME" "$STACK_URL" "$STACK_OUTPUTS" "file://$STACK_PARAMETERS" --template-url $_action
+		aws_change_set "$STACK_NAME" "$STACK_URL" "$STACK_OUTPUTS" "file://$STACK_PARAMETERS" --template-url $_action || FATAL "Failed to $_action stack: $STACK_NAME, $_file"
 	done
 done
