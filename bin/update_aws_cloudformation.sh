@@ -77,17 +77,12 @@ if [ -f "$STACK_MAIN_OUTPUTS" ] && [ -z "$SKIP_STACK_MAIN_OUTPUTS_CHECK" -o x"$S
 	[ -f "$STACK_MAIN_OUTPUTS" ] || FATAL "Existing stack main outputs do exist: '$STACK_MAIN_OUTPUTS'"
 fi
 
-INFO 'Checking if we need to update any parameters'
-for _p in `awk '/ParameterKey/{gsub("(\"|,)",""); print $3}' "$STACK_PARAMETERS"`; do
-	var_name="`echo \"$_p\" | sed -re 's/([a-z0-9])([A-Z])/\1_\U\2/g' | tr '[:lower:]' '[:upper:]'`"
+# We use older options in find due to possible lack of -printf and/or -regex options
+STACK_FILES="`find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
 
-	eval var="\$$var_name"
-
-	# We need to check we have a variable and its not just been set to '$'
-	[ -n "$var" -a x"$var" != x"\$" ] && update_parameter "$STACK_PARAMETERS" "$_p" "$var"
-
-	unset var_name var
-done
+pushd "$CLOUDFORMATION_DIR" >/dev/null
+validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES
+popd >/dev/null
 
 aws_change_set "$DEPLOYMENT_NAME-preamble" "$STACK_PREAMBLE_URL" "$STACK_PREAMBLE_OUTPUTS"
 
@@ -100,6 +95,15 @@ INFO 'Copying templates to S3'
 # Now we can set the main stack URL
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
-aws_change_set "$DEPLOYMENT_NAME" "$STACK_MAIN_URL" "$STACK_MAIN_OUTPUTS" "file://$STACK_PARAMETERS" --template-url
 
-calculate_dns_ip "$STACK_MAIN_OUTPUTS" >>"$STACK_MAIN_OUTPUTS"
+INFO 'Checking if we need to update any parameters'
+for _f in $STACK_FILES; do
+	STACK_NAME="$DEPLOYMENT_NAME-`echo $_f| sed -re "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
+	STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
+	STACK_URL="$templates_bucket_http_url/$_f"
+	STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
+
+	update_parameters_file "$CLOUDFORMATION_DIR/$_f" "$STACK_PARAMETERS"
+
+	aws_change_set "$STACK_NAME" "$STACK_URL" "$STACK_OUTPUTS" "file://$STACK_PARAMETERS" --template-url
+done

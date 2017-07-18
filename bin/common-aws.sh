@@ -47,25 +47,6 @@ stack_exists(){
 		cloudformation list-stacks | grep -Eq "^$stack_name"
 }
 
-update_parameter(){
-	local file="$1"
-	local parameter="$2"
-	local value="$3"
-
-	[ -f "$file" ] || FATAL "Parameter file does not exist: $file"
-	[ -z "$parameter" ] && FATAL 'No parameter to set'
-	[ -z "$value" ] && FATAL 'No value provided'
-
-	# A value containing @ will probably be an email address which should mean # is not used
-	# ...
-	echo "$value" | grep -E '#' && local separator='@' || local separator='#'
-
-	if ! grep -Eq "ParameterValue\": \"$value\"" "$file"; then
-		sed -i -re "s$separator\"(ParameterKey)\": \"($parameter)\", \"(ParameterValue)\": \"[^\"]+\"$separator\"\1\": \"\2\", \"\3\": \"$value\"${separator}g" \
-			"$file"
-	fi
-}
-
 validate_json_files(){
 	local failure=0
 
@@ -118,6 +99,32 @@ EOF
 	done | awk '{ line[++i]=$0 }END{ for(l=1; l<=i; l++){ if(i == l){ print line[l] }else{ printf("%s,\n",line[l]) } } }'
 	echo ']'
 
+}
+
+update_parameters_file(){
+	local stack_json="$1"
+	local parameters_file="$2"
+
+	[ -n "$stack_json" ] || FATAL 'No Cloudformation stack JSON file provided'
+	[ -f "$stack_json" ] || FATAL "Cloudformation stack JSON file does not exist: '$stack_json'"
+	[ -n "$parameters_file" ] || FATAL 'No Cloudformation parameters file provided'
+	[ -f "$parameters_file" ] || FATAL "Cloudformation parameters file does not exist: '$parameters_file'"
+
+	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1 } }' "$stack_json"`; do
+		var_name="`echo $_key | perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'`"
+		eval _param="\$$var_name"
+
+		[ -z "$_param" -o x"$_param" = x'$' ] && continue
+
+		echo "$_param:$_key" | grep -qE '#' && local separator='@' || local separator='#'
+
+		if ! grep -Eq "{ \"ParameterKey\": \"$_key\", \"ParameterValue\": \"$_param\" }" "$parameters_file"; then
+			sed -i -re "s$separator\"(ParameterKey)\": \"($_param)\", \"(ParameterValue)\": \"[^\"]+\"$separator\"\1\": \"\2\", \"\3\": \"$_key\"${separator}g" \
+				"$file"
+		fi
+
+		unset var var_name
+	done
 }
 
 check_cloudformation_stack(){
