@@ -24,7 +24,7 @@ STACK_OUTPUTS_DIR_RELATIVE="$DEPLOYMENT_BASE_DIR_RELATIVE/$DEPLOYMENT_NAME/outpu
 [ -f "$DEPLOYMENT_DIR/bosh-ssh.sh" ] || FATAL "Bosh SSH config does not exist: $DEPLOYMENT_DIR/bosh-ssh.sh"
 [ -f "$DEPLOYMENT_DIR/bosh-config.sh" ] || FATAL "Bosh config does not exist: $DEPLOYMENT_DIR/bosh-config.sh"
 
-load_outputs_var "$STACK_OUTPUTS_DIR_RELATIVE" director_dns
+load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" NONE director_dns
 eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-ssh.sh"`
 eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-config.sh"`
 
