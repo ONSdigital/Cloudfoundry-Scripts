@@ -67,8 +67,8 @@ generate_vars_yml(){
 		var_name="$variable_name"
 		var_suffix="$variable_suffix"
 
-		[ -z "$var_name" ] && var_name="`echo $_k | sed -re "s,^([^/]*/)*([^./]+)(\.[^/]+)$,\2,g" -e 's/-/_/g'`"
-		[ x"$var_suffix" != x"NONE" -a -z "$var_suffix" ] && local var_suffix="`echo $_k | sed -re 's/^.*.(ce?rt|key)$/_\1/g'`"
+		[ -z "$var_name" ] && var_name="`echo $_k | sed $SED_EXTENDED -e "s,^([^/]*/)*([^./]+)(\.[^/]+)$,\2,g" -e 's/-/_/g'`"
+		[ x"$var_suffix" != x"NONE" -a -z "$var_suffix" ] && local var_suffix="`echo $_k | sed $SED_EXTENDED -e 's/^.*.(ce?rt|key)$/_\1/g'`"
 
 		[ -z "$var_name" ] && FATAL "Unable to determine variable name from $_k and nothing was supplied"
 		[ x"$var_suffix" != x"NONE" -a -z "$var_suffix" ] && FATAL "Unable to determine variable suffix from $_k and nothing was supplied"
@@ -80,12 +80,12 @@ generate_vars_yml(){
 		[ -f "$var_file" ] || echo --- >"$var_file"
 
 		if [ 0$length -gt 1 ]; then
-			sed -re 's/^(.*)$/\L\1/g' >>"$var_file" <<EOF
+			sed $SED_EXTENDED -e 's/^(.*)$/\L\1/g' >>"$var_file" <<EOF
 $variable_prefix$var_name$var_suffix: |
 EOF
-			sed -re 's/^/  /g' "$_k" >>"$var_file"
+			sed $SED_EXTENDED -e 's/^/  /g' "$_k" >>"$var_file"
 		else
-			sed -re 's/^(.*)$/\L\1/g' >>"$var_file" <<EOF
+			sed $SED_EXTENDED -e 's/^(.*)$/\L\1/g' >>"$var_file" <<EOF
 $variable_prefix$var_name$var_suffix: `cat "$_k"`
 EOF
 		fi

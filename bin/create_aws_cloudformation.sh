@@ -95,6 +95,8 @@ for stack_file in $STACK_FILES; do
 		[ -d "$STACK_OUTPUTS_DIR" ] && rm -rf "$STACK_OUTPUTS_DIR"
 
 		FATAL "Problem validating template: '$stack_file'"
+	elif [ 0$FAILED -ne 0 ]; then
+		FATAL "Failed to validate stack: $STACK_NAME, $stack_file"
 	fi
 done
 

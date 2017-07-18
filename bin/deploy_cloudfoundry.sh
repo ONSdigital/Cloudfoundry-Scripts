@@ -22,7 +22,7 @@ if [ ! -f "$PASSWORD_CONFIG_FILE" -o x"$REGENERATE_PASSWORDS" = x"true" ]; then
 	# Environmental variables are insecure
 	INFO 'Generating password config'
 	echo '# Cloudfoundry passwords' >"$PASSWORD_CONFIG_FILE"
-	for i in `sed -nre 's/.*\(\(([^).]*(password|secret)[^).]*)\)\).*/\1/gp' "$BOSH_FULL_MANIFEST_FILE" "$BOSH_LITE_MANIFEST_FILE" | sort -u`; do
+	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*(password|secret)[^).]*)\)\).*/\1/gp' "$BOSH_FULL_MANIFEST_FILE" "$BOSH_LITE_MANIFEST_FILE" | sort -u`; do
 		cat <<EOF
 $i='`generate_password`'
 EOF

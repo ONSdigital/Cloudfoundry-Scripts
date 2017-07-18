@@ -119,7 +119,7 @@ update_parameters_file(){
 		echo "$_param:$_key" | grep -qE '#' && local separator='@' || local separator='#'
 
 		if ! grep -Eq "{ \"ParameterKey\": \"$_key\", \"ParameterValue\": \"$_param\" }" "$parameters_file"; then
-			sed -i -re "s$separator\"(ParameterKey)\": \"($_param)\", \"(ParameterValue)\": \"[^\"]+\"$separator\"\1\": \"\2\", \"\3\": \"$_key\"${separator}g" \
+			sed -i $SED_EXTENDED -e "s$separator\"(ParameterKey)\": \"($_param)\", \"(ParameterValue)\": \"[^\"]+\"$separator\"\1\": \"\2\", \"\3\": \"$_key\"${separator}g" \
 				"$file"
 		fi
 
