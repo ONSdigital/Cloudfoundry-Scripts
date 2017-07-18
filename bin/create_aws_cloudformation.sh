@@ -175,7 +175,7 @@ fi
 if [ ! -f "$BOSH_SSH_KEY_FILENAME" ]; then
 	# This will need silencing
 	INFO 'Generating SSH key'
-	[ -n "$INSECURE_SSH_KEY" ] && ssh-keygen -f "$BOSH_SSH_KEY_FILENAME" -p '' || ssh-keygen -f "$BOSH_SSH_KEY_FILENAME"
+	[ -n "$SECURE_SSH_KEY" ] && ssh-keygen -f "$BOSH_SSH_KEY_FILENAME" || ssh-keygen -f "$BOSH_SSH_KEY_FILENAME" || -P ''
 fi
 
 [ -f "$BOSH_SSH_KEY_FILENAME" ] || FATAL "SSH key does not exist '$BOSH_SSH_KEY_FILENAME'"
