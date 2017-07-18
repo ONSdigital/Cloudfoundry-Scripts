@@ -16,6 +16,7 @@ aws_change_set(){
 	local stack_outputs="$3"
 	local stack_parameters="$4"
 	local template_option="${5:---template-body}"
+	local create_validate="${6:-create}"
 
 	[ -z "$stack_name" ] && FATAL 'No stack name provided'
 	[ -z "$stack_url" ] && FATAL 'No stack url provided'
@@ -36,6 +37,8 @@ aws_change_set(){
 
 	INFO "Validating Cloudformation template: $stack_name"
 	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation validate-template $template_option "$stack_url"
+
+	[ x"$create_validate" = x"validate" ] && return
 
 	INFO 'Creating Cloudformation stack change set'
 	INFO 'Stack details:'
@@ -90,20 +93,20 @@ INFO 'Parsing preamble outputs'
 eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
 
 INFO 'Copying templates to S3'
-"$AWS" --profile "$AWS_PROFILE" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-.json" --include 'Templates/*.json'
+"$AWS" --profile "$AWS_PROFILE" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
 
 # Now we can set the main stack URL
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
+for _action in validate create; do
+	for _file in $STACK_FILES; do
+		STACK_NAME="$DEPLOYMENT_NAME-`echo $_file| sed -re "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
+		STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
+		STACK_URL="$templates_bucket_http_url/$_file"
+		STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
 
-INFO 'Checking if we need to update any parameters'
-for _f in $STACK_FILES; do
-	STACK_NAME="$DEPLOYMENT_NAME-`echo $_f| sed -re "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
-	STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
-	STACK_URL="$templates_bucket_http_url/$_f"
-	STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
+		[ "$_action" = x"create" ] && update_parameters_file "$CLOUDFORMATION_DIR/$_file" "$STACK_PARAMETERS"
 
-	update_parameters_file "$CLOUDFORMATION_DIR/$_f" "$STACK_PARAMETERS"
-
-	aws_change_set "$STACK_NAME" "$STACK_URL" "$STACK_OUTPUTS" "file://$STACK_PARAMETERS" --template-url
+		aws_change_set "$STACK_NAME" "$STACK_URL" "$STACK_OUTPUTS" "file://$STACK_PARAMETERS" --template-url $_action
+	done
 done
