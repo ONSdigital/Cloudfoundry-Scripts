@@ -92,6 +92,8 @@ for stack_file in $STACK_FILES; do
 		INFO "Waiting for Cloudformation stack deletion to finish creation: '$PREAMBLE_STACK'"
 		"$AWS" --profile "$AWS_PROFILE" cloudformation wait stack-delete-complete --stack-name "$PREAMBLE_STACK" || FATAL 'Failed to delete Cloudformation stack'
 
+		[ -d "$STACK_OUTPUTS_DIR" ] && rm -rf "$STACK_OUTPUTS_DIR"
+
 		FATAL "Problem validating template: '$stack_file'"
 	fi
 done
