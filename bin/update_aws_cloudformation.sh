@@ -33,7 +33,13 @@ aws_change_set(){
 
 	local stack_arn="`\"$AWS\" --profile \"$AWS_PROFILE\" --output text --query \"StackSummaries[?StackName == '$stack_name'].StackId\" cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE`"
 
-	[ -z "$stack_arn" ] && FATAL "Stack no longer exists"
+	if [ -z "$stack_arn" ]; then
+		[ x"$SKIP_MISSING" = x"true" ] && log_level='WARN' || log_level='FATAL'
+
+		$log_level "Stack no longer exists"
+
+		return 0
+	fi
 
 	INFO "Validating Cloudformation template: $stack_url"
 	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation validate-template $template_option "$stack_url"
