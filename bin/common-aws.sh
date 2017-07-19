@@ -132,11 +132,11 @@ check_cloudformation_stack(){
 
 	[ -z "$stack_name" ] && FATAL 'No stack name provided'
 
-	INFO 'Checking for existing Cloudformation stack'
+	INFO "Checking for existing Cloudformation stack: $stack_name"
 	# Is there a better way to query?
 	"$AWS" --profile "$AWS_PROFILE" --output text --query \
 		"StackSummaries[?StackName == '$stack_name' && (StackStatus == 'CREATE_COMPLETE' || StackStatus == 'UPDATE_COMPLETE' || StackStatus == 'UPDATE_ROLLBACK_COMPLETE')].[StackName]" \
-		cloudformation list-stacks | grep -q "^$stack_name$" && INFO 'Stack found' || INFO 'Stack does not exist'
+		cloudformation list-stacks | grep -q "^$stack_name$" && INFO "Stack found: $stack_name" || INFO "Stack does not exist: $stack_name"
 }
 
 calculate_dns_ip(){
