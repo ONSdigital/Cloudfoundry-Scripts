@@ -40,7 +40,7 @@ aws_change_set(){
 
 	[ x"$update_validate" = x"validate" ] && return $?
 
-	INFO 'Creating Cloudformation stack change set'
+	INFO "Creating Cloudformation stack change set: $stack_name"
 	INFO 'Stack details:'
 	sh -c "'$AWS' --profile "$AWS_PROFILE" \
 		--output table \
