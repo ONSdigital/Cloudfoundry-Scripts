@@ -40,7 +40,7 @@ if [ ! -d "$STACK_PARAMETERS_DIR" ]; then
 	mkdir -p "$STACK_PARAMETERS_DIR"
 fi
 
-if [ -z "$SKIP_EXISTING" -o x"$SKIP_EXISTING" != x"true" ] && ! stack_exists "$PREAMBLE_STACK"; then
+if [ -z "$SKIP_EXISTING" -o x"$SKIP_EXISTING" != x"true" ] || ! stack_exists "$PREAMBLE_STACK"; then
 	INFO 'Checking for existing Cloudformation stack'
 	"$AWS" --profile "$AWS_PROFILE" --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') &&  StackStatus != 'DELETE_COMPLETE'].StackName" \
 		cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack(s) exists'
