@@ -61,21 +61,6 @@ findpath(){
 	[ x"$return_var" != x"NONE" ] && eval $return_var="\"$real_dir\"" || echo "$real_dir"
 }
 
-parse_aws_credentials(){
-	[ -f ~/.aws/credentials ] || FATAL 'AWS credentials file does not exist ~/.aws/credentials'
-
-	local aws_access_key_id="`$AWS configure get aws_access_key_id`"
-	local aws_secret_access_key="`$AWS configure get aws_secret_access_key`"
-
-	[ -z "$aws_access_key_id" ] && FATAL 'Unable to find aws_access_key_id'
-	[ -z "$aws_secret_access_key" ] && FATAL 'Unable to find aws_secret_access_key'
-
-	cat <<EOF
-aws_access_key_id='$aws_access_key_id'
-aws_secret_access_key='$aws_secret_access_key'
-EOF
-}
-
 prefix_vars(){
 	local parse_file="$1"
 	local env_prefix="$2"

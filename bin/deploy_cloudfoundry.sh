@@ -22,7 +22,7 @@ if [ ! -f "$PASSWORD_CONFIG_FILE" -o x"$REGENERATE_PASSWORDS" = x"true" ]; then
 	# Environmental variables are insecure
 	INFO 'Generating password config'
 	echo '# Cloudfoundry passwords' >"$PASSWORD_CONFIG_FILE"
-	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*(password|secret)[^).]*)\)\).*/\1/gp' "$BOSH_FULL_MANIFEST_FILE" "$BOSH_LITE_MANIFEST_FILE" | sort -u`; do
+	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*(password|secret))\)\).*/\1/gp' "$BOSH_FULL_MANIFEST_FILE" "$BOSH_LITE_MANIFEST_FILE" | sort -u`; do
 		cat <<EOF
 $i='`generate_password`'
 EOF
@@ -82,8 +82,6 @@ eval bosh_ssh_key_file="\$${ENV_PREFIX}bosh_ssh_key_file"
 findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 
 if [ -n "$DELETE_BOSH_ENV" -a x"$DELETE_BOSH_ENV" = x"true" ]; then
-	[ -n "$NON_AWS_DEPLOYMENT" ] || check_aws_keys
-
 	INFO 'Removing existing Bosh bootstrap environment'
 	bosh_env delete-env
 
@@ -91,20 +89,6 @@ if [ -n "$DELETE_BOSH_ENV" -a x"$DELETE_BOSH_ENV" = x"true" ]; then
 fi
 
 if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
-	# XXX This will need some future changes when vSphere/other support is completed
-	if [ -z "$NON_AWS_DEPLOYMENT" ]; then
-		if [ -z "$AWS_ACCESS_KEY_ID" -o -z "$AWS_SECRET_ACCESS_KEY" ]; then
-			INFO 'Loading AWS credentials'
-			eval export `parse_aws_credentials | prefix_vars -`
-		else
-			INFO 'Setting AWS credentials'
-			aws_access_key_id="$AWS_ACCESS_KEY_ID"
-			aws_secret_access_key="$AWS_SECRET_ACCESS_KEY"
-		fi
-
-		check_aws_keys
-	fi
-
 	INFO 'Creating Bosh bootstrap environment'
 	bosh_env create-env
 

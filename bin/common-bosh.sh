@@ -12,11 +12,6 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common.sh"
 	
-check_aws_keys(){
-	[ -n "$aws_access_key_id" ] || FATAL 'No AWS access key ID provided'
-	[ -n "$aws_secret_access_key" ] || FATAL 'No AWS secret access key provided'
-}
-
 bosh_env(){
 	local action_option=$1
 
@@ -25,8 +20,6 @@ bosh_env(){
 		$BOSH_TTY_OPT \
 		--var bosh_name="$DEPLOYMENT_NAME" \
 		--var bosh_deployment="$BOSH_DEPLOYMENT" \
-		--var aws_access_key_id="$aws_access_key_id" \
-		--var aws_secret_access_key="$aws_secret_access_key" \
 		--state="$BOSH_LITE_STATE_FILE" \
 		--vars-env="$ENV_PREFIX_NAME" \
 		--vars-file="$SSL_YML" \
@@ -42,11 +35,8 @@ BOSH_FULL_MANIFEST_NAME="${2:-Bosh-Template}"
 BOSH_CLOUD_MANIFEST_NAME="${3:-$BOSH_FULL_MANIFEST_NAME-AWS-CloudConfig}"
 BOSH_LITE_MANIFEST_NAME="${4:-$BOSH_FULL_MANIFEST_NAME}"
 
-AWS_ACCESS_KEY_ID="${5:-$AWS_ACCESS_KEY_ID}"
-AWS_SECRET_ACCESS_KEY="${6:-$AWS_SECRET_ACCESS_KEY}"
-
-MANIFESTS_DIR="${7:-Bosh-Manifests}"
-INTERNAL_DOMAIN="${8:-cf.internal}"
+MANIFESTS_DIR="${5:-Bosh-Manifests}"
+INTERNAL_DOMAIN="${6:-cf.internal}"
 
 [ -n "$DEPLOYMENT_NAME" ] || FATAL 'No Bosh deployment name provided'
 
@@ -98,17 +88,6 @@ ENV_PREFIX="${ENV_PREFIX_NAME}_"
 
 # Without a TTY (eg within Jenkins) Bosh doesn't seem to output anything when deploying
 [ -n "$NO_FORCE_TTY" ] || BOSH_TTY_OPT="--tty"
-
-if [ -z "$NON_AWS_DEPLOYMENT" ]; then
-	if [ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ]; then
-		INFO 'Attempting to set AWS credentials'
-		aws_access_key_id="$AWS_ACCESS_KEY_ID"
-		aws_secret_access_key="$AWS_SECRET_ACCESS_KEY"
-	else
-		INFO 'Attempting to load AWS credentials'
-		eval export `parse_aws_credentials | prefix_vars -`
-	fi
-fi
 
 # Check we have bosh installed
 installed_bin bosh
