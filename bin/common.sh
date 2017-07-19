@@ -64,24 +64,16 @@ findpath(){
 parse_aws_credentials(){
 	[ -f ~/.aws/credentials ] || FATAL 'AWS credentials file does not exist ~/.aws/credentials'
 
-	awk -F' ?= ?' '{
-		if(/^\[default\]$/){
-			def=1
-		}else if(/^aws_access_key_id = / && def == 1){
-			printf("aws_access_key_id=\"%s\"\n",$2)
-			key=1
-		}else if(/^aws_secret_access_key = / && def == 1){
-			printf("aws_secret_access_key=\"%s\"\n",$2)
-			secret=1
-		}else{
-			def=0
-		}
-	}END{
-		if(key != 1 || secret != 1)
-			exit 1
+	local aws_access_key_id="`$AWS configure get aws_access_key_id`"
+	local aws_secret_access_key="`$AWS configure get aws_secret_access_key`"
 
-		exit 0
-	}' ~/.aws/credentials || FATAL 'Unable to find aws_access_key_id & aws_secret_access_key from ~/.aws/credentials'
+	[ -z "$aws_access_key_id" ] && FATAL 'Unable to find aws_access_key_id'
+	[ -z "$aws_secret_access_key" ] && FATAL 'Unable to find aws_secret_access_key'
+
+	cat <<EOF
+aws_access_key_id='$aws_access_key_id'
+aws_secret_access_key='$aws_secret_access_key'
+EOF
 }
 
 prefix_vars(){
