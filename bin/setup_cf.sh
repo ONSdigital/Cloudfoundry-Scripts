@@ -52,19 +52,15 @@ INFO 'Available buildpacks:'
 if [ -z "$SKIP_TESTS" ]; then
 	INFO 'Testing application deployment'
 	for i in `ls "$TEST_APPS"`; do
-		cd "$TEST_APPS/$i"
-
-		buildpack="`awk '/^ *buildpack:/{print $2}' manifest.yml`"
+		buildpack="`awk '/^ *buildpack:/{print $2}' "$TEST_APPS/$i/manifest.yml"`"
 
 		if [ -n "$buildpack" ]; then
 			"$CF" buildpacks | grep -q "^$buildpack" || FATAL "Buildpack '$buildpack' not available - please retry"
 		fi
 
-		"$BASE_DIR/cf_push.sh" "$DEPLOYMENT_NAME" "$i" "$ORG_NAME" "$TEST_SPACE"
+		"$BASE_DIR/cf_push.sh" "$DEPLOYMENT_NAME" "$i" "$ORG_NAME" "$TEST_SPACE" "$TEST_APPS/$i"
 
 		"$BASE_DIR/cf_delete.sh" "$DEPLOYMENT_NAME" "$i"
-
-		cd -
 	done
 fi
 
