@@ -15,6 +15,14 @@ BASE_DIR="`dirname \"$0\"`"
 APP_NAME="$1"
 CF_ORG="${2:-$organisation}"
 CF_SPACE="${3:-Test}"
+LOCATION="$4"
+
+if [ -n "$4" ]; then
+	shift 3
+
+	# In case we have been supplied a path with spaces
+	cd "$@"
+fi
 
 if [ -z "$APP_NAME" ]; then
 	[ -f manifest.yml ] || FATAL 'Application manifest does not exist'

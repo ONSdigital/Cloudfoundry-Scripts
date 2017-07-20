@@ -82,13 +82,19 @@ load_outputs(){
 	local stack_outputs_dir="$1"
 	local env_prefix="$2"
 
+	local outputs_dir
+
 	[ -z "$stack_outputs_dir" ] && FATAL 'No stack outputs directory provided'
-	[ -d "$stack_outputs_dir" ] || FATAL "Stack outputs directory does not exist: '$stack_outputs_dir'"	
+
+	# Find the absolute path
+	findpath outputs_dir "$stack_outputs_dir"
+
+	[ -d "$outputs_dir" ] || FATAL "Stack outputs directory does not exist: '$outputs_dir'"	
 
 	INFO "Loading outputs"
-	for _o in `find "$stack_outputs_dir/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")" | awk -F/ '{print $NF}' | sort`; do
+	for _o in `find "$outputs_dir/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")" | awk -F/ '{print $NF}' | sort`; do
 		INFO "Loading '$_o'"
-		eval export `prefix_vars "$stack_outputs_dir/$_o" "$env_prefix"`
+		eval export `prefix_vars "$outputs_dir/$_o" "$env_prefix"`
 	done
 }
 
@@ -96,15 +102,21 @@ load_output_vars(){
 	local stack_outputs_dir="$1"
 	local env_prefix="$2"
 
+	local outputs_dir
+
 	[ -z "$3" ] && FATAL 'Not enough parameters'
 	[ -z "$stack_outputs_dir" ] && FATAL 'No stack outputs directory provided'
-	[ -d "$stack_outputs_dir" ] || FATAL "Stack outputs directory does not exist: '$stack_outputs_dir'"
+
+	# Find the absolute path
+	findpath outputs_dir "$stack_outputs_dir"
+
+	[ -d "$outputs_dir" ] || FATAL "Stack outputs directory does not exist: '$outputs_dir'"
 
 	[ x"$env_prefix" = x"NONE" ] && unset env_prefix
 	shift 2
 
 	for _i in $@; do
-		eval `grep -hE "^$_i=" "$stack_outputs_dir"/* | prefix_vars - "$env_prefix"`
+		eval `grep -hE "^$_i=" "$outputs_dir"/* | prefix_vars - "$env_prefix"`
 	done
 }
 
