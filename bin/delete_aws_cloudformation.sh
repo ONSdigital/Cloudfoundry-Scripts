@@ -13,7 +13,6 @@ IGNORE_MISSING_CONFIG='true'
 # Run common AWS Cloudformation parts
 . "$BASE_DIR/common-aws.sh"
 
-
 empty_bucket(){
 	bucket_name="$1"
 
@@ -25,13 +24,12 @@ empty_bucket(){
 	fi
 }
 
-STACK_OUTPUTS_DIR_RELATIVE="$DEPLOYMENT_BASE_DIR_RELATIVE/$DEPLOYMENT_NAME/outputs"
 load_outputs "$STACK_OUTPUTS_DIR_RELATIVE"
 
-if [ -f "$DEPLOYMENT_DIR/bosh-ssh.sh" ]; then
+if [ -n "$BOSH_SSH_CONFIG" -a -f "$BOSH_SSH_CONFIG" ]; then
 	SSH_KEY_EXISTS=1
 
-	eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-ssh.sh"`
+	eval export `prefix_vars "$BOSH_SSH_CONFIG"`
 fi
 
 if [ -f "$STACK_OUTPUTS_DIR/outputs-preamble.sh" ]; then
@@ -53,8 +51,6 @@ if [ -n "$s3_buckets" ]; then
 	done
 	IFS="$OLDIFS"
 fi
-
-eval `prefix_vars "$DEPLOYMENT_DIR/bosh-ssh.sh"`
 
 check_cloudformation_stack "$DEPLOYMENT_NAME"
 

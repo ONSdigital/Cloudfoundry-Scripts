@@ -6,14 +6,17 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
+DEPLOYMENT_NAME="$1"
+BROKER_NAME="${2:-elasticache}"
+
 . "$BASE_DIR/common.sh"
-. "$BASE_DIR/common-cf.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$DEPLOYMENT_DIR/passwords.sh"`
-eval export `prefix_vars "$DEPLOYMENT_DIR/cf-credentials-admin.sh"`
+eval export `prefix_vars "$PASSWORD_CONFIG_FILE"`
+eval export `prefix_vars "$CF_CREDENTIALS"`
 
-BROKER_NAME="${1:-elasticache}"
+installed_bin cf
+
 BROKER_DIR="$TMP_DIR/$BROKER_NAME"
 BROKER_GIT_URL='https://github.com/cloudfoundry-community/elasticache-broker'
 
@@ -50,7 +53,7 @@ applications:
       GO15VENDOREXPERIMENT: 0
 EOF
 
-[ -f "$CONFIG_DIR/$BROKER_NAME/config.json" ] && JSON_CONFIG="$CONFIG_DIR/$BROKER_NAME/config.json" || JSON_CONFIG="$BROKER_DIR/config-sample.json"
+[ -f "$BROKER_CONFIG_DIR/$BROKER_NAME/config.json" ] && JSON_CONFIG="$BROKER_CONFIG_DIR/$BROKER_NAME/config.json" || JSON_CONFIG="$BROKER_DIR/config-sample.json"
 
 INFO 'Adjusting ElastiCache configuration'
 sed $SED_EXTENDED -e "s/(\"username\"): \"[^\"]+\"/\1: \"$BROKER_USERNAME\"/g" \

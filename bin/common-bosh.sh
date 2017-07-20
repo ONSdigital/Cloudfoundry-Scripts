@@ -10,28 +10,6 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-. "$BASE_DIR/common.sh"
-	
-bosh_env(){
-	local action_option=$1
-
-	"$BOSH" "$action_option" "$BOSH_LITE_MANIFEST_FILE" \
-		$BOSH_INTERACTIVE_OPT \
-		$BOSH_TTY_OPT \
-		--var bosh_name="$DEPLOYMENT_NAME" \
-		--var bosh_deployment="$BOSH_DEPLOYMENT" \
-		--state="$BOSH_LITE_STATE_FILE" \
-		--vars-env="$ENV_PREFIX_NAME" \
-		--vars-file="$SSL_YML" \
-		--vars-store="$BOSH_LITE_VARS_FILE"
-}
-
-
-
-# Set secure umask - the default permissions for ~/.bosh/config are wide open
-INFO 'Setting secure umask'
-umask 077
-
 DEPLOYMENT_NAME="$1"
 BOSH_FULL_MANIFEST_PREFIX="${2:-Bosh-Template}"
 BOSH_CLOUD_MANIFEST_PREFIX="${3:-$BOSH_FULL_MANIFEST_PREFIX-AWS-CloudConfig}"
@@ -40,34 +18,14 @@ BOSH_LITE_MANIFEST_NAME="${4:-Bosh-Template}"
 MANIFESTS_DIR="${5:-Bosh-Manifests}"
 INTERNAL_DOMAIN="${6:-cf.internal}"
 
+. "$BASE_DIR/common.sh"
+
 [ -n "$DEPLOYMENT_NAME" ] || FATAL 'No Bosh deployment name provided'
 
-grep -Eiq '^([[:alnum:]]+-?[[:alnum:]])+$' <<EOF || FATAL 'Invalid domain name, must be a valid domain label'
-$DEPLOYMENT_NAME
-EOF
-
-DEPLOYMENT_DIR="$DEPLOYMENT_BASE_DIR/$DEPLOYMENT_NAME"
-DEPLOYMENT_DIR_RELATIVE="$DEPLOYMENT_BASE_DIR_RELATIVE/$DEPLOYMENT_NAME"
-
-# This is also present in common-aws.sh
-STACK_OUTPUTS_DIR="$DEPLOYMENT_DIR/outputs"
-STACK_OUTPUTS_DIR_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/outputs"
-
-# Set prefix for vars that Bosh will suck in
-ENV_PREFIX_NAME='CF_BOSH'
-ENV_PREFIX="${ENV_PREFIX_NAME}_"
-
 #
-SSL_DIR="$DEPLOYMENT_DIR/ssl"
-SSL_DIR_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssl"
-SSL_YML="$SSL_DIR/ssl_config.yml"
-#
-PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/passwords.sh"
-#
-BOSH_SSH_CONFIG_FILE="$DEPLOYMENT_DIR/bosh-ssh.sh"
-BOSH_CONFIG_FILE="$DEPLOYMENT_DIR/bosh-config.sh"
-
 load_outputs "$STACK_OUTPUTS_DIR_RELATIVE" "$ENV_PREFIX"
+
+eval multi_az="\$${ENV_PREFIX}multi_az"
 
 if [ x"$multi_az" = x"true" ]; then
 	BOSH_FULL_MANIFEST_NAME="$BOSH_FULL_MANIFEST_PREFIX-MultiAZ"

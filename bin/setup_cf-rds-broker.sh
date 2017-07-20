@@ -6,26 +6,28 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
+DEFAULT_RDS_BROKER_DB_NAME="${RDS_BROKER_DB_NAME:-rds_broker}"
+DEFAULT_RDS_BROKER_NAME="${RDS_BROKER_NAME:-rds_broker}"
+
+DEPLOYMENT_NAME="$1"
+RDS_BROKER_DB_NAME="${1:-$DEFAULT_RDS_BROKER_DB_NAME}"
+RDS_BROKER_NAME="${2:-$DEFAULT_RDS_BROKER_NAME}"
+CF_ORG="${3:-$organisation}"
+
 . "$BASE_DIR/common.sh"
-. "$BASE_DIR/common-cf.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-config.sh"`
-eval export `prefix_vars "$DEPLOYMENT_DIR/passwords.sh"`
-eval export `prefix_vars "$DEPLOYMENT_DIR/cf-credentials-admin.sh"`
+installed_bin cf
+
+eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
+eval export `prefix_vars "$PASSWORD_CONFIG_FILE"`
+eval export `prefix_vars "$CF_CREDENTIALS"`
 
 [ -f "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh" ] && eval export `prefix_vars "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh"`
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"
 export BOSH_CA_CERT
-
-DEFAULT_RDS_BROKER_DB_NAME="${RDS_BROKER_DB_NAME:-rds_broker}"
-DEFAULT_RDS_BROKER_NAME="${RDS_BROKER_NAME:-rds_broker}"
-
-RDS_BROKER_DB_NAME="${1:-$DEFAULT_RDS_BROKER_DB_NAME}"
-RDS_BROKER_NAME="${2:-$DEFAULT_RDS_BROKER_NAME}"
-CF_ORG="${3:-$organisation}"
 
 RDS_BROKER_USER="${RDS_BROKER_USER:-rds_broker_user}"
 GOLANG_VERSION='1.8'
@@ -80,8 +82,8 @@ applications:
     AWS_DB_SUBNET_GROUP: $rds_subnet_group
 EOF
 
-if [ -f "$CONFIG_DIR/$SERVICE_NAME/catalog.yaml" ]; then
-	cp -f "$CONFIG_DIR/$SERVICE_NAME/catalog.yaml" "$RDS_BROKER_DIR/catalog.yaml"
+if [ -f "$BROKER_CONFIG_DIR/$SERVICE_NAME/catalog.yaml" ]; then
+	cp -f "$BROKER_CONFIG_DIR/$SERVICE_NAME/catalog.yaml" "$RDS_BROKER_DIR/catalog.yaml"
 fi
 
 INFO "Ensuring space exists: $SERVICES_SPACE"

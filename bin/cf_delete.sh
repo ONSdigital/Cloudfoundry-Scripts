@@ -8,14 +8,15 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-. "$BASE_DIR/common.sh"
-. "$BASE_DIR/bosh-env.sh"
-
-CF_APP="$1"
-CF_SPACE="${2:-Test}"
-CF_ORG="${3:-$organisation}"
+DEPLOYMENT_NAME="$1"
+CF_APP="$2"
+CF_SPACE="${3:-Test}"
+CF_ORG="${4:-$organisation}"
 
 NO_SKIP_SSL_VALIDATION="$5"
+
+. "$BASE_DIR/common.sh"
+. "$BASE_DIR/bosh-env.sh"
 
 [ -z "$CF_APP" ] && FATAL 'No application name provided'
 

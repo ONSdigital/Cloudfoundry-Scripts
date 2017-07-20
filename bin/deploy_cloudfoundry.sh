@@ -12,6 +12,10 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common-bosh.sh"
 
+SSL_DIR="$DEPLOYMENT_DIR/ssl"
+SSL_DIR_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssl"
+SSL_YML="$SSL_DIR/ssl_config.yml"
+
 if [ -f "$BOSH_LITE_STATE_FILE" ]; then
 	[ x"$DELETE_BOSH_STATE" = x"true" ] && rm -f "$BOSH_LITE_STATE_FILE"
 
@@ -55,9 +59,9 @@ if [ ! -f "$EXTERNAL_SSL_DIR/client/director.$domain_name.key" -o ! -f "$EXTERNA
 	FATAL 'No director SSL keypair available'
 fi
 
-if [ ! -f "$BOSH_CONFIG_FILE" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ]; then
+if [ ! -f "$BOSH_DIRECTOR_FILE" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ]; then
 	INFO 'Generating Bosh configurations'
-	cat <<EOF >"$BOSH_CONFIG_FILE"
+	cat <<EOF >"$BOSH_DIRECTOR_FILE"
 # Bosh deployment config
 BOSH_ENVIRONMENT='$director_dns'
 BOSH_DEPLOYMENT='$DEPLOYMENT_NAME'
@@ -68,9 +72,9 @@ EOF
 fi
 
 INFO 'Loading Bosh config'
-[ -f "$BOSH_CONFIG_FILE" ] || FATAL "Bosh configuration file does not exist: '$BOSH_CONFIG_FILE'"
-eval export `prefix_vars "$BOSH_CONFIG_FILE"`
-eval export `prefix_vars "$BOSH_SSH_CONFIG_FILE" "$ENV_PREFIX"`
+[ -f "$BOSH_DIRECTOR_FILE" ] || FATAL "Bosh configuration file does not exist: '$BOSH_DIRECTOR_FILE'"
+eval export `prefix_vars "$BOSH_DIRECTOR_FILE"`
+eval export `prefix_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"`
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"

@@ -6,7 +6,6 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-. "$BASE_DIR/common.sh"
 
 DEPLOYMENT_NAME="$1"
 # vitals|failing
@@ -14,15 +13,15 @@ OPTION="${2:-vitals}"
 INTERVAL="${3:-5}"
 OUTPUT_TYPE="${4:-tty}"
 
-[ x"$OUTPUT_TYPE" = x"tty" -o x"$OUTPUT_TYPE" = x"json" ] || FATAL "Incorrect output type. Valid types: tty or json"
+. "$BASE_DIR/common.sh"
 
-#
-DEPLOYMENT_DIR="$DEPLOYMENT_BASE_DIR/$DEPLOYMENT_NAME"
+[ x"$OUTPUT_TYPE" = x"tty" -o x"$OUTPUT_TYPE" = x"json" ] || FATAL "Incorrect output type. Valid types: tty or json"
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
 [ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"
+[ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh Director configuration file does not exist: $BOSH_DIRECTOR_CONFIG"
 
-eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-config.sh"`
+eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"

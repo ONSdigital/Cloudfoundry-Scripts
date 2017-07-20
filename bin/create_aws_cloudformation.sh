@@ -15,9 +15,7 @@ if [ -d "$STACK_OUTPUTS_DIR" ] && [ -z "$SKIP_STACK_OUTPUTS_DIR" -o x"$SKIP_STAC
 fi
 	
 PREAMBLE_STACK="$DEPLOYMENT_NAME-preamble"
-
 BOSH_SSH_KEY_NAME="$DEPLOYMENT_NAME-key"
-BOSH_SSH_FILE="$DEPLOYMENT_DIR/bosh-ssh.sh"
 
 # We don't want to store the full path when we add the ssh-key location, so we use a relative one - but we use the absolute one for our checks
 BOSH_SSH_KEY_FILENAME="$DEPLOYMENT_DIR/ssh-key"
@@ -189,7 +187,7 @@ if [ -z "$AWS_KEY_EXISTS" ]; then
 fi
 
 INFO 'Creating additional environment configuration'
-cat >"$BOSH_SSH_FILE" <<EOF
+cat >"$BOSH_SSH_CONFIG" <<EOF
 # Bosh SSH vars
 bosh_ssh_key_name='$BOSH_SSH_KEY_NAME'
 bosh_ssh_key_file='$BOSH_SSH_KEY_FILENAME_RELATIVE'

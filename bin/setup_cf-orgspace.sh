@@ -6,16 +6,17 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-. "$BASE_DIR/common.sh"
+DEPLOYMENT_NAME="$1"
+ORG_NAME="${2:-$organisation}"
+SPACE_NAME="${3:-Test}"
 
+. "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-config.sh"`
-eval export `prefix_vars "$DEPLOYMENT_DIR/passwords.sh"`
-eval export `prefix_vars "$DEPLOYMENT_DIR/cf-credentials-admin.sh"`
+eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
+eval export `prefix_vars "$PASSWORD_CONFIG_FILE"`
+eval export `prefix_vars "$CF_CREDENTIALS"`
 
-ORG_NAME="${1:-$organisation}"
-SPACE_NAME="${2:-Test}"
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"

@@ -8,16 +8,18 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
+DEPLOYMENT_NAME="$1"
+APP_NAME="$2"
+CF_ORG="${3:-$organisation}"
+CF_SPACE="${4:-Test}"
+LOCATION="$5"
+
 . "$BASE_DIR/common.sh"
-. "$BASE_DIR/common-cf.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-APP_NAME="$1"
-CF_ORG="${2:-$organisation}"
-CF_SPACE="${3:-Test}"
-LOCATION="$4"
+installed_bin cf
 
-if [ -n "$4" ]; then
+if [ -n "$5" ]; then
 	shift 3
 
 	# In case we have been supplied a path with spaces

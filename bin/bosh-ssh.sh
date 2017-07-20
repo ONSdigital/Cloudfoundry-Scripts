@@ -6,27 +6,23 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-. "$BASE_DIR/common.sh"
-
 DEPLOYMENT_NAME="$1"
 SSH_HOST="$2"
 GATEWAY_USER="${3:-vcap}"
 GATEWAY_HOST="$4"
 
-DEPLOYMENT_DIR="$DEPLOYMENT_BASE_DIR/$DEPLOYMENT_NAME"
-STACK_OUTPUTS_DIR="$DEPLOYMENT_BASE_DIR/$DEPLOYMENT_NAME/outputs"
-STACK_OUTPUTS_DIR_RELATIVE="$DEPLOYMENT_BASE_DIR_RELATIVE/$DEPLOYMENT_NAME/outputs"
+. "$BASE_DIR/common.sh"
 
 [ -z "$SSH_HOST" ] && FATAL 'No host to ssh onto'
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
 [ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"
-[ -f "$DEPLOYMENT_DIR/bosh-ssh.sh" ] || FATAL "Bosh SSH config does not exist: $DEPLOYMENT_DIR/bosh-ssh.sh"
-[ -f "$DEPLOYMENT_DIR/bosh-config.sh" ] || FATAL "Bosh config does not exist: $DEPLOYMENT_DIR/bosh-config.sh"
+[ -f "$BOSH_SSH_CONFIG" ] || FATAL "Bosh SSH config does not exist: $BOSH_SSH_CONFIG"
+[ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh config does not exist: $BOSH_DIRECTOR_CONFIG"
 
 load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" NONE director_dns
-eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-ssh.sh"`
-eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-config.sh"`
+eval export `prefix_vars "$BOSH_SSH_CONFIG"`
+eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"

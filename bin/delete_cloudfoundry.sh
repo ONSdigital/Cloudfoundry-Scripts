@@ -17,9 +17,9 @@ eval DIRECTOR_PASSWORD="\$${ENV_PREFIX}director_password"
 
 
 INFO 'Loading Bosh config'
-[ -f "$BOSH_CONFIG_FILE" ] || FATAL "Bosh configuration file does not exist: '$BOSH_CONFIG_FILE'"
-eval export `prefix_vars "$BOSH_CONFIG_FILE"`
-eval export `prefix_vars "$BOSH_SSH_CONFIG_FILE" "$ENV_PREFIX"`
+[ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh configuration file does not exist: '$BOSH_DIRECTOR_CONFIG'"
+eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
+eval export `prefix_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"`
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"

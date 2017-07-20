@@ -11,17 +11,19 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
+DEPLOYMENT_NAME="$1"
+SERVICE_NAME="${2:-$SERVICE_NAME}"
+SERVICE_USERNAME="${3:-$SERVICE_USERNAME}"
+SERVICE_PASSWORD="${4:-$SERVICE_PASSWORD}"
+SERVICE_URL="${5:-$SERVICE_URL}"
+
 . "$BASE_DIR/common.sh"
-. "$BASE_DIR/common-cf.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$DEPLOYMENT_DIR/bosh-config.sh"`
-eval export `prefix_vars "$DEPLOYMENT_DIR/cf-credentials-admin.sh"`
+installed_bin cf
 
-SERVICE_NAME="${1:-$SERVICE_NAME}"
-SERVICE_USERNAME="${2:-$SERVICE_USERNAME}"
-SERVICE_PASSWORD="${3:-$SERVICE_PASSWORD}"
-SERVICE_URL="${4:-$SERVICE_URL}"
+eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
+eval export `prefix_vars "$CF_CREDENTIALS"`
 
 [ -z "$SERVICE_URL" ] && FATAL 'Not enough parameters'
 
