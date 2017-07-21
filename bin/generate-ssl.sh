@@ -32,7 +32,7 @@ INTERNAL_SERVICE_SSL_NAMES='cloud-controller-ng uaa blobstore'
 INTERNAL_CONSUL_SSL_NAMES='server.dc1 agent.dc1'
 
 # Unqualified names
-INTERNAL_SIMPLE_SSL_NAMES='doppler trafficcontroller metron syslogdrainbinder statsdinjector tps_watcher cc_uploader_cc cc_uploader_mutual'
+INTERNAL_SIMPLE_SSL_NAMES='doppler trafficcontroller metron syslogdrainbinder statsdinjector tps_watcher cc_uploader_cc cc_uploader_mutual router'
 
 # Passed through to $CA_TOOL
 export EXTENDED_CRITICAL=
