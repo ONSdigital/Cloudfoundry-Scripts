@@ -102,7 +102,7 @@ psql -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -P new_database_name="$NE
 CREATE USER :new_database_username ENCRYPTED PASSWORD :new_database_password;
 CREATE DATABASE :new_database_name OWNER :new_database_username;
 EOF_PSQL
-EOF_SSH
+$PRE_COMMAND_END
 EOF_PRE
 else
 	sh <<EOF_PRE
@@ -110,7 +110,7 @@ $PRE_COMMAND_SSH
 psql -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -P new_database_name="$NEW_DATABASE_NAME" <<EOF_PSQL
 CREATE DATABASE :new_database_name;
 EOF_PSQL
-EOF_SSH
+$PRE_COMMAND_END
 EOF_PRE
 fi
 	
@@ -122,9 +122,9 @@ if [ -n "$EXTENSIONS" ]; then
 $PRE_COMMAND_SSH
 psql -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -P extension="$ext" -P new_database_name="$NEW_DATABASE_NAME" <<EOF_PSQL
 \c :new_database_name
-CREATE EXTENSION :extension
+CREATE EXTENSION :extension IF NOT EXISTS;
 EOF_PSQL
-EOF_SSH
+$PRE_COMMAND_END
 EOF_PRE
 	done
 
