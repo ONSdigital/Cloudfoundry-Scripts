@@ -64,6 +64,8 @@ BOSH_FULL_CLOUD_CONFIG_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_CLOUD_MANI
 installed_bin bosh
 
 SSL_DIR="$DEPLOYMENT_DIR/ssl"
+SSL_DIR_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssl"
+SSL_YML="$SSL_DIR/ssl_config.yml"
 
 INFO 'Setting additional variables'
 export ${ENV_PREFIX}internal_domain="$INTERNAL_DOMAIN"
@@ -72,6 +74,7 @@ eval director_dns="\$${ENV_PREFIX}director_dns"
 eval deployment_name="\$${ENV_PREFIX}deployment_name"
 INTERNAL_SSL_DIR="$SSL_DIR/$internal_domain"
 EXTERNAL_SSL_DIR="$SSL_DIR/$domain_name"
+INTERNAL_SSL_DIR_RELATIVE="$SSL_DIR_RELATIVE/$internal_domain"
 # Used for Bosh CA cert
 EXTERNAL_SSL_DIR_RELATIVE="$SSL_DIR_RELATIVE/$domain_name"
 

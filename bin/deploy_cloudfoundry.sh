@@ -12,10 +12,6 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common-bosh.sh"
 
-SSL_DIR="$DEPLOYMENT_DIR/ssl"
-SSL_DIR_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssl"
-SSL_YML="$SSL_DIR/ssl_config.yml"
-
 if [ -f "$BOSH_LITE_STATE_FILE" ]; then
 	[ x"$DELETE_BOSH_STATE" = x"true" ] && rm -f "$BOSH_LITE_STATE_FILE"
 
