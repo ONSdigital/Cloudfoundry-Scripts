@@ -93,6 +93,14 @@ pushd "$CLOUDFORMATION_DIR" >/dev/null
 validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES
 popd >/dev/null
 
+# We need to suck in the region from the existing outputs.sh
+INFO 'Obtaining current stack region'
+load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" NONE aws_region
+[ -z "$aws_region" ] && FATAL "No AWS region has been set in $STACK_MAIN_OUTPUTS"
+
+INFO "Checking if we need to update AWS region to $aws_region"
+aws_region "$aws_region"
+
 aws_change_set "$DEPLOYMENT_NAME-preamble" "$STACK_PREAMBLE_URL" "$STACK_PREAMBLE_OUTPUTS"
 
 INFO 'Parsing preamble outputs'

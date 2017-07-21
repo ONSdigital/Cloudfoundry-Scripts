@@ -55,7 +55,7 @@ else
 fi
 
 # Do we need to update credentials?
-[ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ] && aws_credentials "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$STACK_MAIN_OUTPUTS"
+[ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ] && aws_credentials "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
 
 INFO 'Checking we have the required configuration'
 [ -f ~/.aws/config ] || FATAL 'No AWS config (~/.aws/config)'

@@ -51,6 +51,8 @@ INFO "Pointing Bosh at deployed Bosh: $director_dns"
 "$BOSH" alias-env -e "$director_dns" "$BOSH_ENVIRONMENT"
 
 INFO 'Attempting to login'
+set -x
 "$BOSH" log-in
 
 "$BOSH" ssh --gw-private-key="$bosh_ssh_key_file" --gw-user="$GATEWAY_USER" --gw-host "${GATEWAY_HOST:-$director_dns}" "$SSH_HOST"
+set +x

@@ -67,7 +67,7 @@ install_packages gcc gcc-c++ make patch openssl openssl-devel ruby ruby-devel zl
 
 if [ -n "$REAL_RHEL" ]; then
 	# Untested, but should work
-	install_packages rh-python34-python rh-python34-python-setuptools rh-python34-python-pip rh-python34-python-devel
+	install_packages rh-python34-python rh-python34-python-setuptools rh-python34-python-pip rh-python34-python-devel libyaml-devel bzip2 readline-devel
 else
-	install_packages python34 python34-setuptools python34-pip python34-devel
+	install_packages python34 python34-setuptools python34-pip python34-devel libyaml-devel bzip2 readline-devel
 fi
