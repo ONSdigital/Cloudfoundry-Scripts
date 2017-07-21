@@ -12,18 +12,18 @@ DATABASE_ADMIN_USERNAME='postgres'
 for param in $@; do
 	case "$param" in
 		--admin-database)
-			DATABASE_ADMIN_NAME="$2"
+			ADMIN_DATABASE_NAME="$2"
 			;;
-		--database-admin-username)
-			DATABASE_ADMIN_USERNAME="$2"
+		--admin-username)
+			ADMIN_USERNAME="$2"
 			;;
-		--database-admin-password)
-			DATABASE_ADMIN_PASSWORD="$2"
+		--admin-password)
+			ADMIN_PASSWORD="$2"
 			;;
-		--database-hostname)
-			DATABASE_HOSTNAME="$2"
+		--postgres-hostname|--postgresql-hostname)
+			POSTGRES_HOSTNAME="$2"
 			;;
-		--database-port)
+		--postgres-port|--postgresql-port)
 			DATABASE_PORT="$2"
 			;;
 		--new-database-name)
@@ -46,7 +46,7 @@ for param in $@; do
 	esac
 done
 
-for i in DATABASE_ADMIN_USERNAME NEW_DATABASE_NAME NEW_DATABASE_USERNAME NEW_DATABASE_PASSWORD; do
+for i in ADMIN_USERNAME NEW_DATABASE_NAME; do
 	eval var="\$$i"
 
 	[ -z "$var" -o x"$var" = x'$' ] && FATAL "Missing parameter critical: $i"
@@ -71,30 +71,40 @@ elif [ -n "$JUMP_USERHOST" ]; then
 fi
 
 # Set our DB password - insecurely
-if [ -n "$DATABASE_ADMIN_PASSWORD" ]; then
-	VARS="PGPASSWORD='$PGPASSWORD'"
+if [ -n "$ADMIN_PASSWORD" ]; then
+	VARS="PGPASSWORD='$ADMIN_PASSWORD'"
 fi
 
-if [ -n "$DATABASE_HOSTNAME" ]; then
-	PSQL_HOST_OPT="-h'$DATABASE_HOSTNAME'"
+if [ -n "$POSTGRES_HOSTNAME" ]; then
+	PSQL_HOST_OPT="-h'$POSTGRES_HOSTNAME'"
 fi
 
-if [ -n "$DATABASE_PORT" ]; then
-	PSQL_PORT_OPT="-p'$DATABASE_PORT'"
+if [ -n "$POSTGRES_PORT" ]; then
+	PSQL_PORT_OPT="-p'$POSTGRES_PORT'"
 fi
 
-if [ -n "$DATABASE_ADMIN_NAME" ]; then
-	PSQL_PORT_DATABASE="'$DATABASE_ADMIN_NAME'"
+if [ -n "$ADMIN_DATABASE" ]; then
+	PSQL_ADMIN_DATABASE="'$ADMIN_DATABASE'"
 fi
 
 PSQL_CREATE_DATABASE="CREATE DATABASE :new_database_name OWNER :new_database_username"
 
 
-sh <<EOF_PRE
+if [ -n "$NEW_DATABASE_USERNAME" ]; then
+	sh <<EOF_PRE
 $PRE_COMMAND_SSH
-psql $PSQL_HOST_OPT $PSQL_PORT_OPT -P new_database_name="$NEW_DATABASE_NAME" -P new_databse_username="$NEW_DATABASE_USERNAME" -P new_database_password="'$NEW_DATABASE_PASSWORD'" <<EOF_PSQL
+psql -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -P new_database_name="$NEW_DATABASE_NAME" -P new_databse_username="$NEW_DATABASE_USERNAME" -P new_database_password="'$NEW_DATABASE_PASSWORD'" <<EOF_PSQL
 CREATE USER :new_database_username ENCRYPTED PASSWORD :new_database_password;
 CREATE DATABASE :new_database_name OWNER :new_database_username;
 EOF_PSQL
 EOF_SSH
 EOF_PRE
+else
+	sh <<EOF_PRE
+$PRE_COMMAND_SSH
+psql -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -P new_database_name="$NEW_DATABASE_NAME" <<EOF_PSQL
+CREATE DATABASE :new_database_name;
+EOF_PSQL
+EOF_SSH
+EOF_PRE
+fi

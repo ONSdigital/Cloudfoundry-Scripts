@@ -90,13 +90,8 @@ INFO "Ensuring space exists: $SERVICES_SPACE"
 "$BASE_DIR/setup_cf-orgspace.sh" "$DEPLOYMENT_NAME" "$ORG_NAME" "$SERVICES_SPACE"
 
 INFO 'Creating inital RDS database'
-WARN "This won't work when we have an external RDS database backing CF - we'll need to install psql locally and connect to the RDS Postgres instance"
-"$BASE_DIR/bosh-ssh.sh" "$DEPLOYMENT_NAME" postgres <<EOF
-export PGPASSWORD="$rds_password";
-PSQL="\`find -L /var/vcap/packages -name psql | sort -n | tail -n1\`";
-"\$PSQL" -h$rds_address -U$rds_username -c "CREATE DATABASE $RDS_BROKER_DB_NAME" || :;
-exit
-EOF
+"$BASE_DIR/create_postgresql_db.sh" --admin-username "$rds_apps_instance_username" --admin-password "$rds_apps_instance_password" \
+	--postgres-hostname "$rds_apps_instance_address" --postgres-port "$rds_apps_instance_port" --new-database-name "$RDS_BROKER_DB_NAME"
 
 cat >"$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh.new" <<EOF
 # RDS Broker configuration
