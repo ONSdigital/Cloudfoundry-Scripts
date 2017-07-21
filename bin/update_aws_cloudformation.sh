@@ -23,7 +23,7 @@ aws_change_set(){
 	[ -z "$stack_outputs" ] && FATAL 'No stack output filename provided'
 
 	# Urgh!
-	if [ -n "$stack_parameters" -f "$stack_parameters" ]; then
+	if [ -n "$stack_parameters" -a -f "$stack_parameters" ]; then
 		local aws_opts="--parameters '$stack_parameters'"
 		findpath stack_parameters "$stack_parameters"
 	fi
