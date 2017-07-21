@@ -3,6 +3,7 @@
 # Very simplified CF push - there is a more full fat CF suite within the CF repo
 # This is here so we can bootstrap/test enough of CF to make sure things work
 # 
+# To be called from another script
 
 set -e
 
@@ -12,20 +13,7 @@ DEPLOYMENT_NAME="$1"
 APP_NAME="$2"
 CF_ORG="${3:-$organisation}"
 CF_SPACE="${4:-Test}"
-LOCATION="$5"
 
-. "$BASE_DIR/common.sh"
-. "$BASE_DIR/bosh-env.sh"
-
-installed_bin cf
-
-if [ -n "$5" ]; then
-	shift 3
-
-	# In case we have been supplied a path with spaces
-	cd "$@"
-fi
-pwd
 if [ -z "$APP_NAME" ]; then
 	[ -f manifest.yml ] || FATAL 'Application manifest does not exist'
 
