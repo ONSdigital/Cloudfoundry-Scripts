@@ -63,6 +63,8 @@ BOSH_FULL_CLOUD_CONFIG_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_CLOUD_MANI
 # Check we have bosh installed
 installed_bin bosh
 
+SSL_DIR="$DEPLOYMENT_DIR/ssl"
+
 INFO 'Setting additional variables'
 export ${ENV_PREFIX}internal_domain="$INTERNAL_DOMAIN"
 eval domain_name="\$${ENV_PREFIX}domain_name"
