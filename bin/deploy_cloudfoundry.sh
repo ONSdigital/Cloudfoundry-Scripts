@@ -59,9 +59,9 @@ if [ ! -f "$EXTERNAL_SSL_DIR/client/director.$domain_name.key" -o ! -f "$EXTERNA
 	FATAL 'No director SSL keypair available'
 fi
 
-if [ ! -f "$BOSH_DIRECTOR_FILE" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ]; then
+if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ]; then
 	INFO 'Generating Bosh configurations'
-	cat <<EOF >"$BOSH_DIRECTOR_FILE"
+	cat <<EOF >"$BOSH_DIRECTOR_CONFIG"
 # Bosh deployment config
 BOSH_ENVIRONMENT='$director_dns'
 BOSH_DEPLOYMENT='$DEPLOYMENT_NAME'
@@ -72,8 +72,8 @@ EOF
 fi
 
 INFO 'Loading Bosh config'
-[ -f "$BOSH_DIRECTOR_FILE" ] || FATAL "Bosh configuration file does not exist: '$BOSH_DIRECTOR_FILE'"
-eval export `prefix_vars "$BOSH_DIRECTOR_FILE"`
+[ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh configuration file does not exist: '$BOSH_DIRECTOR_CONFIG'"
+eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 eval export `prefix_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"`
 
 # Convert from relative to an absolute path
