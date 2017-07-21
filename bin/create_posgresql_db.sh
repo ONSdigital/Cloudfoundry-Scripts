@@ -41,9 +41,14 @@ for param in $@; do
 		--ssh-key)
 			SSH_KEY="$2"
 			;;
+		--extensions)
+			# CSV list
+			EXTENSIONS="$2"
 		*)
 			FATAL "Unknown parameter: '$param'"
 	esac
+
+	[ -n "$2" ] && shift 2
 done
 
 for i in ADMIN_USERNAME NEW_DATABASE_NAME; do
@@ -107,4 +112,21 @@ CREATE DATABASE :new_database_name;
 EOF_PSQL
 EOF_SSH
 EOF_PRE
+fi
+	
+if [ -n "$EXTENSIONS" ]; then
+	OLDIFS="$IFS"
+	IFS=','
+	for ext in $EXTENSIONS; do
+		sh <<EOF_PRE
+$PRE_COMMAND_SSH
+psql -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -P extension="$ext" -P new_database_name="$NEW_DATABASE_NAME" <<EOF_PSQL
+\c :new_database_name
+CREATE EXTENSION :extension
+EOF_PSQL
+EOF_SSH
+EOF_PRE
+	done
+
+	IFS="$OLDIFS"
 fi
