@@ -26,7 +26,7 @@ aws_change_set(){
 	if [ -n "$stack_parameters" -a -f "$stack_parameters" ]; then
 	
 		findpath stack_parameters "$stack_parameters"
-		local aws_opts="--parameters '`cat $stack_parameters`'"
+		local aws_opts="--parameters '`cat \"$stack_parameters\"`'"
 	fi
 
 	shift 3
