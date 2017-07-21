@@ -7,13 +7,14 @@ set -e
 BASE_DIR="`dirname \"$0\"`"
 
 DEPLOYMENT_NAME="$1"
+
+. "$BASE_DIR/common.sh"
+. "$BASE_DIR/bosh-env.sh"
+
 EMAIL_ADDRESS="${2:-NONE}"
 ORG_NAME="${3:-$organisation}"
 TEST_SPACE="${4:-Test}"
 DONT_SKIP_SSL_VALIDATION="$5"
-
-. "$BASE_DIR/common.sh"
-. "$BASE_DIR/bosh-env.sh"
 
 eval export `prefix_vars "$PASSWORD_CONFIG_FILE"`
 
