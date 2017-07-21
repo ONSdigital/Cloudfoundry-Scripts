@@ -135,6 +135,9 @@ update_parameters_file(){
 	[ -n "$parameters_file" ] || FATAL 'No Cloudformation parameters file provided'
 	[ -f "$parameters_file" ] || FATAL "Cloudformation parameters file does not exist: '$parameters_file'"
 
+	findpath stack_json "$stack_json"
+	findpath parameters_file "$parameters_file"
+
 	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1 } }' "$stack_json"`; do
 		var_name="`echo $_key | perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'`"
 		eval _param="\$$var_name"
