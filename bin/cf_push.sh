@@ -25,7 +25,7 @@ if [ -n "$5" ]; then
 	# In case we have been supplied a path with spaces
 	cd "$@"
 fi
-
+pwd
 if [ -z "$APP_NAME" ]; then
 	[ -f manifest.yml ] || FATAL 'Application manifest does not exist'
 
