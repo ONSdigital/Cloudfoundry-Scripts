@@ -59,7 +59,7 @@ if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE
 	INFO 'Generating Bosh configurations'
 	cat <<EOF >"$BOSH_DIRECTOR_CONFIG"
 # Bosh deployment config
-BOSH_ENVIRONMENT='${BOSH_IP_OVERRIDE:-$director_dns}'
+BOSH_ENVIRONMENT='$director_dns'
 BOSH_DEPLOYMENT='$DEPLOYMENT_NAME'
 BOSH_CLIENT_SECRET='$DIRECTOR_PASSWORD'
 BOSH_CLIENT='director'
