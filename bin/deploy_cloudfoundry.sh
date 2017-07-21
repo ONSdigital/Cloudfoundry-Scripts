@@ -81,6 +81,12 @@ export BOSH_CA_CERT
 eval bosh_ssh_key_file="\$${ENV_PREFIX}bosh_ssh_key_file"
 findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 
+(
+env
+set
+) | sort
+exit 1
+
 if [ -n "$DELETE_BOSH_ENV" -a x"$DELETE_BOSH_ENV" = x"true" ]; then
 	INFO 'Removing existing Bosh bootstrap environment'
 	bosh_env delete-env
