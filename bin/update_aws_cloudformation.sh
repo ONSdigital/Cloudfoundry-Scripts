@@ -121,10 +121,10 @@ for _action in validate update; do
 		STACK_PARAMETERS="$STACK_PARAMETERS_DIR_RELATIVE/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 		STACK_URL="$templates_bucket_http_url/$_file"
 		STACK_OUTPUTS="$STACK_OUTPUTS_DIR_RELATIVE/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
-set -x
+
 		[ "$_action" = x"update" ] && update_parameters_file "$CLOUDFORMATION_DIR/$_file" "$STACK_PARAMETERS"
 
 		aws_change_set "$STACK_NAME" "$STACK_URL" "$STACK_OUTPUTS" "$STACK_PARAMETERS" --template-url $_action || FATAL "Failed to $_action stack: $STACK_NAME, $_file"
-set +x
+
 	done
 done
