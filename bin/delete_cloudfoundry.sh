@@ -31,7 +31,7 @@ eval bosh_ssh_key_file="\$${ENV_PREFIX}bosh_ssh_key_file"
 findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 
 INFO 'Pointing Bosh at newly deployed Bosh'
-"$BOSH" alias-env $BOSH_TTY_OPT -e "$director_dns" "$BOSH_ENVIRONMENT"
+"$BOSH" alias-env $BOSH_TTY_OPT -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT"
 
 INFO 'Attempting to login'
 "$BOSH" log-in $BOSH_TTY_OPT

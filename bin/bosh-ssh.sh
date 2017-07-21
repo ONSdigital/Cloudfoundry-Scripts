@@ -20,7 +20,7 @@ GATEWAY_HOST="$4"
 [ -f "$BOSH_SSH_CONFIG" ] || FATAL "Bosh SSH config does not exist: $BOSH_SSH_CONFIG"
 [ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh config does not exist: $BOSH_DIRECTOR_CONFIG"
 
-load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" NONE director_dns
+#load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" NONE director_dns
 eval export `prefix_vars "$BOSH_SSH_CONFIG"`
 eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 
@@ -45,14 +45,14 @@ fi
 
 export BOSH_CA_CERT
 
-[ -z "${GATEWAY_HOST:-$director_dns}" ] && FATAL 'No gateway host available'
+[ -z "${GATEWAY_HOST:-$BOSH_ENVIRONMENT}" ] && FATAL 'No gateway host available'
 
-INFO "Pointing Bosh at deployed Bosh: $director_dns"
-"$BOSH" alias-env -e "$director_dns" "$BOSH_ENVIRONMENT"
+INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
+"$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT"
 
 INFO 'Attempting to login'
 set -x
 "$BOSH" log-in
 
-"$BOSH" ssh --gw-private-key="$bosh_ssh_key_file" --gw-user="$GATEWAY_USER" --gw-host "${GATEWAY_HOST:-$director_dns}" "$SSH_HOST"
+"$BOSH" ssh --gw-private-key="$bosh_ssh_key_file" --gw-user="$GATEWAY_USER" --gw-host "${GATEWAY_HOST:-$BOSH_ENVIRONMENT}" "$SSH_HOST"
 set +x

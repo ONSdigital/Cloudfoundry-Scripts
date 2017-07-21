@@ -16,7 +16,7 @@ DEPLOYMENT_NAME="$1"
 
 shift
 
-load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" NONE director_dns
+#load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" NONE director_dns
 eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 
 # Convert from relative to an absolute path
@@ -24,10 +24,10 @@ findpath BOSH_CA_CERT "$BOSH_CA_CERT"
 
 export BOSH_CA_CERT
 
-[ -z "${GATEWAY_HOST:-$director_dns}" ] && FATAL 'No gateway host available'
+[ -z "${GATEWAY_HOST:-$BOSH_ENVIRONMENT}" ] && FATAL 'No gateway host available'
 
-INFO "Pointing Bosh at deployed Bosh: $director_dns"
-"$BOSH" alias-env -e "$director_dns" "$BOSH_ENVIRONMENT"
+INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
+"$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT"
 
 INFO 'Attempting to login'
 "$BOSH" log-in

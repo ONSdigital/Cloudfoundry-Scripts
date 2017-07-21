@@ -59,7 +59,7 @@ if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE
 	INFO 'Generating Bosh configurations'
 	cat <<EOF >"$BOSH_DIRECTOR_CONFIG"
 # Bosh deployment config
-BOSH_ENVIRONMENT='$director_dns'
+BOSH_ENVIRONMENT='${BOSH_IP_OVERRIDE:-$director_dns}'
 BOSH_DEPLOYMENT='$DEPLOYMENT_NAME'
 BOSH_CLIENT_SECRET='$DIRECTOR_PASSWORD'
 BOSH_CLIENT='director'
@@ -103,7 +103,7 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 fi
 
 INFO 'Pointing Bosh at newly deployed Bosh'
-"$BOSH" alias-env $BOSH_TTY_OPT -e "$director_dns" "$BOSH_ENVIRONMENT"
+"$BOSH" alias-env $BOSH_TTY_OPT -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT"
 
 INFO 'Attempting to login'
 "$BOSH" log-in $BOSH_TTY_OPT
@@ -114,7 +114,7 @@ INFO 'Setting CloudConfig'
 	$BOSH_TTY_OPT \
 	--var bosh_name="$DEPLOYMENT_NAME" \
 	--var bosh_deployment="$BOSH_DEPLOYMENT" \
-	--var bosh_lite_ip="$director_dns" \
+	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
 	--vars-file="$SSL_YML" \
 	--vars-env="$ENV_PREFIX_NAME" \
 	--vars-store="$BOSH_FULL_VARS_FILE"
@@ -129,7 +129,7 @@ INFO 'Checking Bosh deployment dry-run'
 	$BOSH_TTY_OPT \
 	--var bosh_name="$DEPLOYMENT_NAME" \
 	--var bosh_deployment="$BOSH_DEPLOYMENT" \
-	--var bosh_lite_ip="$director_dns" \
+	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
 	--vars-file="$SSL_YML" \
 	--vars-env="$ENV_PREFIX_NAME" \
 	--vars-store="$BOSH_FULL_VARS_FILE"
@@ -140,7 +140,7 @@ INFO 'Deploying Bosh'
 	$BOSH_TTY_OPT \
 	--var bosh_name="$DEPLOYMENT_NAME" \
 	--var bosh_deployment="$BOSH_DEPLOYMENT" \
-	--var bosh_lite_ip="$director_dns" \
+	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
 	--vars-file="$SSL_YML" \
 	--vars-env="$ENV_PREFIX_NAME" \
 	--vars-store="$BOSH_FULL_VARS_FILE"
