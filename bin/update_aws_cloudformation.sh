@@ -24,8 +24,8 @@ aws_change_set(){
 
 	# Urgh!
 	if [ -n "$stack_parameters" -a -f "$stack_parameters" ]; then
-		local aws_opts="--parameters '$stack_parameters'"
 		findpath stack_parameters "$stack_parameters"
+		local aws_opts="--parameters \"$stack_parameters\""
 	fi
 
 	shift 3
