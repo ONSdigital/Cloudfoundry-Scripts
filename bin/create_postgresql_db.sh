@@ -44,6 +44,7 @@ for param in $@; do
 		--extensions)
 			# CSV list
 			EXTENSIONS="$2"
+			;;
 		*)
 			FATAL "Unknown parameter: '$param'"
 	esac
