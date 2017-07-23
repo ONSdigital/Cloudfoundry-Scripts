@@ -49,7 +49,7 @@ for param in $@; do
 #			FATAL "Unknown parameter: '$param'"
 	esac
 
-	[ -n "$2" ] && shift 2
+#	[ -n "$2" ] && shift 2
 done
 
 for i in ADMIN_USERNAME NEW_DATABASE_NAME; do
