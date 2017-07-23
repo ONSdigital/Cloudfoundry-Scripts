@@ -45,8 +45,8 @@ for param in $@; do
 			# CSV list
 			EXTENSIONS="$2"
 			;;
-		*)
-			FATAL "Unknown parameter: '$param'"
+#		*)
+#			FATAL "Unknown parameter: '$param'"
 	esac
 
 	[ -n "$2" ] && shift 2
