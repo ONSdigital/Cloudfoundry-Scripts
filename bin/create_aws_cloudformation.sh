@@ -19,7 +19,7 @@ BOSH_SSH_KEY_NAME="$DEPLOYMENT_NAME-key"
 
 # We don't want to store the full path when we add the ssh-key location, so we use a relative one - but we use the absolute one for our checks
 BOSH_SSH_KEY_FILENAME="$DEPLOYMENT_DIR/ssh-key"
-#BOSH_SSH_KEY_FILENAME_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssh-key"
+BOSH_SSH_KEY_FILENAME_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssh-key"
 
 # We use older options in find due to possible lack of -printf and/or -regex options
 STACK_FILES="`find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
@@ -190,5 +190,5 @@ INFO 'Creating additional environment configuration'
 cat >"$BOSH_SSH_CONFIG" <<EOF
 # Bosh SSH vars
 bosh_ssh_key_name='$BOSH_SSH_KEY_NAME'
-bosh_ssh_key_file='$BOSH_SSH_KEY_FILENAME'
+bosh_ssh_key_file='$BOSH_SSH_KEY_FILENAME_RELATIVE'
 EOF
