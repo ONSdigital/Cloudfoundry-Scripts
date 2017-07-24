@@ -74,7 +74,7 @@ INFO 'Copying templates to S3'
 "$AWS" --profile "$AWS_PROFILE" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
 
 for stack_file in $STACK_FILES; do
-	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$_file"`"
+	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
 	STACK_URL="$templates_bucket_http_url/$stack_file"
 
 	INFO "Validating Cloudformation template: '$stack_file'"
@@ -99,7 +99,7 @@ for stack_file in $STACK_FILES; do
 done
 
 for stack_file in $STACK_FILES; do
-	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$_file"`"
+	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
 	STACK_URL="$templates_bucket_http_url/$stack_file"
 	STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 	STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
