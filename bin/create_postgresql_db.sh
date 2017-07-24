@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# Horrible....
+#
 
 set -e
 
@@ -9,8 +12,8 @@ BASE_DIR="`dirname \"$0\"`"
 DATABASE_ADMIN_NAME='postgres'
 DATABASE_ADMIN_USERNAME='postgres'
 
-for param in $@; do
-	case "$param" in
+while [[ $# -gt 1 ]]; do
+	case "$1" in
 		--admin-database)
 			ADMIN_DATABASE_NAME="$2"
 			;;
@@ -45,11 +48,11 @@ for param in $@; do
 			# CSV list
 			EXTENSIONS="$2"
 			;;
-#		*)
-#			FATAL "Unknown parameter: '$param'"
+		*)
+			FATAL "Unknown parameter: '$1'"
 	esac
 
-#	[ -n "$2" ] && shift 2
+	[ -n "$2" ] && shift 2
 done
 
 for i in ADMIN_USERNAME NEW_DATABASE_NAME; do
@@ -67,12 +70,12 @@ elif [ -n "$SSH_KEY" ]; then
 fi
 
 # Do we need to jump to another host before doing anything?
-if [ -n "$JUMP_USERHOST" -n "$SSH_KEY" ]; then
-	PRE_COMMAND_SSH="ssh -i '$SSH_KEY' '$JUMP_USERHOST' <<EOF_SSH"
+if [ -n "$JUMP_USERHOST" -a -n "$SSH_KEY" ]; then
+	PRE_COMMAND_SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -ti '$SSH_KEY' '$JUMP_USERHOST' <<EOF_SSH"
 	PRE_COMMAND_END='EOF_SSH'
 
 elif [ -n "$JUMP_USERHOST" ]; then
-	PRE_COMMAND_SSH="ssh '$JUMP_USERHOST' <<EOF_SSH"
+	PRE_COMMAND_SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -t '$JUMP_USERHOST' <<EOF_SSH"
 	PRE_COMMAND_END='EOF_SSH'
 fi
 
@@ -92,23 +95,31 @@ fi
 if [ -n "$ADMIN_DATABASE" ]; then
 	PSQL_ADMIN_DATABASE="'$ADMIN_DATABASE'"
 fi
-
 PSQL_CREATE_DATABASE="CREATE DATABASE :new_database_name OWNER :new_database_username"
-
 
 if [ -n "$NEW_DATABASE_USERNAME" ]; then
 	sh <<EOF_PRE
 $PRE_COMMAND_SSH
-psql -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -P new_database_name="$NEW_DATABASE_NAME" -P new_databse_username="$NEW_DATABASE_USERNAME" -P new_database_password="'$NEW_DATABASE_PASSWORD'" <<EOF_PSQL
+if ! which psql >/dev/null 2>&1; then
+	[ -d "/var/vcap" ] && PSQL="\\\`find /var/vcap -name \\\*psql 2>/dev/null | head -n1\\\`"
+else
+	PSQL='psql'
+fi
+$VARS "\\\$PSQL" -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -v new_database_name="$NEW_DATABASE_NAME" -v new_databse_username="$NEW_DATABASE_USERNAME" -v new_database_password="'$NEW_DATABASE_PASSWORD'" <<EOF_PSQL
 CREATE USER :new_database_username ENCRYPTED PASSWORD :new_database_password;
 CREATE DATABASE :new_database_name OWNER :new_database_username;
 EOF_PSQL
 $PRE_COMMAND_END
 EOF_PRE
 else
-	sh <<EOF_PRE
+	shx <<EOF_PRE
 $PRE_COMMAND_SSH
-psql -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -P new_database_name="$NEW_DATABASE_NAME" <<EOF_PSQL
+if ! which psql >/dev/null 2>&1; then
+	[ -d "/var/vcap" ] && PSQL="\\\`find /var/vcap -name \\\*psql 2>/dev/null | head -n1\\\`"
+else
+	PSQL='psql'
+fi
+$VARS "\\\$PSQL" -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -v new_database_name="$NEW_DATABASE_NAME" <<EOF_PSQL
 CREATE DATABASE :new_database_name;
 EOF_PSQL
 $PRE_COMMAND_END
@@ -119,9 +130,14 @@ if [ -n "$EXTENSIONS" ]; then
 	OLDIFS="$IFS"
 	IFS=','
 	for ext in $EXTENSIONS; do
-		sh <<EOF_PRE
+		shx <<EOF_PRE
 $PRE_COMMAND_SSH
-psql -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -P extension="$ext" -P new_database_name="$NEW_DATABASE_NAME" <<EOF_PSQL
+if ! which psql >/dev/null 2>&1; then
+	[ -d "/var/vcap" ] && PSQL="\\\`find /var/vcap -name \\\*psql 2>/dev/null | head -n1\\\`"
+else
+	PSQL='psql'
+fi
+$VARS "\\\$PSQL" -U"$ADMIN_USERNAME" $PSQL_HOST_OPT $PSQL_PORT_OPT -v extension="$ext" -v new_database_name="$NEW_DATABASE_NAME" <<EOF_PSQL
 \c :new_database_name
 CREATE EXTENSION :extension IF NOT EXISTS;
 EOF_PSQL
