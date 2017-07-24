@@ -73,6 +73,6 @@ EOF
 fi
 
 # Set secure umask - the default permissions for ~/.bosh/config are wide open
-INFO 'Setting secure umask'
+DEBUG 'Setting secure umask'
 umask 077
 
