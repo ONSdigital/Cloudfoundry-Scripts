@@ -33,14 +33,9 @@ if [ -n "$BOSH_SSH_CONFIG" -a -f "$BOSH_SSH_CONFIG" ]; then
 fi
 
 if [ -f "$STACK_OUTPUTS_DIR/outputs-preamble.sh" ]; then
-	STACKS="$DEPLOYMENT_NAME $DEPLOYMENT_NAME-preamble"
-
 	eval `prefix_vars "$STACK_OUTPUTS_DIR/outputs-preamble.sh"`
 
 	empty_bucket "$templates_bucket_name"
-
-else
-	STACKS="$DEPLOYMENT_NAME"
 fi
 
 if [ -n "$s3_buckets" ]; then
@@ -52,8 +47,6 @@ if [ -n "$s3_buckets" ]; then
 	IFS="$OLDIFS"
 fi
 
-check_cloudformation_stack "$DEPLOYMENT_NAME"
-
 # Provide the ability to optionally delete existing AWS SSH key
 if [ -z "$KEEP_SSH_KEY" -o x"$KEEP_SSH_KEY" = x"false" ] && [ -n "$SSH_KEY_EXISTS" -a -n "$bosh_ssh_key_name" ] && \
 	"$AWS" --profile "$AWS_PROFILE" ec2 describe-key-pairs --key-names "$bosh_ssh_key_name" >/dev/null 2>&1; then
@@ -62,10 +55,15 @@ if [ -z "$KEEP_SSH_KEY" -o x"$KEEP_SSH_KEY" = x"false" ] && [ -n "$SSH_KEY_EXIST
 	"$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$bosh_ssh_key_name"
 fi
 
-for s in $STACKS; do
+# We use older options in find due to possible lack of -printf and/or -regex options
+for _file in `find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort` AWS-Bosh-preamble.json; do
+	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$_file"`"
+
+	check_cloudformation_stack "$STACK_NAME" || continue
+
 	INFO "Deleting stack: $s"
-	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-stack --stack-name "$s"
+	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-stack --stack-name "$STACK_NAME"
 
 	INFO 'Waiting for Cloudformation stack to be deleted'
-	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-delete-complete --stack-name "$s"
+	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-delete-complete --stack-name "$STACK_NAME"
 done

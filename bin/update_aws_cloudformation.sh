@@ -114,7 +114,7 @@ STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
 for _action in validate update; do
 	for _file in $STACK_FILES; do
-		STACK_NAME="$DEPLOYMENT_NAME-`echo $_file| sed $SED_EXTENDED -e "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
+		STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$_file"`"
 		STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 		STACK_URL="$templates_bucket_http_url/$_file"
 		STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"

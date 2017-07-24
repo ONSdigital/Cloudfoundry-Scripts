@@ -20,6 +20,16 @@ DEBUG(){
 
 	"$ECHO" -e "${DEBUG_COLOUR}DEBUG $@$NORMAL_COLOUR" >&2
 }
+
+stack_file_name(){
+	local deployment_name="$1"
+	local stack_file="$2"
+
+	[ -z "$stack_file" ] && FATAL 'Not enough parameters'
+
+	echo "$deployment_name-`echo $stack_file | sed $SED_EXTENDED -e "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
+}
+
 # Quite long winded, but we need to ensure we don't trample over any customised config
 aws_region(){
 	local new_aws_region="$1"
