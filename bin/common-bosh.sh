@@ -23,7 +23,9 @@ INTERNAL_DOMAIN="${6:-cf.internal}"
 [ -n "$DEPLOYMENT_NAME" ] || FATAL 'No Bosh deployment name provided'
 
 #
-load_outputs "$STACK_OUTPUTS_DIR_RELATIVE" "$ENV_PREFIX"
+set -x
+load_outputs "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
+set +x
 
 eval multi_az="\$${ENV_PREFIX}multi_az"
 
@@ -64,7 +66,7 @@ BOSH_FULL_CLOUD_CONFIG_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_CLOUD_MANI
 installed_bin bosh
 
 SSL_DIR="$DEPLOYMENT_DIR/ssl"
-SSL_DIR_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssl"
+#SSL_DIR_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssl"
 SSL_YML="$SSL_DIR/ssl_config.yml"
 
 INFO 'Setting additional variables'
@@ -74,8 +76,8 @@ eval director_dns="\$${ENV_PREFIX}director_dns"
 eval deployment_name="\$${ENV_PREFIX}deployment_name"
 INTERNAL_SSL_DIR="$SSL_DIR/$internal_domain"
 EXTERNAL_SSL_DIR="$SSL_DIR/$domain_name"
-INTERNAL_SSL_DIR_RELATIVE="$SSL_DIR_RELATIVE/$internal_domain"
+#INTERNAL_SSL_DIR_RELATIVE="$SSL_DIR_RELATIVE/$internal_domain"
 # Used for Bosh CA cert
-EXTERNAL_SSL_DIR_RELATIVE="$SSL_DIR_RELATIVE/$domain_name"
+#EXTERNAL_SSL_DIR_RELATIVE="$SSL_DIR_RELATIVE/$domain_name"
 
 [ x"$deployment_name" = x"$DEPLOYMENT_NAME" ] || FATAL "Deployment names do not match: $deployment_name != $DEPLOYMENT_NAME"

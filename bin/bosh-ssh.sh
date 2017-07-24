@@ -20,7 +20,6 @@ GATEWAY_HOST="$4"
 [ -f "$BOSH_SSH_CONFIG" ] || FATAL "Bosh SSH config does not exist: $BOSH_SSH_CONFIG"
 [ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh config does not exist: $BOSH_DIRECTOR_CONFIG"
 
-#load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" NONE director_dns
 eval export `prefix_vars "$BOSH_SSH_CONFIG"`
 eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 

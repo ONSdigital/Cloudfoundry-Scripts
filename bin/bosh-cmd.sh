@@ -16,7 +16,6 @@ DEPLOYMENT_NAME="$1"
 
 shift
 
-#load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" NONE director_dns
 eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 
 # Convert from relative to an absolute path

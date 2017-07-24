@@ -14,6 +14,12 @@ WARN(){
 INFO(){
 	"$ECHO" -e "${INFO_COLOUR}INFO $@$NORMAL_COLOUR" >&2
 }
+
+DEBUG(){
+	[ -z "$DEBUG" -o x"$DEBUG" = x"false" ] && return 0
+
+	"$ECHO" -e "${DEBUG_COLOUR}DEBUG $@$NORMAL_COLOUR" >&2
+}
 # Quite long winded, but we need to ensure we don't trample over any customised config
 aws_region(){
 	local new_aws_region="$1"
@@ -313,7 +319,7 @@ load_outputs(){
 
 	INFO "Loading outputs"
 	for _o in `find "$outputs_dir/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")" | awk -F/ '{print $NF}' | sort`; do
-		INFO "Loading '$_o'"
+		DEBUG  "Loading '$_o'"
 		eval export `prefix_vars "$outputs_dir/$_o" "$env_prefix"`
 	done
 }

@@ -13,11 +13,14 @@ DEPLOYMENT_NAME="$1"
 APP_NAME="$2"
 CF_ORG="${3:-$organisation}"
 CF_SPACE="${4:-Test}"
+DIRECTOR="$5"
 
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
 
 installed_bin cf
+
+cd "$DIRECTORY"
 
 if [ -z "$APP_NAME" ]; then
 	[ -f manifest.yml ] || FATAL 'Application manifest does not exist'

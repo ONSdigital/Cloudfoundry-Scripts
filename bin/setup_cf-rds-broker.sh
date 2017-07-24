@@ -22,6 +22,7 @@ installed_bin cf
 eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 eval export `prefix_vars "$PASSWORD_CONFIG_FILE"`
 eval export `prefix_vars "$CF_CREDENTIALS"`
+eval export `prefix_vars "$BOSH_SSH_CONFIG"`
 
 [ -f "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh" ] && eval export `prefix_vars "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh"`
 
@@ -90,8 +91,10 @@ INFO "Ensuring space exists: $SERVICES_SPACE"
 "$BASE_DIR/setup_cf-orgspace.sh" "$DEPLOYMENT_NAME" "$ORG_NAME" "$SERVICES_SPACE"
 
 INFO 'Creating inital RDS database'
+# Not an ideal way to create databases...
 "$BASE_DIR/create_postgresql_db.sh" --admin-username "$rds_apps_instance_username" --admin-password "$rds_apps_instance_password" \
-	--postgres-hostname "$rds_apps_instance_address" --postgres-port "$rds_apps_instance_port" --new-database-name "$RDS_BROKER_DB_NAME"
+	--postgres-hostname "$rds_apps_instance_address" --postgres-port "$rds_apps_instance_port" --new-database-name "$RDS_BROKER_DB_NAME" \
+	--ssh-key "$bosh_ssh_key_file" --jump-userhost "vcap@$director_dns"
 
 cat >"$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh.new" <<EOF
 # RDS Broker configuration

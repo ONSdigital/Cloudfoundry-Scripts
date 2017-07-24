@@ -62,7 +62,7 @@ aws_change_set(){
 		$template_option '$stack_url' \
 		$aws_opts"
 
-
+set -x
 	INFO "Waiting for Cloudformation changeset to be created: $change_set_name"
 	if "$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"; then
 		INFO 'Stack change set details:'
@@ -78,7 +78,7 @@ aws_change_set(){
 		WARN "Deleting empty change set: $change_set_name"
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 	fi
-
+set +x
 	parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
 }
 
@@ -99,7 +99,7 @@ popd >/dev/null
 
 # We need to suck in the region from the existing outputs.sh
 INFO 'Obtaining current stack region'
-load_output_vars "$STACK_OUTPUTS_DIR_RELATIVE" NONE aws_region
+load_output_vars "$STACK_OUTPUTS_DIR" NONE aws_region
 [ -z "$aws_region" ] && FATAL "No AWS region has been set in $STACK_MAIN_OUTPUTS"
 
 INFO "Checking if we need to update AWS region to $aws_region"
@@ -119,9 +119,9 @@ STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 for _action in validate update; do
 	for _file in $STACK_FILES; do
 		STACK_NAME="$DEPLOYMENT_NAME-`echo $_file| sed $SED_EXTENDED -e "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
-		STACK_PARAMETERS="$STACK_PARAMETERS_DIR_RELATIVE/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
+		STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 		STACK_URL="$templates_bucket_http_url/$_file"
-		STACK_OUTPUTS="$STACK_OUTPUTS_DIR_RELATIVE/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
+		STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
 
 		INFO "Updating: $STACK_PARAMETERS"
 		[ x"$_action" = x"update" ] && update_parameters_file "$CLOUDFORMATION_DIR/$_file" "$STACK_PARAMETERS"

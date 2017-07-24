@@ -43,7 +43,7 @@ INFO "Setting API target as $api_dns"
 "$CF" api "$api_dns" "$CF_EXTRA_OPTS"
 
 INFO "Logging in as $CF_ADMIN_USERNAME"
-"$CF" login -u "$CF_ADMIN_USERNAME" -p "$CF_ADMIN_PASSWORD" "$CF_EXTRA_OPTS"
+"$CF" login -u "$CF_ADMIN_USERNAME" -p "$CF_ADMIN_PASSWORD" "$CF_EXTRA_OPTS" </dev/null
 
 "$BASE_DIR/setup_cf-orgspace.sh" "$DEPLOYMENT_NAME" "$ORG_NAME" "$TEST_SPACE"
 
@@ -61,9 +61,13 @@ if [ -z "$SKIP_TESTS" ]; then
 			"$CF" buildpacks | grep -q "^$buildpack" || FATAL "Buildpack '$buildpack' not available - please retry"
 		fi
 
-		"$BASE_DIR/cf_push.sh" "$DEPLOYMENT_NAME" "$i" "$ORG_NAME" "$TEST_SPACE"
+		pushd "$TEST_APPS/$i"
+
+		"$BASE_DIR/cf_push.sh" "$DEPLOYMENT_NAME" "$i" "$ORG_NAME" "$TEST_SPACE" "$TEST_APPS/$i"
 
 		"$BASE_DIR/cf_delete.sh" "$DEPLOYMENT_NAME" "$i"
+
+		popd
 	done
 fi
 
