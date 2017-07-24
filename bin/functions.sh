@@ -140,15 +140,15 @@ update_parameters_file(){
 
 	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1 } }' "$stack_json"`; do
 		var_name="`echo $_key | perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'`"
-		eval _param="\$$var_name"
+		eval _value="\$$var_name"
 
-		[ -z "$_param" -o x"$_param" = x'$' ] && continue
+		[ -z "$_value" -o x"$_value" = x'$' ] && continue
 
-		echo "$_param:$_key" | grep -qE '#' && local separator='@' || local separator='#'
+		echo "$_key:$_value" | grep -qE '#' && local separator='@' || local separator='#'
 
-		if ! grep -Eq "{ \"ParameterKey\": \"$_key\", \"ParameterValue\": \"$_param\" }" "$parameters_file"; then
-			sed -i $SED_EXTENDED -e "s$separator\"(ParameterKey)\": \"($_param)\", \"(ParameterValue)\": \"[^\"]+\"$separator\"\1\": \"\2\", \"\3\": \"$_key\"${separator}g" \
-				"$file"
+		if ! grep -Eq "{ \"ParameterKey\": \"$_key\", \"ParameterValue\": \"$_value\" }" "$parameters_file"; then
+			sed -i $SED_EXTENDED -e "s$separator\"(ParameterKey)\": \"($_key)\", \"(ParameterValue)\": \".*\"$separator\"\1\": \"\2\", \"\3\": \"$_value\"${separator}g" \
+				"$parameters_file"
 		fi
 
 		unset var var_name
