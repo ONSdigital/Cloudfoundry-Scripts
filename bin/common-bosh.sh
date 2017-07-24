@@ -23,9 +23,7 @@ INTERNAL_DOMAIN="${6:-cf.internal}"
 [ -n "$DEPLOYMENT_NAME" ] || FATAL 'No Bosh deployment name provided'
 
 #
-set -x
 load_outputs "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
-set +x
 
 eval multi_az="\$${ENV_PREFIX}multi_az"
 
