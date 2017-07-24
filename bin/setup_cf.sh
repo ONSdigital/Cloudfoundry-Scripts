@@ -61,13 +61,13 @@ if [ -z "$SKIP_TESTS" ]; then
 			"$CF" buildpacks | grep -q "^$buildpack" || FATAL "Buildpack '$buildpack' not available - please retry"
 		fi
 
-		pushd "$TEST_APPS/$i"
+		cd "$TEST_APPS/$i"
 
 		"$BASE_DIR/cf_push.sh" "$DEPLOYMENT_NAME" "$i" "$ORG_NAME" "$TEST_SPACE" "$TEST_APPS/$i"
 
 		"$BASE_DIR/cf_delete.sh" "$DEPLOYMENT_NAME" "$i"
 
-		popd
+		cd -
 	done
 fi
 

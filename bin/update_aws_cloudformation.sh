@@ -89,9 +89,9 @@ fi
 # We use older options in find due to possible lack of -printf and/or -regex options
 STACK_FILES="`find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
 
-pushd "$CLOUDFORMATION_DIR" >/dev/null
+cd "$CLOUDFORMATION_DIR" >/dev/null
 validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES
-popd >/dev/null
+cd - >/dev/null
 
 # We need to suck in the region from the existing outputs.sh
 INFO 'Obtaining current stack region'
