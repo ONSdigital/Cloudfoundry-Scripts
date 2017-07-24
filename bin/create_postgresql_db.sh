@@ -44,11 +44,12 @@ for param in $@; do
 		--extensions)
 			# CSV list
 			EXTENSIONS="$2"
-		*)
-			FATAL "Unknown parameter: '$param'"
+			;;
+#		*)
+#			FATAL "Unknown parameter: '$param'"
 	esac
 
-	[ -n "$2" ] && shift 2
+#	[ -n "$2" ] && shift 2
 done
 
 for i in ADMIN_USERNAME NEW_DATABASE_NAME; do
