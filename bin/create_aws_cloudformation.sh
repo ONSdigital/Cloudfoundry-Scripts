@@ -104,14 +104,14 @@ for stack_file in $STACK_FILES; do
 	STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 	STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
 
-	INFO "Generating Cloudformation parameters JSON file: '$stack_file'"
-	generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
-
 	if [ -n "$SKIP_EXISTING" -a x"$SKIP_EXISTING" = x"true" ] && stack_exists "$STACK_NAME"; then
 		WARN "Stack already exists, skipping: $STACK_NAME"
 
 		continue
 	fi
+
+	INFO "Generating Cloudformation parameters JSON file: '$stack_file'"
+	generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
 
 	INFO "Creating Cloudformation stack: '$STACK_NAME'"
 	INFO 'Stack details:'
