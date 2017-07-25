@@ -119,6 +119,18 @@ parse_aws_cloudformation_outputs(){
 		END{ print $r{$_} foreach(sort(keys(%r))) }'
 }
 
+find_aws_parameters(){
+	local stack_json="$1"
+	local search_regex="$2"
+
+	[ -n "$stack_json" ] || FATAL 'No Cloudformation stack JSON file provided'
+	[ -f "$stack_json" ] || FATAL "Cloudformation stack JSON file does not exist: '$stack_json'"
+	[ -n "$search_regex" ] || FATAL 'No search regex provided'
+
+	awk -v search_regex="$search_regex" \
+		'{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); if($1 ~ search_regex) print $1 } }' "$stack_json"
+}
+
 generate_parameters_file(){
 	local stack_json="$1"
 
@@ -127,7 +139,7 @@ generate_parameters_file(){
 
 	echo '['
 	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1 } }' "$stack_json"`; do
-		var_name="`echo $_key | perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'`"
+		var_name="`echo $_key | capitalise_aws`"
 		eval _param="\$$var_name"
 
 		[ -z "$_param" -o x"$_param" = x'$' ] && continue
@@ -140,6 +152,10 @@ EOF
 	done | awk '{ line[++i]=$0 }END{ for(l=1; l<=i; l++){ if(i == l){ print line[l] }else{ printf("%s,\n",line[l]) } } }'
 	echo ']'
 
+}
+
+capitalise_aws(){
+	 perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'
 }
 
 update_parameters_file(){
@@ -155,7 +171,7 @@ update_parameters_file(){
 	findpath parameters_file "$parameters_file"
 
 	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1 } }' "$stack_json"`; do
-		var_name="`echo $_key | perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'`"
+		var_name="`echo $_key | capitalise_aws`"
 		eval _value="\$$var_name"
 
 		[ -z "$_value" -o x"$_value" = x'$' ] && continue
