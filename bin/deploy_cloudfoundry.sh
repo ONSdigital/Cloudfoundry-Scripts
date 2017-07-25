@@ -94,7 +94,7 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 
 	# Do not keep any state file if things fail
 	if [ 0$? -ne 0 ]; then
-		rm -f "$BOSH_LITE_STATE_FILE"
+		[ -z "$KEEP_BOSH_STATE" ] || rm -f "$BOSH_LITE_STATE_FILE"
 
 		FATAL 'Bosh lite deployment failed'
 	fi
