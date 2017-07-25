@@ -36,8 +36,6 @@ INFO 'Pointing Bosh at newly deployed Bosh'
 INFO 'Attempting to login'
 "$BOSH" log-in $BOSH_TTY_OPT
 
-check_aws_keys
-
 INFO 'Deleting Bosh Deployment'
 "$BOSH" delete-deployment --force $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
 
