@@ -12,7 +12,9 @@ BASE_DIR="`dirname \"$0\"`"
 DATABASE_ADMIN_NAME='postgres'
 DATABASE_ADMIN_USERNAME='postgres'
 
-while [[ $# -gt 1 ]]; do
+# [[ is not supported by the Debian shell (dash)
+#while [[ $# -gt 1 ]]; do
+for i in `seq 1 $#`; do
 	case "$1" in
 		--admin-database)
 			ADMIN_DATABASE_NAME="$2"
