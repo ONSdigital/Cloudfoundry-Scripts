@@ -23,9 +23,10 @@ BOSH_SSH_KEY_FILENAME_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssh-key"
 
 # We use older options in find due to possible lack of -printf and/or -regex options
 STACK_FILES="`find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
+STACK_TEMPLATES_FILES="`find "$CLOUDFORMATION_DIR/Templates" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
 
 cd "$CLOUDFORMATION_DIR" >/dev/null
-validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES
+validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES $STACK_TEMPLATES_FILES
 cd - >/dev/null
 
 if [ ! -d "$STACK_OUTPUTS_DIR" ]; then
