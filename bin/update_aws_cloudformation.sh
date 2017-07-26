@@ -66,6 +66,10 @@ aws_change_set(){
 	if "$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"; then
 		INFO 'Stack change set details:'
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation list-change-sets --stack-name "$stack_arn"
+
+		INFO 'Change set details:'
+		"$AWS" cloudformation describe-change-set --change-set-name "$change_set_name"
+
 		INFO "Starting Cloudformation changeset: $change_set_name"
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
@@ -120,7 +124,7 @@ for _action in validate update; do
 
 		[ x"$_action" = x"update" ] && action_name='Updating' || action_name='Validating'
 
-		INFO "$cloud_watch_enabled: $STACK_PARAMETERS"
+		INFO "$action_name: $STACK_PARAMETERS"
 		[ x"$_action" = x"update" -a -f "$STACK_PARAMETERS" ] && update_parameters_file "$CLOUDFORMATION_DIR/$_file" "$STACK_PARAMETERS"
 
 		aws_change_set "$STACK_NAME" "$STACK_URL" "$STACK_OUTPUTS" "$STACK_PARAMETERS" --template-url $_action || FATAL "Failed to $_action stack: $STACK_NAME, $_file"
