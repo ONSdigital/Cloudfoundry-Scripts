@@ -118,7 +118,7 @@ for _action in validate update; do
 		STACK_URL="$templates_bucket_http_url/$_file"
 		STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
 
-		[ -n x"$_action" = x"update" ] && action_name='Updating' || action_name='Validating'
+		[ x"$_action" = x"update" ] && action_name='Updating' || action_name='Validating'
 
 		INFO "$cloud_watch_enabled: $STACK_PARAMETERS"
 		[ x"$_action" = x"update" -a -f "$STACK_PARAMETERS" ] && update_parameters_file "$CLOUDFORMATION_DIR/$_file" "$STACK_PARAMETERS"
