@@ -33,6 +33,11 @@ aws_change_set(){
 
 	local change_set_name="$stack_name-changeset-`date +%s`"
 
+	INFO "Validating Cloudformation template: $stack_url"
+	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation validate-template $template_option "$stack_url"
+
+	[ x"$update_validate" = x"validate" ] && return $?
+
 	check_cloudformation_stack "$stack_name"
 
 	local stack_arn="`\"$AWS\" --profile \"$AWS_PROFILE\" --output text --query \"StackSummaries[?StackName == '$stack_name'].StackId\" cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE`"
@@ -44,11 +49,6 @@ aws_change_set(){
 
 		return 0
 	fi
-
-	INFO "Validating Cloudformation template: $stack_url"
-	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation validate-template $template_option "$stack_url"
-
-	[ x"$update_validate" = x"validate" ] && return $?
 
 	INFO "Creating Cloudformation stack change set: $stack_name"
 	INFO 'Stack details:'
