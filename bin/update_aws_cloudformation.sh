@@ -67,9 +67,6 @@ aws_change_set(){
 		INFO 'Stack change set details:'
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation list-change-sets --stack-name "$stack_arn"
 
-		INFO 'Change set details:'
-		"$AWS" cloudformation describe-change-set --change-set-name "$change_set_name"
-
 		INFO "Starting Cloudformation changeset: $change_set_name"
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
