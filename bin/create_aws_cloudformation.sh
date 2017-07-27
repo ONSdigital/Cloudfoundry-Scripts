@@ -153,52 +153,29 @@ done
 # For bonus points we should really check the local SSH key fingerprint matches the AWS SSH key finger print
 #
 # Provide the ability to optionally delete existing AWS SSH key
-if "$AWS" --profile "$AWS_PROFILE" ec2 describe-key-pairs --key-names "$BOSH_SSH_KEY_NAME" >/dev/null 2>&1; then
-	INFO "Existing key $BOSH_SSH_KEY_NAME exists:"
-	"$AWS" --profile "$AWS_PROFILE" --output table ec2 describe-key-pairs --key-names "$BOSH_SSH_KEY_NAME"
+"$AWS" --profile "$AWS_PROFILE" ec2 describe-key-pairs --key-names "$BOSH_SSH_KEY_NAME" >/dev/null 2>&1 && AWS_KEY_EXISTS='true'
 
-	AWS_KEY_EXISTS=1
+if [ x"$DELETE_AWS_SSH_KEY" = x"true" ]; then
+	"$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$BOSH_SSH_KEY_NAME"
 
-	# We want the ability to run silently (eg via Jenkins)
-	if [ -z "$DELETE_AWS_KEY" ]; then
-		read -p "Delete existing AWS SSH key (Y/N)" DELETE_AWS_KEY
-	fi
-
-	if [ -n "$DELETE_AWS_KEY" -o x"$DELETE_AWS_KEY" != x"N" ]; then
-		unset AWS_KEY_EXISTS
-
-		"$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$BOSH_SSH_KEY_NAME"
-	fi
+	AWS_KEY_EXISTS='false'
 fi
 
+if [ x"$REGENERATE_SSH_KEY" x="true" ]; then
+	rm -f "$BOSH_SSH_KEY_FILENAME" "$BOSH_SSH_KEY_FILENAME.pub"
 
-# ... and the ability to delete existing local versions of the SSH key
-if [ -f "$BOSH_SSH_KEY_FILENAME" ]; then
-	LOCAL_KEY_EXISTS=1
-
-	if [ -z "$DELETE_LOCAL_KEY" ]; then
-		read -p "Delete existing local SSH key (Y/N)" DELETE_LOCAL_KEY
-	fi
-
-	if [ -n "$DELETE_LOCAL_KEY" -o x"$DELETE_LOCAL_KEY" != x"N" ]; then
-		unset LOCAL_KEY_EXISTS
-
-		rm -f "$BOSH_SSH_KEY_FILENAME" "$BOSH_SSH_KEY_FILENAME.pub"
-	fi
+	[ x"$AWS_KEY_EXISTS" = x"true" ] && "$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$BOSH_SSH_KEY_NAME"
 fi
-
-[ -n "$AWS_KEY_EXISTS" -a -z "$LOCAL_KEY_EXISTS" ] && FATAL 'No local SSH key available'
 
 # We don't have a local key, so we have to generate one
 if [ ! -f "$BOSH_SSH_KEY_FILENAME" ]; then
-	# This will need silencing
 	INFO 'Generating SSH key'
 	[ -n "$SECURE_SSH_KEY" ] && ssh-keygen -f "$BOSH_SSH_KEY_FILENAME" || ssh-keygen -f "$BOSH_SSH_KEY_FILENAME" -P ''
 fi
 
 [ -f "$BOSH_SSH_KEY_FILENAME" ] || FATAL "SSH key does not exist '$BOSH_SSH_KEY_FILENAME'"
 
-if [ -z "$AWS_KEY_EXISTS" ]; then
+if [ x"$AWS_KEY_EXISTS" != x"true" ]; then
 	INFO "Uploading $BOSH_SSH_KEY_NAME to AWS"
 	KEY_DATA="`cat \"$BOSH_SSH_KEY_FILENAME.pub\"`"
 	"$AWS" --profile "$AWS_PROFILE" ec2 import-key-pair --key-name "$BOSH_SSH_KEY_NAME" --public-key-material "$KEY_DATA"
