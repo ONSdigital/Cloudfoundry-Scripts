@@ -3,7 +3,6 @@
 #
 
 set -e
-pwd
 
 BASE_DIR="`dirname \"$0\"`"
 
@@ -40,8 +39,6 @@ INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
 
 INFO 'Attempting to login'
 "$BOSH" log-in
-
-set -x
 
 cd "$RELEASE_DIR"
 
