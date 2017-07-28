@@ -46,4 +46,4 @@ cd "$RELEASE_DIR"
 
 "$BOSH" create-release --force
 
-"$BOSH" upload-release
+"$BOSH" upload-release --rebase 
