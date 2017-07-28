@@ -122,6 +122,9 @@ INFO 'Setting CloudConfig'
 # Upload Stemcells & releases
 [ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ] && "$BASE_DIR/upload_components.sh"
 
+# Allow running of a custom script that can do other things - temporary until we can create a release tar ball
+[ -f "../pre_deploy.sh" -a -x "../pre_deploy.sh" ] && ../pre_deploy.sh
+
 INFO 'Checking Bosh deployment dry-run'
 "$BOSH" deploy "$BOSH_FULL_MANIFEST_FILE" \
 	--dry-run \
