@@ -3,6 +3,7 @@
 #
 
 set -e
+pwd
 
 BASE_DIR="`dirname \"$0\"`"
 
