@@ -14,9 +14,10 @@ DEPLOYMENT_NAME="$1"
 BOSH_FULL_MANIFEST_PREFIX="${2:-Bosh-Template}"
 BOSH_CLOUD_MANIFEST_PREFIX="${3:-$BOSH_FULL_MANIFEST_PREFIX-AWS-CloudConfig}"
 BOSH_LITE_MANIFEST_NAME="${4:-Bosh-Template}"
+BOSH_PREAMBLE_MANIFEST_NAME="${5:-Bosh-Template-preamble}"
 
-MANIFESTS_DIR="${5:-Bosh-Manifests}"
-INTERNAL_DOMAIN="${6:-cf.internal}"
+MANIFESTS_DIR="${6:-Bosh-Manifests}"
+INTERNAL_DOMAIN="${7:-cf.internal}"
 
 . "$BASE_DIR/common.sh"
 
@@ -38,6 +39,7 @@ fi
 #
 BOSH_LITE_STATE_FILE="$DEPLOYMENT_DIR/$BOSH_LITE_MANIFEST_NAME-Lite-state.json"
 BOSH_LITE_VARS_FILE="$DEPLOYMENT_DIR/$BOSH_LITE_MANIFEST_NAME-Lite-vars.yml"
+BOSH_PREAMBLE_VARS_FILE="$DEPLOYMENT_DIR/$BOSH_PREAMBLE_MANIFEST_NAME-vars.yml"
 BOSH_FULL_VARS_FILE="$DEPLOYMENT_DIR/$BOSH_FULL_MANIFEST_NAME-Full-vars.yml"
 
 # Expand manifests dir to full path
@@ -46,6 +48,7 @@ findpath MANIFESTS_DIR "$MANIFESTS_DIR"
 #
 BOSH_LITE_MANIFEST_FILE="$MANIFESTS_DIR/Bosh-Lite-Manifests/$BOSH_LITE_MANIFEST_NAME.yml"
 BOSH_FULL_MANIFEST_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_FULL_MANIFEST_NAME.yml"
+BOSH_PREAMBLE_MANIFEST_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_PREAMBLE_MANIFEST_NAME.yml"
 BOSH_FULL_CLOUD_CONFIG_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_CLOUD_MANIFEST_NAME.yml"
 
 # Check for required config
@@ -53,6 +56,7 @@ BOSH_FULL_CLOUD_CONFIG_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_CLOUD_MANI
 [ -d "$STACK_OUTPUTS_DIR" ] || FATAL "Cloud outputs directory '$STACK_OUTPUTS_DIR' does not exist"
 [ -f "$BOSH_LITE_MANIFEST_FILE" ] || FATAL "Bosh lite manifest file '$BOSH_LITE_MANIFEST_FILE' does not exist"
 [ -f "$BOSH_FULL_MANIFEST_FILE" ] || FATAL "Bosh manifest file '$BOSH_FULL_MANIFEST_FILE' does not exist"
+[ -f "$BOSH_PREAMBLE_MANIFEST_FILE" ] || FATAL "Bosh manifest file '$BOSH_PREAMBLE_MANIFEST_FILE' does not exist"
 
 # Run non-interactively?
 [ -n "$INTERACTIVE" ] || BOSH_INTERACTIVE_OPT="--non-interactive"
