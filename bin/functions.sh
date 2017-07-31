@@ -254,6 +254,27 @@ bosh_env(){
 		--vars-store="$BOSH_LITE_VARS_FILE"
 }
 
+bosh_deploy(){
+	local bosh_deployment_name="$1"
+	local bosh_manifest="$2"
+	local bosh_vars="$3"
+	local extra_opt="$4"
+
+	[ -z "$bosh_manifest" ] && FATAL 'Not enough options'
+	[ -f "$bosh_manifest" ] || FATAL "Unable to find: $bosh_manifest"
+
+	"$BOSH" deploy "$bosh_manifest" \
+		$extra_opt \
+		$BOSH_INTERACTIVE_OPT \
+		$BOSH_TTY_OPT \
+		--var bosh_name="$bosh_deployment_name" \
+		--var bosh_deployment="$bosh_deployment_name" \
+		--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
+		--vars-file="$SSL_YML" \
+		--vars-env="$ENV_PREFIX_NAME" \
+		--vars-store="$bosh_vars"
+}
+
 cf_app_url(){
 	local application="$1"
 
