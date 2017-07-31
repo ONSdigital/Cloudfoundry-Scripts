@@ -122,31 +122,47 @@ INFO 'Setting CloudConfig'
 # Upload Stemcells & releases
 [ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ] && "$BASE_DIR/upload_components.sh"
 
-# Allow running of a custom script that can do other things - temporary until we can create a release tar ball
+# Allow running of a custom script that can do other things (eg upload a local release)
 [ -f "../pre_deploy.sh" -a -x "../pre_deploy.sh" ] && ../pre_deploy.sh
 
+if [ x"$RERUN_BOSH_PREAMBLE" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
+	INFO 'Checking Bosh preamble dry-run'
+	bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE" --dry-run
+
+	INFO 'Deploying Bosh preamble'
+	bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE"
+
+	for _e in `"$BOSH" errands`; do
+		"$BOSH" run-errand "$_e" --download-logs  --keep-alive
+	done
+fi
+
+exit
+
 INFO 'Checking Bosh deployment dry-run'
-"$BOSH" deploy "$BOSH_FULL_MANIFEST_FILE" \
-	--dry-run \
-	$BOSH_INTERACTIVE_OPT \
-	$BOSH_TTY_OPT \
-	--var bosh_name="$DEPLOYMENT_NAME" \
-	--var bosh_deployment="$BOSH_DEPLOYMENT" \
-	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
-	--vars-file="$SSL_YML" \
-	--vars-env="$ENV_PREFIX_NAME" \
-	--vars-store="$BOSH_FULL_VARS_FILE"
+bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE" --dry-run
+#"$BOSH" deploy "$BOSH_FULL_MANIFEST_FILE" \
+#	--dry-run \
+#	$BOSH_INTERACTIVE_OPT \
+#	$BOSH_TTY_OPT \
+#	--var bosh_name="$DEPLOYMENT_NAME" \
+#	--var bosh_deployment="$BOSH_DEPLOYMENT" \
+#	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
+#	--vars-file="$SSL_YML" \
+#	--vars-env="$ENV_PREFIX_NAME" \
+#	--vars-store="$BOSH_FULL_VARS_FILE"
 
 INFO 'Deploying Bosh'
-"$BOSH" deploy "$BOSH_FULL_MANIFEST_FILE" \
-	$BOSH_INTERACTIVE_OPT \
-	$BOSH_TTY_OPT \
-	--var bosh_name="$DEPLOYMENT_NAME" \
-	--var bosh_deployment="$BOSH_DEPLOYMENT" \
-	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
-	--vars-file="$SSL_YML" \
-	--vars-env="$ENV_PREFIX_NAME" \
-	--vars-store="$BOSH_FULL_VARS_FILE"
+bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE"
+#"$BOSH" deploy "$BOSH_FULL_MANIFEST_FILE" \
+#	$BOSH_INTERACTIVE_OPT \
+#	$BOSH_TTY_OPT \
+#	--var bosh_name="$DEPLOYMENT_NAME" \
+#	--var bosh_deployment="$BOSH_DEPLOYMENT" \
+#	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
+#	--vars-file="$SSL_YML" \
+#	--vars-env="$ENV_PREFIX_NAME" \
+#	--vars-store="$BOSH_FULL_VARS_FILE"
 
 INFO 'Cloudfoundry VMs'
 "$BOSH" vms
