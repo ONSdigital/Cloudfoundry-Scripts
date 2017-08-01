@@ -161,7 +161,7 @@ if [ x"$DELETE_AWS_SSH_KEY" = x"true" ]; then
 	AWS_KEY_EXISTS='false'
 fi
 
-if [ x"$REGENERATE_SSH_KEY" x="true" ]; then
+if [ x"$REGENERATE_SSH_KEY" x= "true" ]; then
 	rm -f "$BOSH_SSH_KEY_FILENAME" "$BOSH_SSH_KEY_FILENAME.pub"
 
 	[ x"$AWS_KEY_EXISTS" = x"true" ] && "$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$BOSH_SSH_KEY_NAME"
