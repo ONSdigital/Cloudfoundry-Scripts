@@ -133,11 +133,9 @@ if [ x"$RERUN_BOSH_PREAMBLE" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
 	bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE"
 
 	for _e in `"$BOSH" errands`; do
-		"$BOSH" run-errand "$_e" --download-logs  --keep-alive
+		"$BOSH" run-errand "$_e"
 	done
 fi
-
-exit
 
 INFO 'Checking Bosh deployment dry-run'
 bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE" --dry-run
