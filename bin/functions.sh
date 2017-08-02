@@ -178,13 +178,25 @@ update_parameters_file(){
 
 		echo "$_key:$_value" | grep -qE '#' && local separator='@' || local separator='#'
 
-		if ! grep -Eq "{ \"ParameterKey\": \"$_key\", \"ParameterValue\": \"$_value\" }" "$parameters_file"; then
-			sed -i $SED_EXTENDED -e "s$separator\"(ParameterKey)\": \"($_key)\", \"(ParameterValue)\": \".*\"$separator\"\1\": \"\2\", \"\3\": \"$_value\"${separator}g" \
-				"$parameters_file"
+		# Check if we have a 'correct' parameter entry already
+		if ! grep -E "\"ParameterKey\": \"$_key\", \"ParameterValue\": \"$_value\"" "$parameters_file"; then
+			# ... now check if we have any parameter that has the same key
+			if grep -Eq "\"ParameterKey\": \"$_key\"" "$parameters_file"; then
+				# ... need to update an existing entry
+				sed $SED_EXTENDED -ne "s$separator\"(ParameterKey)\": \"($_key)\", \"(ParameterValue)\": \".*\"$separator\"\1\": \"\2\", \"\3\": \"$_value\"${separator}gp" \
+					"$parameters_file"
+			else
+				# ... can just print out the new line
+				cat <<EOF
+	{ "ParameterKey": "$_key", "ParameterValue": "$_value" }
+EOF
+			fi
 		fi
 
 		unset var var_name
-	done
+	done | awk '{ gsub(/,/,""); params[++i]=$0 }END{ printf("[\n"); for(j=1; j<=i; j++){ printf("%s%s\n",params[j],i==j ? "" : ",") } printf("]\n")}' >"$parameters_file"
+	# We expect awk to not right any output to $parameters_file until the for loop is complete - if it writes before then things will fall apart as we read the file
+	# during the loops
 }
 
 check_cloudformation_stack(){
@@ -240,6 +252,15 @@ show_duplicate_output_names(){
 	awk -F= '!/^#/{ a[$1]++ }END{ for(i in a){ if(a[i] > 1) printf("%s=%d\n",i,a[i])}}' "$outputs_dir"/outputs-*.sh
 }
 
+bosh_int(){
+	local manifest="$1"
+
+	[ -z "$manifest" ] && FATAL 'No manifest to interpolate for'
+	[ -f "$manifest" ] || FATAL "Manifest file does not exist: $manifest"
+
+	"$BOSH" interpolate --vars-env="$ENV_PREFIX_NAME" "$manifest"
+}
+
 bosh_env(){
 	local action_option=$1
 
@@ -247,11 +268,12 @@ bosh_env(){
 		$BOSH_INTERACTIVE_OPT \
 		$BOSH_TTY_OPT \
 		--state="$BOSH_LITE_STATE_FILE" \
-		--ops-file="$BOSH_FULL_OPS_FILE" \
+		--ops-file="$BOSH_LITE_OPS_FILE" \
 		--var bosh_name="$DEPLOYMENT_NAME" \
 		--var bosh_deployment="$BOSH_DEPLOYMENT" \
 		--vars-env="$ENV_PREFIX_NAME" \
 		--vars-file="$SSL_YML" \
+		--vars-file="$BOSH_LITE_STATIC_IPS_YML" \
 		--vars-store="$BOSH_LITE_VARS_FILE"
 }
 
@@ -268,11 +290,12 @@ bosh_deploy(){
 		$extra_opt \
 		$BOSH_INTERACTIVE_OPT \
 		$BOSH_TTY_OPT \
+		--ops-file="$BOSH_FULL_OPS_FILE" \
 		--var bosh_name="$bosh_deployment_name" \
 		--var bosh_deployment="$bosh_deployment_name" \
 		--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
 		--vars-file="$SSL_YML" \
-		--vars-file="$BOSH_FULL_STATIC_IPS_FILE" \
+		--vars-file="$BOSH_FULL_STATIC_IPS_YML" \
 		--vars-env="$ENV_PREFIX_NAME" \
 		--vars-store="$bosh_vars"
 }
