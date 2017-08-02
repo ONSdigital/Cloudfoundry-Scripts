@@ -271,6 +271,7 @@ bosh_deploy(){
 		--var bosh_deployment="$bosh_deployment_name" \
 		--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
 		--vars-file="$SSL_YML" \
+		--vars-file="$BOSH_FULL_STATIC_IPS_FILE" \
 		--vars-env="$ENV_PREFIX_NAME" \
 		--vars-store="$bosh_vars"
 }

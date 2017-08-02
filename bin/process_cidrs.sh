@@ -23,17 +23,17 @@ decimal_to_ip(){
         echo $value |  awk '{address=$1; for(i=1; i<=4; i++){d[i]=address%256; address-=d[i]; address=address/256;} for(j=1; j<=4; j++){ printf("%d",d[5-j]);if( j==4 ){ printf("\n") }else{ printf(".")}}}'
 }
 
-for n in $@; do
-	network="`tr '[[:lower:]]' '[[:upper:]]'`"
+for network in $@; do
+	network_uc="`echo "$network" | tr '[[:lower:]]' '[[:upper:]]'`"
 
-	eval cidr="\$${network}_CIDR"
-	eval default_route_offset="\$${network}_DEFAULT_ROUTE_OFFSET"
-	eval reserved_start_offset="\$${network}_RESERVED_START_OFSET"
-	eval reserved_size="\$${network}_RESERVED_SIZE"
-	eval static_start_offset="\$${network}_STATIC_START_OFFSET"
-	eval static_size="\$${network}_STATIC_SIZE"
+	eval cidr="\$${network_uc}_CIDR"
+	eval default_route_offset="\$${network_uc}_DEFAULT_ROUTE_OFFSET"
+	eval reserved_start_offset="\$${network_uc}_RESERVED_START_OFSET"
+	eval reserved_size="\$${network_uc}_RESERVED_SIZE"
+	eval static_start_offset="\$${network_uc}_STATIC_START_OFFSET"
+	eval static_size="\$${network_uc}_STATIC_SIZE"
 
-	[ -z "$cidr" ] && FATAL "Nothing found for ${network}_CIDR"
+	[ -z "$cidr" ] && FATAL "Nothing found for ${network_uc}_CIDR"
 
 	decimal="`ip_to_decimal "$cidr"`"
 

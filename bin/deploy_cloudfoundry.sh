@@ -130,6 +130,7 @@ INFO 'Setting CloudConfig'
 	--var bosh_deployment="$BOSH_DEPLOYMENT" \
 	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
 	--vars-file="$SSL_YML" \
+	--vars-file="$BOSH_LITE_STATIC_IPS_FILE" \
 	--vars-env="$ENV_PREFIX_NAME" \
 	--vars-store="$BOSH_FULL_VARS_FILE"
 

@@ -15,9 +15,10 @@ BOSH_FULL_MANIFEST_PREFIX="${2:-Bosh-Template}"
 BOSH_CLOUD_MANIFEST_PREFIX="${3:-$BOSH_FULL_MANIFEST_PREFIX-AWS-CloudConfig}"
 BOSH_LITE_MANIFEST_NAME="${4:-Bosh-Template}"
 BOSH_PREAMBLE_MANIFEST_NAME="${5:-Bosh-Template-preamble}"
+BOSH_STATIC_IPS_PREFIX="${6:-Bosh-static-ips}"
 
-MANIFESTS_DIR="${6:-Bosh-Manifests}"
-INTERNAL_DOMAIN="${7:-cf.internal}"
+MANIFESTS_DIR="${7:-Bosh-Manifests}"
+INTERNAL_DOMAIN="${8:-cf.internal}"
 
 . "$BASE_DIR/common.sh"
 
@@ -28,12 +29,17 @@ load_outputs "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
 
 eval multi_az="\$${ENV_PREFIX}multi_az"
 
+# Bosh Lite is not HA
+BOSH_LITE_STATIC_IPS_NAME="$BOSH_STATIC_IPS_PREFIX"
+
 if [ x"$multi_az" = x"true" ]; then
 	BOSH_FULL_MANIFEST_NAME="$BOSH_FULL_MANIFEST_PREFIX-MultiAZ"
 	BOSH_CLOUD_MANIFEST_NAME="$BOSH_CLOUD_MANIFEST_PREFIX-MultiAZ"
+	BOSH_FULL_STATIC_IPS_NAME="$BOSH_STATIC_IPS_PREFIX-MultiAZ"
 else
 	BOSH_FULL_MANIFEST_NAME="$BOSH_FULL_MANIFEST_PREFIX"
 	BOSH_CLOUD_MANIFEST_NAME="$BOSH_CLOUD_MANIFEST_PREFIX"
+	BOSH_FULL_STATIC_IPS_NAME="$BOSH_STATIC_IPS_PREFIX"
 fi
 
 #
@@ -47,16 +53,20 @@ findpath MANIFESTS_DIR "$MANIFESTS_DIR"
 
 #
 BOSH_LITE_MANIFEST_FILE="$MANIFESTS_DIR/Bosh-Lite-Manifests/$BOSH_LITE_MANIFEST_NAME.yml"
-BOSH_FULL_MANIFEST_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_FULL_MANIFEST_NAME.yml"
+BOSH_LITE_STATIC_IPS_FILE="$MANIFESTS_DIR/Bosh-Lite-Manifests/$BOSH_LITE_STATIC_IPS_NAME.yml"
 BOSH_PREAMBLE_MANIFEST_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_PREAMBLE_MANIFEST_NAME.yml"
+BOSH_FULL_MANIFEST_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_FULL_MANIFEST_NAME.yml"
 BOSH_FULL_CLOUD_CONFIG_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_CLOUD_MANIFEST_NAME.yml"
+BOSH_FULL_STATIC_IPS_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_FULL_STATIC_IPS_NAME.yml"/
 
 # Check for required config
 [ -d "$MANIFESTS_DIR" ] || FATAL "$MANIFESTS_DIR directory does not exist"
 [ -d "$STACK_OUTPUTS_DIR" ] || FATAL "Cloud outputs directory '$STACK_OUTPUTS_DIR' does not exist"
-[ -f "$BOSH_LITE_MANIFEST_FILE" ] || FATAL "Bosh lite manifest file '$BOSH_LITE_MANIFEST_FILE' does not exist"
-[ -f "$BOSH_FULL_MANIFEST_FILE" ] || FATAL "Bosh manifest file '$BOSH_FULL_MANIFEST_FILE' does not exist"
+[ -f "$BOSH_LITE_MANIFEST_FILE" ] || FATAL "Bosh Lite manifest file '$BOSH_LITE_MANIFEST_FILE' does not exist"
+[ -f "$BOSH_LITE_STATIC_IPS_FILE" ] || FATAL "Bosh Lite static IPs file '$BOSH_LITE_STATIC_IPS_FILE' does not exist"
 [ -f "$BOSH_PREAMBLE_MANIFEST_FILE" ] || FATAL "Bosh manifest file '$BOSH_PREAMBLE_MANIFEST_FILE' does not exist"
+[ -f "$BOSH_FULL_MANIFEST_FILE" ] || FATAL "Bosh manifest file '$BOSH_FULL_MANIFEST_FILE' does not exist"
+[ -f "$BOSH_FULL_STATIC_IPS_FILE" ] || FATAL "Bosh static IPs file '$BOSH_FULL_STATIC_IPS_FILE' does not exist"
 
 # Run non-interactively?
 [ -n "$INTERACTIVE" ] || BOSH_INTERACTIVE_OPT="--non-interactive"
