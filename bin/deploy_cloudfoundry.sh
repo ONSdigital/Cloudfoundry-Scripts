@@ -37,8 +37,6 @@ if [ ! -f "$NETWORK_CONFIG_FILE" -o x"$REGENERATE_NETWORKS_CONFIG" = x"true" ]; 
 	done >>"$NETWORK_CONFIG_FILE"
 fi
 
-exit
-
 # Sanity check
 [ -f "$PASSWORD_CONFIG_FILE" ] || FATAL "Password configuration file does not exist: '$PASSWORD_CONFIG_FILE'"
 
