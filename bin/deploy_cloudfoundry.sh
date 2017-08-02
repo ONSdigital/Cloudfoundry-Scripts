@@ -33,7 +33,8 @@ if [ ! -f "$NETWORK_CONFIG_FILE" -o x"$REGENERATE_NETWORKS_CONFIG" = x"true" ]; 
 	INFO 'Generating network configuration'
 	echo '# Cloudfoundry network configuration' >"$NETWORK_CONFIG_FILE"
 	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*)_cidr\)\).*/\1/gp' "$BOSH_FULL_CLOUD_CONFIG_FILE" "$BOSH_LITE_MANIFEST_FILE" | sort -u`; do
-		"$BASE_DIR/process_cidrs.sh" "$i" "$ENV_PREFIX"
+		eval cidr="\$${ENV_PREFIX}${i}_cidr"
+		"$BASE_DIR/process_cidrs.sh" "$i" "$cidr"
 	done >>"$NETWORK_CONFIG_FILE"
 fi
 
@@ -81,7 +82,7 @@ INFO 'Loading Bosh config'
 eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 INFO 'Loading Bosh SSH config'
 eval export `prefix_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"`
-INFO 'Loading Cloudfoundry network config'
+INFO 'Loading Bosh network configuration'
 eval export `prefix_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"`
 
 # Convert from relative to an absolute path
@@ -92,6 +93,16 @@ export BOSH_CA_CERT
 # so we need to make sure the SSH file is an absolute location
 eval bosh_ssh_key_file="\$${ENV_PREFIX}bosh_ssh_key_file"
 findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
+
+# Bosh doesn't seem to be able to handle templating (eg ((variable))) and variables files at the same time, so we need to expand the variables and then use
+# the output when we do a bosh create-env/deploy
+if [ ! -f "$LITE_STATIC_IPS_YML" -o "$REINTERPOLATE_LITE_STATIC_IPS" = x"true" ]; then
+	cat >"$BOSH_LITE_STATIC_IPS_YML" <<EOF
+---
+EOF
+	bosh_int "$BOSH_LITE_STATIC_IPS_FILE" >>"$BOSH_LITE_STATIC_IPS_YML"
+fi
+
 
 if [ -n "$DELETE_BOSH_ENV" -a x"$DELETE_BOSH_ENV" = x"true" ]; then
 	INFO 'Removing existing Bosh bootstrap environment'
@@ -120,6 +131,13 @@ INFO 'Pointing Bosh at newly deployed Bosh'
 INFO 'Attempting to login'
 "$BOSH" log-in $BOSH_TTY_OPT
 
+if [ ! -f "$FULL_STATIC_IPS_YML" -o "$REINTERPOLATE_FULL_STATIC_IPS" = x"true" ]; then
+	cat >"$BOSH_FULL_STATIC_IPS_YML" <<EOF
+---
+EOF
+	bosh_int "$BOSH_FULL_STATIC_IPS_FILE" >>"$BOSH_FULL_STATIC_IPS_YML"
+fi
+
 INFO 'Setting CloudConfig'
 "$BOSH" update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE" \
 	$BOSH_INTERACTIVE_OPT \
@@ -129,7 +147,7 @@ INFO 'Setting CloudConfig'
 	--var bosh_deployment="$BOSH_DEPLOYMENT" \
 	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
 	--vars-file="$SSL_YML" \
-	--vars-file="$BOSH_LITE_STATIC_IPS_FILE" \
+	--vars-file="$NETWORK_CONFIG_YML" \
 	--vars-env="$ENV_PREFIX_NAME" \
 	--vars-store="$BOSH_FULL_VARS_FILE"
 

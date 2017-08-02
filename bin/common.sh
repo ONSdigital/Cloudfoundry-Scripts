@@ -66,15 +66,14 @@ EOF
 
 	BOSH_SSH_CONFIG="$DEPLOYMENT_DIR/bosh-ssh.sh"
 	BOSH_DIRECTOR_CONFIG="$DEPLOYMENT_DIR/bosh-config.sh"
-
 	CF_CREDENTIALS="$DEPLOYMENT_DIR/cf-credentials-admin.sh"
-
+	NETWORK_CONFIG_FILE="$DEPLOYMENT_DIR/networks.sh"
 	PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/passwords.sh"
 
-	NETWORK_CONFIG_FILE="$DEPLOYMENT_DIR/networks.sh"
+	BOSH_LITE_STATIC_IPS_YML="$DEPLOYMENT_DIR/bosh-lite-static-ips.yml"
+	BOSH_FULL_STATIC_IPS_YML="$DEPLOYMENT_DIR/bosh-full-static-ips.yml"
 fi
 
 # Set secure umask - the default permissions for ~/.bosh/config are wide open
 DEBUG 'Setting secure umask'
 umask 077
-
