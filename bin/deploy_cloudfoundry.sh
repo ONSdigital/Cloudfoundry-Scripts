@@ -32,9 +32,9 @@ fi
 if [ ! -f "$NETWORK_CONFIG_FILE" -o x"$REGENERATE_NETWORKS_CONFIG" = x"true" ]; then
 	INFO 'Generating network configuration'
 	echo '# Cloudfoundry network configuration' >"$NETWORK_CONFIG_FILE"
-	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*(cidr))\)\).*/\1/gp' "$BOSH_FULL_MANIFEST_FILE" "$BOSH_LITE_MANIFEST_FILE" | sort -u`; do
-		"$BASE_DIR/process_cidrs.sh" "$i"
-	done
+	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*)_cidr\)\).*/\1/gp' "$BOSH_FULL_CLOUD_CONFIG_FILE" "$BOSH_LITE_MANIFEST_FILE" | sort -u`; do
+		"$BASE_DIR/process_cidrs.sh" "$i" "$ENV_PREFIX"
+	done >>"$NETWORK_CONFIG_FILE"
 fi
 
 exit
@@ -126,6 +126,7 @@ INFO 'Setting CloudConfig'
 "$BOSH" update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE" \
 	$BOSH_INTERACTIVE_OPT \
 	$BOSH_TTY_OPT \
+	--ops-file="$BOSH_LITE_OPS_FILE" \
 	--var bosh_name="$DEPLOYMENT_NAME" \
 	--var bosh_deployment="$BOSH_DEPLOYMENT" \
 	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \

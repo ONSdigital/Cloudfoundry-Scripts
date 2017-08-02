@@ -246,9 +246,10 @@ bosh_env(){
 	"$BOSH" "$action_option" "$BOSH_LITE_MANIFEST_FILE" \
 		$BOSH_INTERACTIVE_OPT \
 		$BOSH_TTY_OPT \
+		--state="$BOSH_LITE_STATE_FILE" \
+		--ops-file="$BOSH_FULL_OPS_FILE" \
 		--var bosh_name="$DEPLOYMENT_NAME" \
 		--var bosh_deployment="$BOSH_DEPLOYMENT" \
-		--state="$BOSH_LITE_STATE_FILE" \
 		--vars-env="$ENV_PREFIX_NAME" \
 		--vars-file="$SSL_YML" \
 		--vars-store="$BOSH_LITE_VARS_FILE"
