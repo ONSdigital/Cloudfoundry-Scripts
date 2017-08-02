@@ -29,6 +29,16 @@ EOF
 	done >>"$PASSWORD_CONFIG_FILE"
 fi
 
+if [ ! -f "$NETWORK_CONFIG_FILE" -o x"$REGENERATE_NETWORKS_CONFIG" = x"true" ]; then
+	INFO 'Generating network configuration'
+	echo '# Cloudfoundry network configuration' >"$NETWORK_CONFIG_FILE"
+	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*(cidr))\)\).*/\1/gp' "$BOSH_FULL_MANIFEST_FILE" "$BOSH_LITE_MANIFEST_FILE" | sort -u`; do
+		"$BASE_DIR/process_cidrs.sh" "$i"
+	done
+fi
+
+exit
+
 # Sanity check
 [ -f "$PASSWORD_CONFIG_FILE" ] || FATAL "Password configuration file does not exist: '$PASSWORD_CONFIG_FILE'"
 
@@ -67,10 +77,14 @@ BOSH_CA_CERT='$EXTERNAL_SSL_DIR_RELATIVE/ca/$domain_name.crt'
 EOF
 fi
 
-INFO 'Loading Bosh config'
 [ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh configuration file does not exist: '$BOSH_DIRECTOR_CONFIG'"
+
+INFO 'Loading Bosh config'
 eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
+INFO 'Loading Bosh SSH config'
 eval export `prefix_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"`
+INFO 'Loading Cloudfoundry network config'
+eval export `prefix_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"`
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"

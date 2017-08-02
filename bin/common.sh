@@ -70,6 +70,8 @@ EOF
 	CF_CREDENTIALS="$DEPLOYMENT_DIR/cf-credentials-admin.sh"
 
 	PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/passwords.sh"
+
+	NETWORK_CONFIG_FILE="$DEPLOYMENT_DIR/networks.sh"
 fi
 
 # Set secure umask - the default permissions for ~/.bosh/config are wide open
