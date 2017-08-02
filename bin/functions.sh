@@ -194,7 +194,7 @@ EOF
 		fi
 
 		unset var var_name
-	done | awk '{ gsub(/,/,""); params[++i]=$0 }END{ printf("[\n"); for(j=1; j<=i; j++){ printf("%s%s\n",params[j],i==j ? "" : ",") } printf("]\n")}' >"$parameters_file"
+	done | awk '{ gsub(/, *$/,""); params[++i]=$0 }END{ printf("[\n"); for(j=1; j<=i; j++){ printf("%s%s\n",params[j],i==j ? "" : ",") } printf("]\n")}' >"$parameters_file"
 	# We expect awk to not right any output to $parameters_file until the for loop is complete - if it writes before then things will fall apart as we read the file
 	# during the loops
 }
