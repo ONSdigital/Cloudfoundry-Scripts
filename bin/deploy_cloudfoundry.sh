@@ -142,12 +142,11 @@ INFO 'Setting CloudConfig'
 "$BOSH" update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE" \
 	$BOSH_INTERACTIVE_OPT \
 	$BOSH_TTY_OPT \
-	--ops-file="$BOSH_LITE_OPS_FILE" \
 	--var bosh_name="$DEPLOYMENT_NAME" \
 	--var bosh_deployment="$BOSH_DEPLOYMENT" \
 	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
 	--vars-file="$SSL_YML" \
-	--vars-file="$NETWORK_CONFIG_YML" \
+	--vars-file="$BOSH_FULL_STATIC_IPS_YML" \
 	--vars-env="$ENV_PREFIX_NAME" \
 	--vars-store="$BOSH_FULL_VARS_FILE"
 
