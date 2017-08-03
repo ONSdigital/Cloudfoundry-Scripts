@@ -45,6 +45,8 @@ INFO 'Loading password configuration'
 eval export `prefix_vars "$PASSWORD_CONFIG_FILE" "$ENV_PREFIX"`
 # We set BOSH_CLIENT_SECRET to this later on
 eval DIRECTOR_PASSWORD="\$${ENV_PREFIX}director_password"
+INFO 'Setting Bosh deployment name'
+export ${ENV_PREFIX}bosh_deployment="$DEPLOYMENT_NAME"
 
 if [ ! -d "$SSL_DIR" -o ! -f "$SSL_YML" -o x"$REGENERATE_SSL" = x"true" -o x"$DELETE_SSL_CA" = x"true" ]; then
 	[ -d "$SSL_DIR" ] && rm -rf "$SSL_DIR"
@@ -143,7 +145,6 @@ INFO 'Setting CloudConfig'
 	$BOSH_INTERACTIVE_OPT \
 	$BOSH_TTY_OPT \
 	--var bosh_deployment="$BOSH_DEPLOYMENT" \
-	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
 	--vars-file="$SSL_YML" \
 	--vars-file="$BOSH_FULL_STATIC_IPS_YML" \
 	--vars-env="$ENV_PREFIX_NAME" \
