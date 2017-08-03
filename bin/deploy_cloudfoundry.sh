@@ -142,7 +142,6 @@ INFO 'Setting CloudConfig'
 "$BOSH" update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE" \
 	$BOSH_INTERACTIVE_OPT \
 	$BOSH_TTY_OPT \
-	--var bosh_name="$DEPLOYMENT_NAME" \
 	--var bosh_deployment="$BOSH_DEPLOYMENT" \
 	--var bosh_lite_ip="$BOSH_ENVIRONMENT" \
 	--vars-file="$SSL_YML" \
