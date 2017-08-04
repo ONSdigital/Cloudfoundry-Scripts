@@ -118,8 +118,8 @@ fi
 cd "$RDS_BROKER_DIR"
 
 INFO "Pushing $BROKER_NAME broker to Cloudfoundry"
-"$BASE_DIR/cf_push.sh" "$DEPLOYMENT_NAME" "$BROKER_NAME" "$ORG_NAME" "$SERVICES_SPACE"
+"$BASE_DIR/cf_push.sh" "$DEPLOYMENT_NAME" "$RDS_BROKER_NAME" "$ORG_NAME" "$SERVICES_SPACE"
 
-BROKER_URL="`cf_app_url \"$BROKER_NAME\"`"
+BROKER_URL="`cf_app_url \"$RDS_BROKER_NAME\"`"
 
 "$BASE_DIR/setup_cf-service-broker.sh" "$DEPLOYMENT_NAME" "$SERVICE_NAME" "$RDS_BROKER_USER" "$RDS_BROKER_PASSWORD" "https://$BROKER_URL"
