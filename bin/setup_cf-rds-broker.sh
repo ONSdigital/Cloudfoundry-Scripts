@@ -66,8 +66,7 @@ applications:
     # Should we create a special user just for this?
     AUTH_USER: $RDS_BROKER_USER
     AUTH_PASS: $RDS_BROKER_PASSWORD
-    DB_URL: $rds_apps_instance_address
-    #DB_URL: $rds_apps_instance_dns
+    DB_URL: $rds_apps_instance_dns
     DB_PORT: $rds_apps_instance_port
     DB_NAME: $RDS_BROKER_DB_NAME
     DB_USER: $rds_apps_instance_username
@@ -89,12 +88,6 @@ fi
 
 INFO "Ensuring space exists: $SERVICES_SPACE"
 "$BASE_DIR/setup_cf-orgspace.sh" "$DEPLOYMENT_NAME" "$ORG_NAME" "$SERVICES_SPACE"
-
-INFO 'Creating inital RDS database'
-# Not an ideal way to create databases...
-"$BASE_DIR/create_postgresql_db.sh" --admin-username "$rds_apps_instance_username" --admin-password "$rds_apps_instance_password" \
-	--postgres-hostname "$rds_apps_instance_address" --postgres-port "$rds_apps_instance_port" --new-database-name "$RDS_BROKER_DB_NAME" \
-	--ssh-key "$bosh_ssh_key_file" --jump-userhost "vcap@$director_dns"
 
 cat >"$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh.new" <<EOF
 # RDS Broker configuration
