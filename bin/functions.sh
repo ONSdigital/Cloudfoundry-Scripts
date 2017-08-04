@@ -127,6 +127,7 @@ find_aws_parameters(){
 	[ -f "$stack_json" ] || FATAL "Cloudformation stack JSON file does not exist: '$stack_json'"
 	[ -n "$search_regex" ] || FATAL 'No search regex provided'
 
+	# This assumes the AWS Cloudformation template is 'correctly' indented using two spaces per indent
 	awk -v search_regex="$search_regex" \
 		'{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); if($1 ~ search_regex) print $1 } }' "$stack_json"
 }
