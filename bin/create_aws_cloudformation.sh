@@ -30,12 +30,12 @@ validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES $STACK_TEMPLATES_FIL
 cd - >/dev/null
 
 if [ ! -d "$STACK_OUTPUTS_DIR" ]; then
-	INFO "Creating '$STACK_OUTPUTS_DIR' to hold stack outputs"
+	INFO "Creating directory to hold stack outputs"
 	mkdir -p "$STACK_OUTPUTS_DIR"
 fi
 
 if [ ! -d "$STACK_PARAMETERS_DIR" ]; then
-	INFO "Creating '$STACK_PARAMETERS_DIR' to hold stack parameters"
+	INFO "Creating directory to hold stack parameters"
 	mkdir -p "$STACK_PARAMETERS_DIR"
 fi
 
