@@ -59,7 +59,7 @@ INFO 'Creating RDS Broker Manifest'
 cat >"$RDS_BROKER_DIR/manifest.yml" <<EOF
 ---
 applications:
-- name: "$RDS_BROKER_NAME"
+- name: $RDS_BROKER_NAME
   memory: 256M
   env:
     GOVERSION: go$GOLANG_VERSION
