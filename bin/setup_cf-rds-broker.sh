@@ -90,15 +90,22 @@ INFO "Ensuring space exists: $SERVICES_SPACE"
 "$BASE_DIR/setup_cf-orgspace.sh" "$DEPLOYMENT_NAME" "$ORG_NAME" "$SERVICES_SPACE"
 
 cat >"$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh.new" <<EOF
-# RDS Broker configuration
+# RDS
 RDS_BROKER_DB_NAME="$RDS_BROKER_DB_NAME"
+RDS_BROKER_DB_ADDRESS="$rds_apps_instance_dns"
+RDS_BROKER_DB_USERNAME="$rds_apps_instance_username"
+RDS_BROKER_DB_PASSWORD="$rds_apps_instance_password"
+# Broker configuration
 RDS_BROKER_NAME="$RDS_BROKER_NAME"
 RDS_BROKER_USER="$RDS_BROKER_USER"
 RDS_BROKER_PASSWORD="$RDS_BROKER_PASSWORD"
 RDS_BROKER_ENC_KEY="$RDS_BROKER_ENC_KEY"
 EOF
 
-if diff -q "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh" "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh.new"; then
+if [ ! -f "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh" ]; then
+	mv "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh.new" "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh"
+
+elif diff -q "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh" "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh.new"; then
 	rm -f "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh"
 
 	INFO "Updating '$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh'"
