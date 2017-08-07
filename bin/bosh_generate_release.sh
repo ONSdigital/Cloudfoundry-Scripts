@@ -41,7 +41,9 @@ if [ -n "$3" ]; then
 	shift 2
 
 	for _s in $@; do
-		"$BOSH" add-blob "$_s" "$RELEASE_BLOB_DESTINATION"
+		filename="`basename "$_s"`"
+
+		"$BOSH" add-blob "$_s" "$RELEASE_BLOB_DESTINATION/$filename"
 	done
 fi
 
