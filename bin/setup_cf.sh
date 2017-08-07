@@ -79,3 +79,14 @@ IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-service-broker.sh" "$DEPLOYMENT_NAME" rabb
 
 INFO 'Setting up ElastiCache broker'
 IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-elasticache-broker.sh" "$DEPLOYMENT_NAME" elasticache-broker
+
+if [ -d "security_groups" ]; then
+	INFO 'Setting up Security Groups'
+
+	for _s in `ls security_groups`; do
+		group_name="`echo $security_group | sed $SED_EXTENDED -e 's/\.json$//g'`"
+		INFO "... $group_name"
+
+		"$CF" "$group_name" "security_groups/$_s"
+	done
+fi
