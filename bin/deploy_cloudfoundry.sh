@@ -156,7 +156,7 @@ INFO 'Setting CloudConfig'
 # Allow running of a custom script that can do other things (eg upload a local release)
 [ -f "../pre_deploy.sh" -a -x "../pre_deploy.sh" ] && ../pre_deploy.sh
 
-if [ x"$RERUN_BOSH_PREAMBLE" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
+if [ x"$NORUN_BOSH_PREAMBLE" != x"true" ] && [ x"$RERUN_BOSH_PREAMBLE" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
 	INFO 'Checking Bosh preamble dry-run'
 	bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE" --dry-run
 
