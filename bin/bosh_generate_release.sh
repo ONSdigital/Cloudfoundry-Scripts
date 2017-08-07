@@ -8,20 +8,17 @@ BASE_DIR="`dirname \"$0\"`"
 
 DEPLOYMENT_NAME="$1"
 RELEASE_DIR="$2"
-RELEASE_BLOB_SOURCE="$3"
-RELEASE_BLOB_DESTINATION="$4"
+
+RELEASE_BLOB_DESTINATION="${RELEASE_BLOB_DESTINATION:-blobs}"
 
 . "$BASE_DIR/common.sh"
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
 [ -z "$RELEASE_DIR" ] && FATAL 'No release dir provided'
-[ -z "$RELEASE_BLOB_DESTINATION" ] && WARN 'No blob desination provided'
 
 [ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist: $DEPLOYMENT_DIR"
 [ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh config does not exist: $BOSH_DIRECTOR_CONFIG"
 [ -d "$RELEASE_DIR" ] || FATAL "Bosh release directory does not exist: $RELEASE_DIR"
-
-[ -z "$RELEASE_BLOB_DESTINATION" ] && RELEASE_BLOB_DESTINATION="`basename "$RELEASE_BLOB_SOURCE"`"
 
 shift
 
@@ -42,7 +39,13 @@ INFO 'Attempting to login'
 
 cd "$RELEASE_DIR"
 
-[ -n "$RELEASE_BLOB_SOURCE" ] && "$BOSH" add-blob "$RELEASE_BLOB_SOURCE" "$RELEASE_BLOB_DESTINATION"
+if [ -n "$3" ]; then
+	shift 2
+
+	for _s in $@; do
+		"$BOSH" add-blob "$_s" "$RELEASE_BLOB_DESTINATION"
+	done
+fi
 
 "$BOSH" create-release --force
 
