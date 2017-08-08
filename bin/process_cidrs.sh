@@ -44,8 +44,14 @@ echo "${NETWORK_NAME}_default_route='`decimal_to_ip "$decimal" "${default_route_
 echo "${NETWORK_NAME}_reserved_start='`decimal_to_ip "$decimal" "${reserved_start_offset:-$DEFAULT_RESERVED_START_OFFSET}"`'"
 echo "${NETWORK_NAME}_reserved_stop='`decimal_to_ip "$decimal" "${reserved_size:-$DEFAULT_RESERVED_SIZE}"`'"
 
-if [ -n "$static_start_offset" -a -n "$static_size" ]; then
-	eval static_stop_offset="`expr $static_start_offset + $static_size - 1`"
+if [ -n "$static_size" ]; then
+	eval reserved_stop="\$${NETWORK_NAME}_reserved_stop"
+
+	[ -z "$static_start_offset" ] && static_start_offset="`expr $reserved_stop + 1`"
+
+	static_stop_offset="`expr $static_start_offset + $static_size - 1`"
+
+	[ x"$static_start_offset" = x"$reserved_stop" ] && FATAL "Static start address is the same as the reserved end address: $static_start_offset & $reserved_stop"
 
 	echo "${NETWORK_NAME}_static_start='`decimal_to_ip "$decimal" "$static_start_offset"`'"
 	echo "${NETWORK_NAME}_static_stop='`decimal_to_ip "$decimal" "$static_stop_offset"`'"
