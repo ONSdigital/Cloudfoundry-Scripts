@@ -16,7 +16,7 @@ BASE_DIR="`dirname \"$0\"`"
 BOSH_STEMCELL_URL="${1:-$BOSH_STEMCELL_URL}"
 
 # https://bosh.io/releases/github.com/cloudfoundry/cf-release
-RELEASE_CF_VERSION="${2:-$RELEASE_CFLINUXFS2_ROOTFS_VERSION}"
+RELEASE_CF_VERSION="${2:-$RELEASE_CF_VERSION}"
 # https://bosh.io/releases/github.com/cloudfoundry/diego-release
 RELEASE_DIEGO_VERSION="${3:-$RELEASE_DIEGO_VERSION}"
 # https://bosh.io/releases/github.com/cloudfoundry/garden-runc-release
