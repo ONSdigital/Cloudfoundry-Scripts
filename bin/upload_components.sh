@@ -50,8 +50,8 @@ for i in $BOSH_UPLOADS; do
 	# Determine upload type
 	echo "$i" | grep -Eq '^RELEASE' && UPLOAD_TYPE=release || UPLOAD_TYPE=stemcell
 
-	INFO "Starting parallel upload of $i"
-	"$BOSH" upload-$UPLOAD_TYPE --fix "$url" &
+	INFO "Starting upload of $i"
+	"$BOSH" upload-$UPLOAD_TYPE --fix "$url"
 
 	PIDS="$PIDS $!"
 
