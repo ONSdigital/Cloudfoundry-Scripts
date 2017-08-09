@@ -266,7 +266,7 @@ bosh_int(){
 
 bosh_env(){
 	local action_option=$1
-set -x
+
 	[ -n "$BOSH_LITE_OPS_FILE" ] && local opts_option="--ops-file='$BOSH_LITE_OPS_FILE'"
 
 	sh -c "'$BOSH' '$action_option' '$BOSH_LITE_MANIFEST_FILE' \
@@ -278,7 +278,6 @@ set -x
 		--vars-file='$SSL_YML' \
 		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
 		--vars-store='$BOSH_LITE_VARS_FILE'"
-set +x
 }
 
 bosh_deploy(){
@@ -291,7 +290,7 @@ bosh_deploy(){
 	[ -f "$bosh_manifest" ] || FATAL "Unable to find: $bosh_manifest"
 
 	[ -n "$BOSH_FULL_OPS_FILE" ] && local opts_option="--ops-file='$BOSH_FULL_OPS_FILE'"
-set -x
+
 	sh -c "'$BOSH' deploy '$bosh_manifest' \
 		$extra_opt \
 		$BOSH_INTERACTIVE_OPT \
@@ -301,7 +300,6 @@ set -x
 		--vars-file='$SSL_YML' \
 		--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
 		--vars-store='$bosh_vars'"
-set +x
 }
 
 cf_app_url(){
