@@ -259,7 +259,9 @@ bosh_int(){
 	[ -z "$manifest" ] && FATAL 'No manifest to interpolate for'
 	[ -f "$manifest" ] || FATAL "Manifest file does not exist: $manifest"
 
-	"$BOSH" interpolate --vars-env="$ENV_PREFIX_NAME" "$manifest"
+	# Stupidly, Bosh prints out its logs to stdout.  When the debug level is 'debug' this causes the output of the
+	# interpolation to be interspersed with debug lines
+	BOSH_LOG_LEVEL=info "$BOSH" interpolate --vars-env="$ENV_PREFIX_NAME" "$manifest"
 }
 
 bosh_env(){
