@@ -29,20 +29,22 @@ CIDR=$2
 [ -z "$NETWORK_NAME" ] && FATAL 'No network name provided'
 [ -z "$CIDR" ] && FATAL 'No CIDR provided'
 
-network_uc="`echo "$NETWORK_NAME" | tr '[[:lower:]]' '[[:upper:]]'`"
+IP_BASE="`echo "$CIDR" | awk -F/ '{print $1}'`"
+
+NETWORK_UC="`echo "$NETWORK_NAME" | tr '[[:lower:]]' '[[:upper:]]'`"
 
 # These are from the environment (eg Jenkins parameters)
-eval default_route_offset="\$${network_uc}_DEFAULT_ROUTE_OFFSET"
-eval reserved_start_offset="\$${network_uc}_RESERVED_START_OFSET"
-eval reserved_size="\$${network_uc}_RESERVED_SIZE"
-eval static_start_offset="\$${network_uc}_STATIC_START_OFFSET"
-eval static_size="\$${network_uc}_STATIC_SIZE"
+eval default_route_offset="\$${NETWORK_UC}_DEFAULT_ROUTE_OFFSET"
+eval reserved_start_offset="\$${NETWORK_UC}_RESERVED_START_OFSET"
+eval reserved_size="\$${NETWORK_UC}_RESERVED_SIZE"
+eval static_start_offset="\$${NETWORK_UC}_STATIC_START_OFFSET"
+eval static_size="\$${NETWORK_UC}_STATIC_SIZE"
 
-decimal="`ip_to_decimal "$CIDR"`"
+DECIMAL_IP="`ip_to_decimal "$CIDR"`"
 
-echo "${NETWORK_NAME}_default_route='`decimal_to_ip "$decimal" "${default_route_offset:-$DEFAULT_DEFAULT_ROUTE_OFFEST}"`'"
-echo "${NETWORK_NAME}_reserved_start='`decimal_to_ip "$decimal" "${reserved_start_offset:-$DEFAULT_RESERVED_START_OFFSET}"`'"
-echo "${NETWORK_NAME}_reserved_stop='`decimal_to_ip "$decimal" "${reserved_size:-$DEFAULT_RESERVED_SIZE}"`'"
+echo "${NETWORK_NAME}_default_route='`decimal_to_ip "$DECIMAL_IP" "${default_route_offset:-$DEFAULT_DEFAULT_ROUTE_OFFEST}"`'"
+echo "${NETWORK_NAME}_reserved_start='`decimal_to_ip "$DECIMAL_IP" "${reserved_start_offset:-$DEFAULT_RESERVED_START_OFFSET}"`'"
+echo "${NETWORK_NAME}_reserved_stop='`decimal_to_ip "$DECIMAL_IP" "${reserved_size:-$DEFAULT_RESERVED_SIZE}"`'"
 
 if [ -n "$static_size" ]; then
 	eval reserved_stop="\$${NETWORK_NAME}_reserved_stop"
@@ -53,15 +55,15 @@ if [ -n "$static_size" ]; then
 
 	[ x"$static_start_offset" = x"$reserved_stop" ] && FATAL "Static start address is the same as the reserved end address: $static_start_offset & $reserved_stop"
 
-	echo "${NETWORK_NAME}_static_start='`decimal_to_ip "$decimal" "$static_start_offset"`'"
-	echo "${NETWORK_NAME}_static_stop='`decimal_to_ip "$decimal" "$static_stop_offset"`'"
+	echo "${NETWORK_NAME}_static_start='`decimal_to_ip "$DECIMAL_IP" "$static_start_offset"`'"
+	echo "${NETWORK_NAME}_static_stop='`decimal_to_ip "$DECIMAL_IP" "$static_stop_offset"`'"
 
 	for i in `seq $static_start_offset $static_stop_offset`; do
 		eval static_offset="`expr $static_start_offset + ${count:-0}`"
 
 		count="`expr ${count:-0} + 1`"
 
-		echo "${NETWORK_NAME}_static_ip$count='`decimal_to_ip "$decimal" "$static_offset"`'"
+		echo "${NETWORK_NAME}_static_ip$count='`decimal_to_ip "$DECIMAL_IP" "$static_offset"`'"
 
 	done
 fi
