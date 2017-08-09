@@ -40,7 +40,7 @@ RELEASE_CF_RABBITMQ_URL="${RELEASE_CF_RABBITMQ_URL:-https://bosh.io/d/github.com
 
 BOSH_UPLOADS='BOSH_STEMCELL RELEASE_CF RELEASE_DIEGO RELEASE_GARDEN_RUNC RELEASE_CFLINUXFS2_ROOTFS RELEASE_CF_RABBITMQ'
 
-if [ -n "$PARALLEL_UPLOAD" -a x"$PARALLEL_UPLOAD" = x"true" ]; then
+if [ -z "$NON_PARALLEL_UPLOAD" -o x"$NON_PARALLEL_UPLOAD" = x"false" ]; then
 	COMMAND_SUFFIX='&'
 	LOG_LINE='parallel '
 fi
@@ -67,3 +67,6 @@ if [ -n "$COMMAND_SUFFIX" ]; then
 	# Wait for completion
 	wait $PIDS
 fi
+
+# Ensure we end with a newline, sometimes uploading doesn't end with a newline
+echo
