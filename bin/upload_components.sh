@@ -40,11 +40,6 @@ RELEASE_CF_RABBITMQ_URL="${RELEASE_CF_RABBITMQ_URL:-https://bosh.io/d/github.com
 
 BOSH_UPLOADS='BOSH_STEMCELL RELEASE_CF RELEASE_DIEGO RELEASE_GARDEN_RUNC RELEASE_CFLINUXFS2_ROOTFS RELEASE_CF_RABBITMQ'
 
-if [ -z "$NON_PARALLEL_UPLOAD" -o x"$NON_PARALLEL_UPLOAD" = x"false" ]; then
-	COMMAND_SUFFIX='&'
-	LOG_LINE='parallel '
-fi
-
 INFO 'Uploading Bosh release(s)'
 for i in $BOSH_UPLOADS; do
 	eval base_url="\$${i}_URL"
@@ -55,8 +50,8 @@ for i in $BOSH_UPLOADS; do
 	# Determine upload type
 	echo "$i" | grep -Eq '^RELEASE' && UPLOAD_TYPE=release || UPLOAD_TYPE=stemcell
 
-	INFO "Starting ${LOG_LINE}upload of $i"
-	"$BOSH" upload-$UPLOAD_TYPE --fix "$url" $COMMAND_SUFFIX
+	INFO "Starting parallel upload of $i"
+	"$BOSH" upload-$UPLOAD_TYPE --fix "$url" &
 
 	PIDS="$PIDS $!"
 
