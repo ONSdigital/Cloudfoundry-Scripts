@@ -24,8 +24,6 @@ INTERNAL_DOMAIN="${8:-cf.internal}"
 
 [ -n "$DEPLOYMENT_NAME" ] || FATAL 'No Bosh deployment name provided'
 
-[ -n "$DEBUG" -a x"$DEBUG" = x"true" ] && export BOSH_LOG_LEVEL='debug'
-
 #
 load_outputs "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
 
