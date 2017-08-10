@@ -62,7 +62,17 @@ aws_change_set(){
 		$template_option '$stack_url' \
 		$aws_opts"
 
-	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation list-change-sets --stack-name "$stack_arn"
+	if "$AWS" --profile "$AWS_PROFILE" --output table \
+		--query "Summaries[?ChangeSetName == '$change_set_name' && Status == 'FAILED'].Status" \
+		cloudformation list-change-sets --stack-name "$stack_arn"; then
+
+		WARN "Change set did not contain any changes: $change_set_name"
+
+		WARN "Deleting empty change set: $change_set_name"
+		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+
+		return 0
+	fi
 
 	INFO "Waiting for Cloudformation changeset to be created: $change_set_name"
 	if "$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"; then
@@ -75,12 +85,9 @@ aws_change_set(){
 		INFO 'Waiting for Cloudformation stack to finish creation'
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
 	else
-		WARN "Change set did not contain any changes: $change_set_name (rc=$?)"
-
-		WARN "Deleting empty change set: $change_set_name"
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		FATAL 'Change set encounted a fatal condition'
 	fi
-set +x
+
 	parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
 }
 
