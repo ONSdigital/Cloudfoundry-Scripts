@@ -166,6 +166,9 @@ if [ x"$NORUN_BOSH_PREAMBLE" != x"true" ] && [ x"$RERUN_BOSH_PREAMBLE" = x"true"
 	for _e in `"$BOSH" errands`; do
 		"$BOSH" run-errand "$_e"
 	done
+
+	INFO 'Deleting Bosh premable deployment'
+	bosh delete-deployment
 fi
 
 INFO 'Checking Bosh deployment dry-run'
