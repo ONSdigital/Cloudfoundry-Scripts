@@ -128,3 +128,7 @@ for _action in validate update; do
 		aws_change_set "$STACK_NAME" "$STACK_URL" "$STACK_OUTPUTS" "$STACK_PARAMETERS" --template-url $_action || FATAL "Failed to $_action stack: $STACK_NAME, $_file"
 	done
 done
+
+INFO 'Configuring DNS settings'
+load_output_vars "$STACK_OUTPUTS_DIR" NONE vpc_cidr
+calculate_dns "$vpc_cidr" >"$STACK_OUTPUTS_DIR/outputs-dns.$STACK_OUTPUTS_SUFFIX"

@@ -21,6 +21,28 @@ DEBUG(){
 	"$ECHO" -e "${DEBUG_COLOUR}DEBUG $@$NORMAL_COLOUR" >&2
 }
 
+calculate_dns(){
+	vpc_cidr="$1"
+
+	[ -z "$vpc_cidr" ] && FATAL 'No VPC CIDR provided'
+
+	vpc_base_address="`echo $1 | awk -F/ '{print $1}'`"
+
+	decimal_to_ip "`ip_to_decimal "$vpc_base_address"`" 2
+}
+
+ip_to_decimal(){
+        echo $1 | awk -F. '{sum=$4+($3*256)+($2*256^2)+($1*256^3)}END{printf("%d\n",sum)}'
+}
+
+decimal_to_ip(){
+	[ -n "$2" ] && value="`expr $1 + $2`" || value="$1"
+
+        # Urgh
+        echo $value |  awk '{address=$1; for(i=1; i<=4; i++){d[i]=address%256; address-=d[i]; address=address/256;} for(j=1; j<=4; j++){ printf("%d",d[5-j]);if( j==4 ){ printf("\n") }else{ printf(".")}}}'
+}
+
+
 stack_file_name(){
 	local deployment_name="$1"
 	local stack_file="$2"

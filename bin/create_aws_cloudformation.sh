@@ -150,6 +150,10 @@ for stack_file in $STACK_FILES; do
 	parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
 done
 
+INFO 'Configuring DNS settings'
+load_output_vars "$STACK_OUTPUTS_DIR" NONE vpc_cidr
+calculate_dns "$vpc_cidr" >"$STACK_OUTPUTS_DIR/outputs-dns.$STACK_OUTPUTS_SUFFIX"
+
 # XXX
 # For bonus points we should really check the local SSH key fingerprint matches the AWS SSH key finger print
 #
