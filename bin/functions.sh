@@ -27,10 +27,10 @@ calculate_dns(){
 	[ -z "$vpc_cidr" ] && FATAL 'No VPC CIDR provided'
 
 	local vpc_base_address="`echo $1 | awk -F/ '{print $1}'`"
+	local vpc_decimal_dns_address="`ip_to_decimal "$vpc_base_address"`"
+	local vpc_dns_ip="`decimal_to_ip "$vpc_decimal_dns_address" 2`"
 
-	local vpc_decimal_dns_address="`ip_to_decimal "$vpc_base_address" 2`"
-
-	"$ECHO" "dns_ip='$vpc_decimal_dns_address'"
+	"$ECHO" "dns_ip='$vpc_dns_ip'"
 }
 
 ip_to_decimal(){
