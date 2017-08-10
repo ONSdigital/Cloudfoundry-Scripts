@@ -62,6 +62,8 @@ aws_change_set(){
 		$template_option '$stack_url' \
 		$aws_opts"
 
+	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation list-change-sets --stack-name "$stack_arn"
+
 	INFO "Waiting for Cloudformation changeset to be created: $change_set_name"
 	if "$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"; then
 		INFO 'Stack change set details:'
