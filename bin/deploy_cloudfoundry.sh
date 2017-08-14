@@ -12,16 +12,17 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common-bosh.sh"
 
-if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
-	# If we have been asked to delete the Bosh env, we need to retain the state file, otherwise we cannot
-	# find the correct VM to delete
-	WARN "Not deleting Bootstrap Bosh state file as we need this to delete the Bootstrap Bosh environment"
-	WARN "The state file will be deleted after we successfully, delete Bosh"
-
-elif [ -f "$BOSH_LITE_STATE_FILE" ]; then
-	[ x"$DELETE_BOSH_STATE" = x"true" ] && rm -f "$BOSH_LITE_STATE_FILE"
-
-	WARN "Existing Bootstrap Bosh state file exists: $BOSH_LITE_STATE_FILE"
+if [ -f "$BOSH_LITE_STATE_FILE" ]; then
+	if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
+		# If we have been asked to delete the Bosh env, we need to retain the state file, otherwise we cannot
+		# find the correct VM to delete
+		WARN "Not deleting Bootstrap Bosh state file as we need this to delete the Bootstrap Bosh environment"
+		WARN "The state file will be deleted after we successfully, delete Bosh"
+	elif [ x"$DELETE_BOSH_STATE" = x"true" ]; then
+		rm -f "$BOSH_LITE_STATE_FILE"
+	else
+		WARN "Existing Bootstrap Bosh state file exists: $BOSH_LITE_STATE_FILE"
+	fi
 fi
 
 if [ ! -f "$PASSWORD_CONFIG_FILE" -o x"$REGENERATE_PASSWORDS" = x"true" ]; then
