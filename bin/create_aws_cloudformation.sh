@@ -113,23 +113,25 @@ for stack_file in $STACK_FILES; do
 
 	[ -f "$AWS_PASSWORD_CONFIG_FILE" ] || echo '# AWS Passwords' >"$AWS_PASSWORD_CONFIG_FILE"
 	for i in `find_aws_parameters "$CLOUDFORMATION_DIR/$stack_file" '^[A-Za-z]+Password$' | capitalise_aws`; do
-		# eg RDS_CF_INSTANCE_PASSWORD
-		eval $i="`generate_password 32`"
-
 		# eg rds_cf_instance_password
 		lower_varname="`echo $i | tr '[[:upper:]]' '[[:lower:]]'`"
 
-		eval value="\$$i"
-
 		if ! grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"; then
+			eval `grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"`
+
 			continue
 		fi
+
+		# eg RDS_CF_INSTANCE_PASSWORD
+		eval $i="`generate_password 32`"
+
+		eval value="\$$i"
 
 		echo "$lower_varname='$value'"
 	done >>"$AWS_PASSWORD_CONFIG_FILE"
 
 
-	INFO "Generating Cloudformation parameters JSON file: '$stack_file'"
+	INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
 	generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
 
 	INFO "Creating Cloudformation stack: '$STACK_NAME'"
