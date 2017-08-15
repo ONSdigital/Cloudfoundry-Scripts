@@ -45,7 +45,7 @@ aws_change_set(){
 	if [ -z "$stack_arn" ]; then
 		[ x"$SKIP_MISSING" = x"true" ] && log_level='WARN' || log_level='FATAL'
 
-		$log_level "Stack no longer exists"
+		$log_level "Stack does not exist"
 
 		return 0
 	fi
