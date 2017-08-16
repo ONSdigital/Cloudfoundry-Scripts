@@ -135,7 +135,7 @@ for stack_file in $STACK_FILES; do
 		echo "$lower_varname='$value'"
 	done >>"$AWS_PASSWORD_CONFIG_FILE"
 
-	if [ -n "$STACK_EXISTS" -o ! -f "$STACK_PARAMETERS" ]; then
+	if [ x"$STACK_EXISTS" != x"true" -o ! -f "$STACK_PARAMETERS" ]; then
 		INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
 		generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
 	fi
@@ -160,6 +160,8 @@ for stack_file in $STACK_FILES; do
 	if [ ! -f "$STACK_OUTPUTS" ]; then
 		parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
 	fi
+
+	unset STACK_EXISTS
 done
 
 INFO 'Configuring DNS settings'

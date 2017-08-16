@@ -70,11 +70,11 @@ aws_change_set(){
 		WARN "Deleting empty change set: $change_set_name"
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
-		NO_STACK_CHANGESET=true
+		local no_stack_changeset=true
 	fi
 
 
-	if [ x"$NO_STACK_CHANGESET" != x"true" ]; then
+	if [ x"$no_stack_changeset" != x"true" ]; then
 		INFO "Waiting for Cloudformation changeset to be created: $change_set_name"
 		if "$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"; then
 			INFO 'Stack change set details:'
@@ -90,7 +90,7 @@ aws_change_set(){
 		fi
 	fi
 
-	if [ ! -f "$stack_outputs" -o x"$NO_STACK_CHANGESET" != x"true" ]; then
+	if [ ! -f "$stack_outputs" -o x"$no_stack_changeset" != x"true" ]; then
 		parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
 	fi
 
