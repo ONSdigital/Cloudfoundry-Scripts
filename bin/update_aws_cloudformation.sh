@@ -33,10 +33,12 @@ aws_change_set(){
 
 	local change_set_name="$stack_name-changeset-`date +%s`"
 
-	INFO "Validating Cloudformation template: $stack_url"
-	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation validate-template $template_option "$stack_url"
+	if [ x"$update_validate" = x"validate" ]; then
+		INFO "Validating Cloudformation template: $stack_url"
+		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation validate-template $template_option "$stack_url"
 
-	[ x"$update_validate" = x"validate" ] && return $?
+		return $?
+	fi
 
 	check_cloudformation_stack "$stack_name"
 
