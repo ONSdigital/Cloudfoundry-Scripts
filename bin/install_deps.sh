@@ -8,9 +8,8 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common.sh"
 
-# Versions:
-# https://bosh.io/docs/cli-v2.html or https://github.com/cloudfoundry/bosh-cli
-CLOUD_TYPES="$@"
+
+INSTALL_AWS="${1:-true}"
 
 CF_GITHUB_RELEASE_URL="https://github.com/cloudfoundry/cli/releases/latest"
 BOSH_GITHUB_RELEASE_URL="https://github.com/cloudfoundry/bosh-cli/releases/latest"
@@ -21,39 +20,6 @@ CF_CLI_RELEASE_TYPE='linux64-binary'
 
 # Only used if we don't have the awscli/azure-cli installed, don't have pip installed and are not running as root
 GET_PIP_URL='https://bootstrap.pypa.io/get-pip.py'
-
-for i in $CLOUD_TYPES; do
-	case "$i" in
-		aws*)
-			if ! which aws >/dev/null 2>&1 && [ ! -f "$BIN_DIR/aws" ]; then
-				[ -n "$CLIS" ] && CLIS="$CLIS aws" || CLIS='aws'
-				[ -n "$PIPS" ] && PIPS="$PIPS awscli" || PIPS='awscli'
-			fi
-			;;
-		azure*)
-			if ! which az >/dev/null 2>&1 || [ ! -f "$BIN_DIR/az" ]; then
-				[ -n "$CLIS" ] && CLIS="$CLIS az" || CLIS='az'
-				[ -n "$PIPS" ] && PIPS="$PIPS azure-cli" || PIPS='azure-cli'
-
-				# Python-2.x doesn't seem to work with Azure CLI
-				#
-				# Collecting azure-datalake-store==0.0.8 (from azure-cli-dls->azure-cli)
-				# Using cached azure-datalake-store-0.0.8.tar.gz
-				# Complete output from command python setup.py egg_info:
-				# Wheel is not available, disabling bdist_wheel hook
-				# error in azure-datalake-store setup command: Invalid environment marker: python_version<'3.4'
-				PIP_VERSION_SUFFIX='3.4'
-
-				# Even when Python3.4 is installed, the python version in the script is just called 'python'. On
-				# RHEL we need to fix this...
-				AZ_INSTALL=1
-			fi
-			;;
-		*)
-			FATAL "Unknown cloud type: '$i'"
-			;;
-	esac
-done
 
 for i in BOSH CF; do
 	eval version="\$${i}_CLI_VERSION"
@@ -99,29 +65,20 @@ if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
 fi
 
 # If running via Jenkins we can install awscli/azure-cli via pyenv
-if [ -n "$PIPS" ]; then
+if [ -n "$INSTALL_AWS" ]; then
 	which pip$PIP_VERSION_SUFFIX >/dev/null 2>&1 || FATAL "No 'pip' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'?  Or pyenv from within Jenkins?"
 
-	for i in $PIPS; do
-		pip$PIP_VERSION_SUFFIX  install "$i" --user
-	done
+	pip$PIP_VERSION_SUFFIX  install "aws-cli" --user
 
-	for i in $CLIS; do
-		[ -f ~/.local/bin/"$i" ] || FATAL "$i cli failed to install"
+	[ -f ~/.local/bin/aws ] || FATAL "AWS cli failed to install"
 
-		cd "$BIN_DIR"
+	cd "$BIN_DIR"
 
-		ln -s ~/.local/bin/"$i"
+	ln -s ~/.local/bin/aws
 
-		cd -
+	cd -
 
-		[ -n "$INSTALLED_EXTRAS" ] && INSTALLED_EXTRAS="$INSTALLED_EXTRAS,$BIN_DIR/$i" || INSTALLED_EXTRAS="$BIN_DIR/$i"
-	done
-
-	if [ -n "$AZ_INSTALL" ]; then
-		# Check the 'az' binary works, it may call python which may not be python-3.4, depending on the OS/environment
-		~/.local/bin/az || sed -i -re "s/(python) (-m azure.cli)/\1$PIP_VERSION_SUFFIX \2/g" ~/.local.bin/az
-	fi
+	[ -n "$INSTALLED_EXTRAS" ] && INSTALLED_EXTRAS="$INSTALLED_EXTRAS,$BIN_DIR/aws" || INSTALLED_EXTRAS="$BIN_DIR/aws"
 
 	CHANGES=1
 fi

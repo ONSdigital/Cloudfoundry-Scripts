@@ -45,7 +45,7 @@ if grep -qE '^Red Hat Enterprise Linux Server' /etc/redhat-release; then
 	fi
 
 	if ! rpm --quiet -q epel-release; then
-		if [ -f "$EPEL_RELEASE" ]; then
+		if [ ! -f "$EPEL_RELEASE" ]; then
 			INFO Downloading EPEL repository config
 			curl -SLo "$EPEL_RELEASE_RPM_FILE" "https://dl.fedoraproject.org/pub/epel/$EPEL_RELEASE_RPM_NAME"
 		fi
@@ -65,9 +65,4 @@ YUM_CLEAN=yes
 # Install packages for bosh
 install_packages gcc gcc-c++ make patch openssl openssl-devel ruby ruby-devel zlib-devel
 
-if [ -n "$REAL_RHEL" ]; then
-	# Untested, but should work
-	install_packages rh-python34-python rh-python34-python-setuptools rh-python34-python-pip rh-python34-python-devel libyaml-devel bzip2 readline-devel
-else
-	install_packages python34 python34-setuptools python34-pip python34-devel libyaml-devel bzip2 readline-devel
-fi
+install_packages python34 python34-setuptools python34-pip python34-devel libyaml-devel bzip2 readline-devel
