@@ -70,26 +70,31 @@ aws_change_set(){
 		WARN "Deleting empty change set: $change_set_name"
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
-		[ x"$REGENERATE_AWS_OUTPUTS" = x"true" ] && parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
-
-		return 0
+		NO_STACK_CHANGESET=true
 	fi
 
-	INFO "Waiting for Cloudformation changeset to be created: $change_set_name"
-	if "$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"; then
-		INFO 'Stack change set details:'
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation list-change-sets --stack-name "$stack_arn"
 
-		INFO "Starting Cloudformation changeset: $change_set_name"
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+	if [ x"$NO_STACK_CHANGESET" != x"true" ]; then
+		INFO "Waiting for Cloudformation changeset to be created: $change_set_name"
+		if "$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name"; then
+			INFO 'Stack change set details:'
+			"$AWS" --profile "$AWS_PROFILE" --output table cloudformation list-change-sets --stack-name "$stack_arn"
 
-		INFO 'Waiting for Cloudformation stack to finish creation'
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
-	else
-		FATAL 'Change set encounted a fatal condition'
+			INFO "Starting Cloudformation changeset: $change_set_name"
+			"$AWS" --profile "$AWS_PROFILE" --output table cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+
+			INFO 'Waiting for Cloudformation stack to finish creation'
+			"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
+		else
+			FATAL 'Change set encounted a fatal condition'
+		fi
 	fi
 
-	parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
+	if [ ! -f "$stack_outputs" -o x"$NO_STACK_CHANGESET" != x"true" ]; then
+		parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
+	fi
+
+	return 0
 }
 
 if [ -f "$STACK_PREAMBLE_OUTPUTS" ] && [ -z "$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK" -o x"$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK" = x"false" ]; then
@@ -107,10 +112,17 @@ cd - >/dev/null
 # We need to suck in the region from the existing outputs.sh
 INFO 'Obtaining current stack region'
 load_output_vars "$STACK_OUTPUTS_DIR" NONE aws_region
-[ -z "$aws_region" ] && FATAL "No AWS region has been set in $STACK_MAIN_OUTPUTS"
+if [ -n "$aws_region" ]; then
+	INFO "Checking if we need to update AWS region to $aws_region"
+	aws_region "$aws_region"
+else
+	WARN "Unable to find region from previous stack outputs"
+fi
 
-INFO "Checking if we need to update AWS region to $aws_region"
-aws_region "$aws_region"
+
+if [ ! -f "$STACK_PREAMBLE_OUTPUTS" ] && ! stack_exists "$DEPLOYMENT_NAME-preamble"; then
+	FATAL "Preamble stack does not exist, do you need to run create_aws_cloudformation.sh first?"
+fi
 
 aws_change_set "$DEPLOYMENT_NAME-preamble" "$STACK_PREAMBLE_URL" "$STACK_PREAMBLE_OUTPUTS"
 

@@ -63,9 +63,12 @@ if [ -z "$SKIP_EXISTING" -o x"$SKIP_EXISTING" != x"true" ] || ! stack_exists "$P
 	INFO 'Waiting for Cloudformation stack to finish creation'
 	"$AWS" --profile "$AWS_PROFILE" cloudformation wait stack-create-complete --stack-name "$DEPLOYMENT_NAME-preamble" || FATAL 'Failed to create Cloudformation preamble stack'
 
-	parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_OUTPUTS"
+	GENERATE_PREAMBLE_OUTPUT=true
 fi
 
+if [ ! -f "$STACK_PREAMBLE_OUTPUTS" -o x"$GENERATE_PREAMBLE_OUTPUTS" = x"true" ]; then
+	parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_OUTPUTS"
+fi
 
 [ -f "$STACK_PREAMBLE_OUTPUTS" ] || FATAL "No preamble outputs available: $STACK_PREAMBLE_OUTPUTS"
 
@@ -108,7 +111,9 @@ for stack_file in $STACK_FILES; do
 	if [ -n "$SKIP_EXISTING" -a x"$SKIP_EXISTING" = x"true" ] && stack_exists "$STACK_NAME"; then
 		WARN "Stack already exists, skipping: $STACK_NAME"
 
-		continue
+		# We don't continue immediately in case we are missing the parameters file, eg if we
+		# were run before but the parameters/outputs/etc were never saved
+		STACK_EXISTS=true
 	fi
 
 	[ -f "$AWS_PASSWORD_CONFIG_FILE" ] || echo '# AWS Passwords' >"$AWS_PASSWORD_CONFIG_FILE"
@@ -130,25 +135,31 @@ for stack_file in $STACK_FILES; do
 		echo "$lower_varname='$value'"
 	done >>"$AWS_PASSWORD_CONFIG_FILE"
 
-	INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
-	generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
+	if [ -n "$STACK_EXISTS" -o ! -f "$STACK_PARAMETERS" ]; then
+		INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
+		generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
+	fi
 
-	INFO "Creating Cloudformation stack: '$STACK_NAME'"
-	INFO 'Stack details:'
-	"$AWS" --profile "$AWS_PROFILE"\
-		--output table \
-		cloudformation create-stack \
-		--stack-name "$STACK_NAME" \
-		--template-url "$STACK_URL" \
-		--capabilities CAPABILITY_IAM \
-		--capabilities CAPABILITY_NAMED_IAM \
-		--on-failure DO_NOTHING \
-		--parameters "file://$STACK_PARAMETERS"
+	if [ x"$STACK_EXISTS" != x"true" ]; then
+		INFO "Creating Cloudformation stack: '$STACK_NAME'"
+		INFO 'Stack details:'
+			"$AWS" --profile "$AWS_PROFILE"\
+			--output table \
+			cloudformation create-stack \
+			--stack-name "$STACK_NAME" \
+			--template-url "$STACK_URL" \
+			--capabilities CAPABILITY_IAM \
+			--capabilities CAPABILITY_NAMED_IAM \
+			--on-failure DO_NOTHING \
+			--parameters "file://$STACK_PARAMETERS"
 
-	INFO "Waiting for Cloudformation stack to finish creation: '$STACK_NAME'"
-	"$AWS" --profile "$AWS_PROFILE" cloudformation wait stack-create-complete --stack-name "$STACK_NAME" || FATAL 'Failed to create Cloudformation stack'
+		INFO "Waiting for Cloudformation stack to finish creation: '$STACK_NAME'"
+		"$AWS" --profile "$AWS_PROFILE" cloudformation wait stack-create-complete --stack-name "$STACK_NAME" || FATAL 'Failed to create Cloudformation stack'
+	fi
 
-	parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
+	if [ ! -f "$STACK_OUTPUTS" ]; then
+		parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
+	fi
 done
 
 INFO 'Configuring DNS settings'

@@ -103,14 +103,6 @@ find_aws(){
 	fi
 }
 
-stack_exists(){
-	local stack_name="$1"
-
-	[ -z "$stack_name" ] && FATAL 'No stack name provided'
-
-	"$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name' &&  StackStatus != 'DELETE_COMPLETE'].StackName" \
-		cloudformation list-stacks | grep -Eq "^$stack_name"
-}
 
 validate_json_files(){
 	local failure=0
@@ -224,7 +216,18 @@ EOF
 	# during the loops
 }
 
+stack_exists(){
+	# Checks if a stack exists
+	local stack_name="$1"
+
+	[ -z "$stack_name" ] && FATAL 'No stack name provided'
+
+	"$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name' &&  StackStatus != 'DELETE_COMPLETE'].StackName" \
+		cloudformation list-stacks | grep -Eq "^$stack_name"
+}
+
 check_cloudformation_stack(){
+	# Checks if a stack is in a state that we can run an update on
 	local stack_name="$1"
 
 	[ -z "$stack_name" ] && FATAL 'No stack name provided'
