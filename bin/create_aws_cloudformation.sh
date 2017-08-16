@@ -116,7 +116,7 @@ for stack_file in $STACK_FILES; do
 		# eg rds_cf_instance_password
 		lower_varname="`echo $i | tr '[[:upper:]]' '[[:lower:]]'`"
 
-		if ! grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"; then
+		if grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"; then
 			eval `grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"`
 
 			continue
@@ -129,7 +129,6 @@ for stack_file in $STACK_FILES; do
 
 		echo "$lower_varname='$value'"
 	done >>"$AWS_PASSWORD_CONFIG_FILE"
-
 
 	INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
 	generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"

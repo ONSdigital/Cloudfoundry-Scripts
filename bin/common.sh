@@ -72,6 +72,8 @@ EOF
 
 	BOSH_LITE_STATIC_IPS_YML="$DEPLOYMENT_DIR/bosh-lite-static-ips.yml"
 	BOSH_FULL_STATIC_IPS_YML="$DEPLOYMENT_DIR/bosh-full-static-ips.yml"
+
+	AWS_PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/aws-passwords.sh"
 fi
 
 # Set secure umask - the default permissions for ~/.bosh/config are wide open

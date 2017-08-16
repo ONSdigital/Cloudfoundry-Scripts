@@ -70,6 +70,8 @@ aws_change_set(){
 		WARN "Deleting empty change set: $change_set_name"
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
+		[ x"$REGENERATE_AWS_OUTPUTS" = x"true" ] && parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
+
 		return 0
 	fi
 

@@ -30,6 +30,9 @@ if [ ! -f "$PASSWORD_CONFIG_FILE" -o x"$REGENERATE_PASSWORDS" = x"true" ]; then
 	INFO 'Generating password config'
 	echo '# Cloudfoundry passwords' >"$PASSWORD_CONFIG_FILE"
 	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*(password|secret))\)\).*/\1/gp' "$BOSH_FULL_MANIFEST_FILE" "$BOSH_LITE_MANIFEST_FILE" | sort -u`; do
+		# We don't want to generate passwords that are held in the AWS passwords file
+		[ -f "$AWS_PASSWORD_CONFIG_FILE" ] && grep -Eq "^$i=" "$AWS_PASSWORD_CONFIG_FILE" && continue
+
 		cat <<EOF
 $i='`generate_password`'
 EOF
@@ -47,9 +50,11 @@ fi
 
 # Sanity check
 [ -f "$PASSWORD_CONFIG_FILE" ] || FATAL "Password configuration file does not exist: '$PASSWORD_CONFIG_FILE'"
+[ -f "$AWS_PASSWORD_CONFIG_FILE" ] || FATAL "AWS Password configuration file does not exist: '$AWS_PASSWORD_CONFIG_FILE'"
 
 INFO 'Loading password configuration'
 eval export `prefix_vars "$PASSWORD_CONFIG_FILE" "$ENV_PREFIX"`
+eval export `prefix_vars "$AWS_PASSWORD_CONFIG_FILE" "$ENV_PREFIX"`
 # We set BOSH_CLIENT_SECRET to this later on
 eval DIRECTOR_PASSWORD="\$${ENV_PREFIX}director_password"
 INFO 'Setting Bosh deployment name'
