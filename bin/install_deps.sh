@@ -66,9 +66,9 @@ fi
 
 # If running via Jenkins we can install awscli/azure-cli via pyenv
 if [ -n "$INSTALL_AWS" ]; then
-	which pip$PIP_VERSION_SUFFIX >/dev/null 2>&1 || FATAL "No 'pip' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'?  Or pyenv from within Jenkins?"
+	which pip${PIP_VERSION_SUFFIX:-3} >/dev/null 2>&1 || FATAL "No 'pip' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'?  Or pyenv from within Jenkins?"
 
-	pip$PIP_VERSION_SUFFIX  install "aws-cli" --user
+	pip${PIP_VERSION_SUFFIX:-3}  install "awscli" --user
 
 	[ -f ~/.local/bin/aws ] || FATAL "AWS cli failed to install"
 
