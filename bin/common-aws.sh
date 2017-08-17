@@ -1,7 +1,7 @@
 
 
 DEPLOYMENT_NAME="$1"
-AWS_CONFIG_PREFIX="$2"
+AWS_CONFIG_PREFIX="${2:-AWS-Bosh}"
 HOSTED_ZONE="${HOSTED_ZONE:-$3}"
 
 # Configure AWS client
