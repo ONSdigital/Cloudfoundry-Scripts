@@ -13,7 +13,7 @@ BASE_DIR="`dirname \"$0\"`"
 if [ -d "$STACK_OUTPUTS_DIR" ] && [ -z "$SKIP_STACK_OUTPUTS_DIR" -o x"$SKIP_STACK_OUTPUTS_DIR" = "false" ] && [ x"$SKIP_EXISTING" != x"true" ]; then
 	 FATAL "Existing stack outputs directory: '$STACK_OUTPUTS_DIR', do you need to run\n\t$BASE_DIR/update_aws_cloudformation.sh instead?"
 fi
-	
+
 PREAMBLE_STACK="$DEPLOYMENT_NAME-preamble"
 BOSH_SSH_KEY_NAME="$DEPLOYMENT_NAME-key"
 
@@ -124,15 +124,17 @@ for stack_file in $STACK_FILES; do
 		if grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"; then
 			eval `grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"`
 
+			eval "$i='$lower_varname'"
+
 			continue
 		fi
 
 		# eg RDS_CF_INSTANCE_PASSWORD
-		eval $i="`generate_password 32`"
+		password="`generate_password 32`"
 
-		eval value="\$$i"
+		eval "$i='$password'"
 
-		echo "$lower_varname='$value'"
+		echo "$lower_varname='$password'"
 	done >>"$AWS_PASSWORD_CONFIG_FILE"
 
 	if [ x"$STACK_EXISTS" != x"true" -o ! -f "$STACK_PARAMETERS" ]; then
