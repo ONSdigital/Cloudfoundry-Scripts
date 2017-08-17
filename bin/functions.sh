@@ -244,7 +244,7 @@ check_cloudformation_stack(){
 		INFO "Stack does not exist: $stack_name"
 	fi
 
-	return $?
+	return $rc
 }
 
 calculate_dns_ip(){
