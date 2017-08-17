@@ -56,7 +56,7 @@ if [ -z "$KEEP_SSH_KEY" -o x"$KEEP_SSH_KEY" = x"false" ] && [ -n "$SSH_KEY_EXIST
 fi
 
 # We use older options in find due to possible lack of -printf and/or -regex options
-for _file in `find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort` AWS-Bosh-preamble.json; do
+for _file in `find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort -r` AWS-Bosh-preamble.json; do
 	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$_file"`"
 
 	check_cloudformation_stack "$STACK_NAME" || continue
