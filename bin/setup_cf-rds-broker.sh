@@ -78,7 +78,7 @@ applications:
     AWS_ACCESS_KEY_ID: $rds_broker_access_key_id
     AWS_SECRET_ACCESS_KEY: $rds_broker_secret_access_key
     INSTANCE_TAGS: [ 'name','$deployment_name-Broker-Database' ]
-    AWS_SEC_GROUP: $rds_security_group
+    AWS_SEC_GROUP: $apps_rds_security_group
     AWS_DB_SUBNET_GROUP: $rds_subnet_group
 EOF
 
