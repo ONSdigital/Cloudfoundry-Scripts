@@ -64,6 +64,9 @@ aws_change_set(){
 		$template_option '$stack_url' \
 		$aws_opts"
 
+	INFO "Waiting for $AWS_CHANGESET_WAIT_TIME seconds"
+	sleep ${AWS_CHANGESET_WAIT_TIME}s
+
 	if "$AWS" --profile "$AWS_PROFILE" --query "Summaries[?ChangeSetName == '$change_set_name' && Status == 'FAILED'].StatusReason" cloudformation list-change-sets --stack-name "$stack_arn" | \
 		grep -Eq "The submitted information didn't contain changes"; then
 
