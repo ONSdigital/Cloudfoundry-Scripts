@@ -69,8 +69,9 @@ aws_change_set(){
 	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name" >/dev/null 2>&1 || :
 
 	INFO 'Checking changeset status'
-	if "$AWS" --profile "$AWS_PROFILE" --output text --query "Summaries[?ChangeSetName == '$change_set_name' && Status == 'FAILED'].StatusReason" cloudformation list-change-sets \
-		--stack-name "$stack_arn" | grep -Eq "The submitted information didn't contain changes"; then
+	if "$AWS" --profile "$AWS_PROFILE" --output text \
+		--query "ChangeSetName == \"$change_set_name\" && StatusReason == \"The submitted information didn't contain changes. Submit different information to create a change set.\"" \
+		cloudformation list-change-sets --stack-name "$stack_arn" | grep -Eq "True"; then
 
 		WARN "Changeset did not contain any changes: $change_set_name"
 
@@ -78,12 +79,12 @@ aws_change_set(){
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
 		local no_stack_changeset=true
-	elif "$AWS" --profile "$AWS_PROFILE" --output table --query "Summaries[?ChangeSetName == '$change_set_name' && Status == 'FAILED'].Status" cloudformation list-change-sets \
+	elif "$AWS" --profile "$AWS_PROFILE" --output text --query "Summaries[?ChangeSetName == '$change_set_name' && Status == 'FAILED'].Status" cloudformation list-change-sets \
 		--stack-name "$stack_arn" | grep -Eq '^FAILED$'; then
 
 		WARN "Changeset failed to create"
-		"$AWS" --output text --profile "$AWS_PROFILE" --query "Summaries[?ChangeSetName == '$change_set_name' && Status == 'FAILED'].Status" cloudformation list-change-sets \
-			--stack-name "$stack_arn"
+		"$AWS" --output table --profile "$AWS_PROFILE" --query "Summaries[?ChangeSetName == '$change_set_name' && Status == 'FAILED']" cloudformation describe-change-set \
+			--stack-name "$stack_arn" --change-set-name "$change_set_name"
 
 		WARN "Deleting failed changeset: $change_set_name"
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
