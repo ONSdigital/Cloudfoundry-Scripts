@@ -22,7 +22,6 @@ fi
 
 if [ -z "$STACK_PREFIX" ]; then
 	echo No stack prefix provided
-
 	exit 1
 fi
 
