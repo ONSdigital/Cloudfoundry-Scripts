@@ -47,7 +47,6 @@ else
 	"$CF" target -s "$SERVICES_SPACE"
 fi
 
-set -x
 INFO "Creating service broker: $SERVICE_NAME"
 "$CF" create-service-broker "$SERVICE_NAME" "$SERVICE_USERNAME" "$SERVICE_PASSWORD" "$SERVICE_URL"
 
