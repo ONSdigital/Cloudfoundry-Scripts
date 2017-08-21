@@ -24,8 +24,6 @@ findpath BOSH_CA_CERT "$BOSH_CA_CERT"
 
 export BOSH_CA_CERT
 
-[ -z "${GATEWAY_HOST:-$BOSH_ENVIRONMENT}" ] && FATAL 'No gateway host available'
-
 INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
 "$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT"
 

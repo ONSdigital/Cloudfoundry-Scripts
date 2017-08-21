@@ -1,13 +1,22 @@
 
 
 DEPLOYMENT_NAME="$1"
-AWS_CONFIG_PREFIX="${2:-AWS-Bosh}"
-HOSTED_ZONE="${HOSTED_ZONE:-$3}"
+[ -n "$1" ] && shift
+
+# Allow script to be used by non-AWS Cloudformation deployment steps
+if [ -z "$NON_AWS_DEPLOY" ]; then
+
+	AWS_CONFIG_PREFIX="${1:-AWS-Bosh}"
+	[ -n "$1" ] && shift
+
+	HOSTED_ZONE="${HOSTED_ZONE:-$1}"
+	[ -n "$1" ] && shift
+fi
 
 # Configure AWS client
-AWS_REGION="${AWS_REGION:-$4}"
-AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-$5}"
-AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-$6}"
+AWS_REGION="${1:-$AWS_REGION}"
+AWS_ACCESS_KEY_ID="${2:-$AWS_ACCESS_KEY_ID}"
+AWS_SECRET_ACCESS_KEY="${3:-$AWS_SECRET_ACCESS_KEY}"
 
 . "$BASE_DIR/common.sh"
 

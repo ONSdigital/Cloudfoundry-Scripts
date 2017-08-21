@@ -175,6 +175,11 @@ capitalise_aws(){
 	 perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'
 }
 
+# decapitalise/uncapitalise doesn't sound 100% correct as it sounds as if they would revert back to original case
+lowercase_aws(){
+	 perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print lc($_)'
+}
+
 update_parameters_file(){
 	local stack_json="$1"
 	local parameters_file="$2"
