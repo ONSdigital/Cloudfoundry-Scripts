@@ -69,30 +69,10 @@ aws_change_set(){
 	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name" >/dev/null 2>&1 || :
 
 	INFO 'Checking changeset status'
-	if "$AWS" --profile "$AWS_PROFILE" --output text \
-		--query "ChangeSetName == \"$change_set_name\" && StatusReason == \"The submitted information didn't contain changes. Submit different information to create a change set.\"" \
-		cloudformation list-change-sets --stack-name "$stack_arn" | grep -Eq "True"; then
+	if "$AWS" --output text --profile "$AWS_PROFILE" --query \
+		"Status == 'CREATE_COMPLETE' && ExecutionStatus == 'AVAILABLE'" \
+		cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name" | grep -Eq '^True$'; then
 
-		WARN "Changeset did not contain any changes: $change_set_name"
-
-		WARN "Deleting empty changeset: $change_set_name"
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
-
-		local no_stack_changeset=true
-	elif "$AWS" --profile "$AWS_PROFILE" --output text --query "Summaries[?ChangeSetName == '$change_set_name' && Status == 'FAILED'].Status" cloudformation list-change-sets \
-		--stack-name "$stack_arn" | grep -Eq '^FAILED$'; then
-
-		WARN "Changeset failed to create"
-		"$AWS" --output table --profile "$AWS_PROFILE" --query "Summaries[?ChangeSetName == '$change_set_name' && Status == 'FAILED']" cloudformation describe-change-set \
-			--stack-name "$stack_arn" --change-set-name "$change_set_name"
-
-		WARN "Deleting failed changeset: $change_set_name"
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
-
-		FATAL 'Changeset creation failed'
-	fi
-
-	if [ x"$no_stack_changeset" != x"true" ]; then
 		INFO 'Stack change set details:'
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation list-change-sets --stack-name "$stack_arn"
 
@@ -101,14 +81,31 @@ aws_change_set(){
 
 		INFO 'Waiting for Cloudformation stack to finish creation'
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
+
+		stack_changes='true'
+	elif "$AWS" --output text --profile "$AWS_PROFILE" --query "StatusReason == 'The submitted information didn"\\\'"t contain changes. Submit different information to create a change set.'" \
+		cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name" | grep -Eq '^True$'; then
+
+		WARN "Changeset did not contain any changes: $change_set_name"
+
+		WARN "Deleting empty changeset: $change_set_name"
+		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+	else
+		WARN "Changeset failed to create"
+		"$AWS" --output table --profile "$AWS_PROFILE" cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+
+		WARN "Deleting failed changeset: $change_set_name"
+		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 	fi
 
-	if [ ! -f "$stack_outputs" -o x"$no_stack_changeset" != x"true" ]; then
+
+	if [ ! -f "$stack_outputs" -o x"$stack_changes" = x"true" ]; then
 		parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
 	fi
 
 	return 0
 }
+
 
 if [ -f "$STACK_PREAMBLE_OUTPUTS" ] && [ -z "$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK" -o x"$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK" = x"false" ]; then
 	[ -f "$STACK_PREAMBLE_OUTPUTS" ] || FATAL "Existing stack preamble outputs do exist: '$STACK_PREAMBLE_OUTPUTS'"
