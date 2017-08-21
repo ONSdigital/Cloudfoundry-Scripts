@@ -74,7 +74,7 @@ aws_change_set(){
 		cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name" | grep -Eq '^True$'; then
 
 		INFO 'Stack change set details:'
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation list-change-sets --stack-name "$stack_arn"
+		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation describe-change-sets --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
 		INFO "Starting Cloudformation changeset: $change_set_name"
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
