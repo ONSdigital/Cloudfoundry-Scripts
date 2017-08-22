@@ -99,9 +99,8 @@ aws_change_set(){
 	fi
 
 
-	if [ ! -f "$stack_outputs" -o x"$stack_changes" = x"true" ]; then
-		parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
-	fi
+	# Always regenerate outputs
+	parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
 
 	return 0
 }
