@@ -30,7 +30,7 @@ INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
 INFO 'Attempting to login'
 "$BOSH" log-in
 
-# Bosh prints everything out to stdout, so we need 
+# Bosh prints everything out to stdout, so we need
 for _e in `"$BOSH" errands | grep -E '^backup-'`; do
 	"$BOSH" run-errand "$_e"
 done

@@ -5,13 +5,13 @@ DEPLOYMENT_NAME="$1"
 
 # Allow script to be used by non-AWS Cloudformation deployment steps
 if [ -z "$NON_AWS_DEPLOY" ]; then
-
 	AWS_CONFIG_PREFIX="${1:-AWS-Bosh}"
 	[ -n "$1" ] && shift
 
 	HOSTED_ZONE="${HOSTED_ZONE:-$1}"
 	[ -n "$1" ] && shift
 fi
+
 
 # Configure AWS client
 AWS_REGION="${1:-$AWS_REGION}"

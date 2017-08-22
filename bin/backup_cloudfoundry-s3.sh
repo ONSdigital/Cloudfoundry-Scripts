@@ -10,6 +10,10 @@ export NON_AWS_DEPLOY=true
 
 . "$BASE_DIR/common-aws.sh"
 
+s3_location(){
+	echo $1 | grep -Eq '^s3://'
+}
+
 DEPLOYMENT_NAME="$1"
 ACTION="${2:-backup}"
 SRC_OR_DST="${3:-s3_backups}"
@@ -38,13 +42,22 @@ for _s3 in `echo $s3_bucket_resource_names | lowercase_aws`; do
 		src="s3://$s3_bucket"
 		dst="$SRC_OR_DST/$_s3"
 
-		[ -d "$dst" ] || mkdir -p "$dst"
+		if ! s3_location "$dst" && [ ! -d "$dst" ]; then
+			mkdir -p "$dst"
+		fi
 
 	elif [ x"$action" = x"restore" ]; then
 		src="$SRC_OR_DST/$_s3"
 		dst="s3://$s3_bucket"
 
-		[ -d "$src" ] && WARN "Restore directory does not exist: $src"
+		if ! s3_location "$src" && [ ! -d "$src" ]; then
+			WARN "Restore directory does not exist: $src"
+
+			STATE='FAILED'
+			LOG_LEVEL='FATAL'
+
+			continue
+		fi
 	else
 		FATAL "Unknown action: $action"
 	fi
@@ -53,4 +66,4 @@ for _s3 in `echo $s3_bucket_resource_names | lowercase_aws`; do
 done
 IFS="$OLDIFS"
 
-INFO 'Backup completed'
+"$LOG_LEVEL" "Backup $STATE"
