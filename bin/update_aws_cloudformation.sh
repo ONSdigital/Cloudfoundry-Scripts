@@ -40,9 +40,9 @@ aws_change_set(){
 		return $?
 	fi
 
-	check_cloudformation_stack "$stack_name"
-
-	local stack_arn="`\"$AWS\" --profile \"$AWS_PROFILE\" --output text --query \"StackSummaries[?StackName == '$stack_name'].StackId\" cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE`"
+	if check_cloudformation_stack "$stack_name"; then
+		local stack_arn="`\"$AWS\" --profile \"$AWS_PROFILE\" --output text --query \"StackSummaries[?StackName == '$stack_name'].StackId\" cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE`"
+	fi
 
 	if [ -z "$stack_arn" ]; then
 		[ x"$SKIP_MISSING" = x"true" ] && log_level='WARN' || log_level='FATAL'
