@@ -243,7 +243,7 @@ check_cloudformation_stack(){
 		"StackSummaries[?StackName == '$stack_name' && (StackStatus == 'CREATE_COMPLETE' || StackStatus == 'UPDATE_COMPLETE' || StackStatus == 'UPDATE_ROLLBACK_COMPLETE')].[StackName]" \
 		cloudformation list-stacks | grep -q "^$stack_name$" && rc=$? || rc=$?
 
-	if [ 0$rc = 0 ]; then
+	if [ 0$rc -eq 0 ]; then
  		INFO "Stack found: $stack_name"
 	else
 		INFO "Stack does not exist: $stack_name"
