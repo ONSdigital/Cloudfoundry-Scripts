@@ -119,9 +119,9 @@ for stack_file in $STACK_FILES; do
 		lower_varname="`echo $i | tr '[[:upper:]]' '[[:lower:]]'`"
 
 		if grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"; then
-			eval `grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"`
+			eval `grep -E "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"`
 
-			eval "$i="\$$lower_varname"
+			eval "$i"="\$$lower_varname"
 
 			continue
 		fi
