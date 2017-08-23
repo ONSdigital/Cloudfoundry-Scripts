@@ -192,6 +192,8 @@ update_parameters_file(){
 	findpath stack_json "$stack_json"
 	findpath parameters_file "$parameters_file"
 
+	local updated_parameters="`mktemp "$parameters_file.XXXX"`"
+
 	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1 } }' "$stack_json"`; do
 		var_name="`echo $_key | capitalise_aws`"
 		eval _value="\$$var_name"
@@ -200,24 +202,27 @@ update_parameters_file(){
 
 		# Beware, some of these greps are silent and some are not!
 		if [ -z "$_value" -o x"$_value" = x'$' ]; then
+			DEBUG "No value provided for key $_key"
 			# No value provided, so cannot update, so see if we have an existing entry we can retain
-			grep -E "\"ParameterKey\": \"$_key\"" "$parameters_file" && WARN "Retaining existing value for $_key"
+			grep -E "\"ParameterKey\": \"$_key\"" "$parameters_file" && DEBUG "Retaining existing value for $_key" || 
 
 		elif grep -Eq "\"ParameterKey\": \"$_key\"" "$parameters_file"; then
 			# ... update an existing entry
+			DEBUG "Updating key $_key with value $_value"
 			sed $SED_EXTENDED -ne "s$separator\"(ParameterKey)\": \"($_key)\", \"(ParameterValue)\": \".*\"$separator\"\1\": \"\2\", \"\3\": \"$_value\"${separator}gp" \
 				"$parameters_file"
 		else
 			# ... add a new entry
+			DEBUG "Adding new key $_key with value $_value"
 			cat <<EOF
 	{ "ParameterKey": "$_key", "ParameterValue": "$_value" }
 EOF
 		fi
 
 		unset var var_name
-	done | awk '{ gsub(/, *$/,""); params[++i]=$0 }END{ printf("[\n"); for(j=1; j<=i; j++){ printf("%s%s\n",params[j],i==j ? "" : ",") } printf("]\n")}' >"$parameters_file"
-	# We expect awk to not write any output to $parameters_file until the for loop is complete, eg awk hits the END{} section once it sees the end of the for loop
-	# If it writes before then things will fall apart as we read the file during the loops
+	done | awk '{ gsub(/, *$/,""); params[++i]=$0 }END{ printf("[\n"); for(j=1; j<=i; j++){ printf("%s%s\n",params[j],i==j ? "" : ",") } printf("]\n")}' >"$updated_parameters"
+
+	diff -q "$updated_parameters" "$parameters_file" && mv -f "$updated_parameters" "$parameters_file" || rm -f "$updated_parameters"
 }
 
 stack_exists(){
