@@ -136,10 +136,9 @@ for stack_file in $STACK_FILES; do
 		echo "$lower_varname='$password'"
 	done >>"$AWS_PASSWORD_CONFIG_FILE"
 
-	if [ x"$STACK_EXISTS" != x"true" -o ! -f "$STACK_PARAMETERS" ]; then
-		INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
-		generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
-	fi
+	# Always renegerate the parameters file
+	INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
+	generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
 
 	if [ x"$STACK_EXISTS" != x"true" ]; then
 		INFO "Creating Cloudformation stack: '$STACK_NAME'"
