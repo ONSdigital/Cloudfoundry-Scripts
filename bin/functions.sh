@@ -198,30 +198,26 @@ update_parameters_file(){
 
 		echo "$_key:$_value" | grep -qE '#' && local separator='@' || local separator='#'
 
-		# Check if we have a 'correct' parameter entry already
-		if ! grep -qE "\"ParameterKey\": \"$_key\", \"ParameterValue\": \"$_value\"" "$parameters_file"; then
-			# ... now check if we have any parameter that has the same key
-			if [ -z "$_value" -o x"$_value" = x'$' ]; then
-				WARN "Retaining existing value for $_key"
-				grep -E "\"ParameterKey\": \"$_key\"" "$parameters_file"
+		# Beware, some of these greps are silent and some are not!
+		if [ -z "$_value" -o x"$_value" = x'$' ]; then
+			# No value provided, so cannot update, so see if we have an existing entry we can retain
+			grep -E "\"ParameterKey\": \"$_key\"" "$parameters_file" && WARN "Retaining existing value for $_key"
 
-			elif grep -Eq "\"ParameterKey\": \"$_key\"" "$parameters_file"; then
-				# ... need to update an existing entry
-				sed $SED_EXTENDED -ne "s$separator\"(ParameterKey)\": \"($_key)\", \"(ParameterValue)\": \".*\"$separator\"\1\": \"\2\", \"\3\": \"$_value\"${separator}gp" \
-					"$parameters_file"
-			else
-				# ... can just print out the new line
-				cat <<EOF
+		elif grep -Eq "\"ParameterKey\": \"$_key\"" "$parameters_file"; then
+			# ... update an existing entry
+			sed $SED_EXTENDED -ne "s$separator\"(ParameterKey)\": \"($_key)\", \"(ParameterValue)\": \".*\"$separator\"\1\": \"\2\", \"\3\": \"$_value\"${separator}gp" \
+				"$parameters_file"
+		else
+			# ... add a new entry
+			cat <<EOF
 	{ "ParameterKey": "$_key", "ParameterValue": "$_value" }
 EOF
-			fi
 		fi
 
 		unset var var_name
 	done | awk '{ gsub(/, *$/,""); params[++i]=$0 }END{ printf("[\n"); for(j=1; j<=i; j++){ printf("%s%s\n",params[j],i==j ? "" : ",") } printf("]\n")}' >"$parameters_file"
-
-	# We expect awk to not right any output to $parameters_file until the for loop is complete - if it writes before then things will fall apart as we read the file
-	# during the loops
+	# We expect awk to not write any output to $parameters_file until the for loop is complete, eg awk hits the END{} section once it sees the end of the for loop
+	# If it writes before then things will fall apart as we read the file during the loops
 }
 
 stack_exists(){
