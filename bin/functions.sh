@@ -156,12 +156,12 @@ generate_parameters_file(){
 
 	echo '['
 	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1 } }' "$stack_json"`; do
-		var_name="`echo $_key | capitalise_aws`"
+		local var_name="`echo $_key | capitalise_aws`"
 		eval _param="\$$var_name"
 
 		[ -z "$_param" -o x"$_param" = x'$' ] && continue
 
-		# Correctly indented, Two tabs indentation for HEREDOC
+		# Correctly indented, One tab indentation for HEREDOC
 		cat <<EOF
 	{ "ParameterKey": "$_key", "ParameterValue": "$_param" }
 EOF
