@@ -196,14 +196,16 @@ update_parameters_file(){
 		var_name="`echo $_key | capitalise_aws`"
 		eval _value="\$$var_name"
 
-		[ -z "$_value" -o x"$_value" = x'$' ] && continue
-
 		echo "$_key:$_value" | grep -qE '#' && local separator='@' || local separator='#'
 
 		# Check if we have a 'correct' parameter entry already
-		if ! grep -E "\"ParameterKey\": \"$_key\", \"ParameterValue\": \"$_value\"" "$parameters_file"; then
+		if ! grep -qE "\"ParameterKey\": \"$_key\", \"ParameterValue\": \"$_value\"" "$parameters_file"; then
 			# ... now check if we have any parameter that has the same key
-			if grep -Eq "\"ParameterKey\": \"$_key\"" "$parameters_file"; then
+			if [ -z "$_value" -o x"$_value" = x'$' ]; then
+				WARN "Retaining existing value for $_key"
+				grep -E "\"ParameterKey\": \"$_key\"" "$parameters_file"; then
+
+			elif grep -Eq "\"ParameterKey\": \"$_key\"" "$parameters_file"; then
 				# ... need to update an existing entry
 				sed $SED_EXTENDED -ne "s$separator\"(ParameterKey)\": \"($_key)\", \"(ParameterValue)\": \".*\"$separator\"\1\": \"\2\", \"\3\": \"$_value\"${separator}gp" \
 					"$parameters_file"
@@ -217,6 +219,7 @@ EOF
 
 		unset var var_name
 	done | awk '{ gsub(/, *$/,""); params[++i]=$0 }END{ printf("[\n"); for(j=1; j<=i; j++){ printf("%s%s\n",params[j],i==j ? "" : ",") } printf("]\n")}' >"$parameters_file"
+
 	# We expect awk to not right any output to $parameters_file until the for loop is complete - if it writes before then things will fall apart as we read the file
 	# during the loops
 }
