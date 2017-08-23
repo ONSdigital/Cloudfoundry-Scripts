@@ -66,9 +66,8 @@ if [ -z "$SKIP_EXISTING" -o x"$SKIP_EXISTING" != x"true" ] || ! stack_exists "$P
 	GENERATE_PREAMBLE_OUTPUT=true
 fi
 
-if [ ! -f "$STACK_PREAMBLE_OUTPUTS" -o x"$GENERATE_PREAMBLE_OUTPUTS" = x"true" ]; then
-	parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_OUTPUTS"
-fi
+# Always generate outputs
+parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_OUTPUTS"
 
 [ -f "$STACK_PREAMBLE_OUTPUTS" ] || FATAL "No preamble outputs available: $STACK_PREAMBLE_OUTPUTS"
 
@@ -159,9 +158,8 @@ for stack_file in $STACK_FILES; do
 		"$AWS" --profile "$AWS_PROFILE" cloudformation wait stack-create-complete --stack-name "$STACK_NAME" || FATAL 'Failed to create Cloudformation stack'
 	fi
 
-	if [ ! -f "$STACK_OUTPUTS" ]; then
-		parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
-	fi
+	# Always generate outputs
+	parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
 
 	unset STACK_EXISTS
 done
