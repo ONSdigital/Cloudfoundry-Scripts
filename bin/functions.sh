@@ -203,7 +203,7 @@ update_parameters_file(){
 			# ... now check if we have any parameter that has the same key
 			if [ -z "$_value" -o x"$_value" = x'$' ]; then
 				WARN "Retaining existing value for $_key"
-				grep -E "\"ParameterKey\": \"$_key\"" "$parameters_file"; then
+				grep -E "\"ParameterKey\": \"$_key\"" "$parameters_file"
 
 			elif grep -Eq "\"ParameterKey\": \"$_key\"" "$parameters_file"; then
 				# ... need to update an existing entry
