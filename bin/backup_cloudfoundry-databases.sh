@@ -24,6 +24,8 @@ findpath BOSH_CA_CERT "$BOSH_CA_CERT"
 
 export BOSH_CA_CERT
 
+installed_bin "$BOSH"
+
 INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
 "$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT"
 
