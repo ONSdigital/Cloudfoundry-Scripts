@@ -37,4 +37,4 @@ for _e in `"$BOSH" errands | grep -E '^backup-'`; do
 	"$BOSH" run-errand "$_e"
 done
 
-"$AWS" --profile "$AWS_PROFILE" s3 sync "s3://$backup_bucket_name/databases/" "$BACKUP_DESTINATION/"
+"$AWS" --profile "$AWS_PROFILE" s3 sync "s3://$backup_bucket/databases/" "$BACKUP_DESTINATION/"
