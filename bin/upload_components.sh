@@ -53,15 +53,8 @@ for i in $BOSH_UPLOADS; do
 	INFO "Starting upload of $i"
 	"$BOSH" upload-$UPLOAD_TYPE --fix "$url"
 
-	PIDS="$PIDS $!"
-
 	unset base_url version
 done
-
-if [ -n "$COMMAND_SUFFIX" ]; then
-	# Wait for completion
-	wait $PIDS
-fi
 
 # Ensure we end with a newline, sometimes uploading doesn't end with a newline
 echo
