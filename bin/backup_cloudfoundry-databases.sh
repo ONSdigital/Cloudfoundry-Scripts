@@ -9,7 +9,7 @@ BASE_DIR="`dirname \"$0\"`"
 DEPLOYMENT_NAME="$1"
 BACKUP_DESTINATION="${2:-.}"
 
-. "$BASE_DIR/common.sh"
+. "$BASE_DIR/common-aws.sh"
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
 [ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"
