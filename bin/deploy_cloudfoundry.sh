@@ -180,7 +180,7 @@ if [ x"$NORUN_BOSH_PREAMBLE" != x"true" ] && [ x"$RERUN_BOSH_PREAMBLE" = x"true"
 	done
 
 	INFO 'Deleting Bosh premable deployment'
-	"$BOSH" delete-deployment
+	"$BOSH" delete-deployment --force $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
 fi
 
 INFO 'Checking Bosh deployment dry-run'
