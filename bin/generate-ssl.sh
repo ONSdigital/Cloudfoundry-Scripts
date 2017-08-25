@@ -106,18 +106,18 @@ done
 [ x"$ONLY_MISSING" = x"true" -a -f "$INTERNAL_CA_NAME/ca/$INTERNAL_CA_NAME.crt" ] || generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/ca/$INTERNAL_CA_NAME.crt" internal_ca
 [ x"$ONLY_MISSING" = x"true" -a -f "$EXTERNAL_CA_NAME/ca/$EXTERNAL_CA_NAME.crt" ] || generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/ca/$EXTERNAL_CA_NAME.crt" external_ca
 
-if [ x"$ONLY_MISSING" != x"true" -a ! -f "$EXTERNAL_CA_NAME/client/ha-proxy.$SYSTEM_DOMAIN.crt" ]; then
+if [ x"$ONLY_MISSING" = x"false" -o ! -f "$EXTERNAL_CA_NAME/client/ha-proxy.$SYSTEM_DOMAIN.crt" ]; then
 	# Public facing SSL
 	"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "ha-proxy.$SYSTEM_DOMAIN" -s "DNS:*.$APPS_DOMAIN" -s "DNS:*.$SYSTEM_DOMAIN"
 	generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/ha-proxy.$SYSTEM_DOMAIN"
 fi
 
-if [ x"$ONLY_MISSING" != x"true" -a ! -f "$EXTERNAL_CA_NAME/client/director.$EXTERNAL_DOMAIN.crt" ]; then
+if [ x"$ONLY_MISSING" = x"false" -o ! -f "$EXTERNAL_CA_NAME/client/director.$EXTERNAL_DOMAIN.crt" ]; then
 	"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "director.$EXTERNAL_DOMAIN" -s "DNS:director.$EXTERNAL_DOMAIN"
 	generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/director.$EXTERNAL_DOMAIN"
 fi
 
-if [ x"$ONLY_MISSING" != x"true" -a ! -f "$INTERNAL_CA_NAME/client/cf-etcd.$SERVICE_DOMAIN.crt" ]; then
+if [ x"$ONLY_MISSING" = x"false" -o ! -f "$INTERNAL_CA_NAME/client/cf-etcd.$SERVICE_DOMAIN.crt" ]; then
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "cf-etcd.$SERVICE_DOMAIN" -s "DNS:cf-etcd.$SERVICE_DOMAIN" -s "DNS:*.cf-etcd.$SERVICE_DOMAIN"
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name 'cf-etcd-client' -s "DNS:cf-etcd-client.$SERVICE_DOMAIN"
 	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/cf-etcd.$SERVICE_DOMAIN.crt" NONE NONE _server_crt
