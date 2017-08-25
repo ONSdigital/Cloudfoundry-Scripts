@@ -84,7 +84,7 @@ if [ ! -f "$EXTERNAL_SSL_DIR/client/director.$domain_name.key" -o ! -f "$EXTERNA
 	FATAL 'No director SSL keypair available'
 fi
 
-if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ]; then
+if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ] || ! grep -Eq "^BOSH_CLIENT_SECRET='$DIRECTOR_PASSWORD'" "$BOSH_DIRECTOR_CONFIG"; then
 	INFO 'Generating Bosh configurations'
 	cat <<EOF >"$BOSH_DIRECTOR_CONFIG"
 # Bosh deployment config
