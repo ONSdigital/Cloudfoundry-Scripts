@@ -65,7 +65,7 @@ if [ x"$REGENERATE_SSL" = x"true" -o x"$DELETE_SSL_CA" = x"true" ] && [ -d "$SSL
 	rm -rf "$SSL_DIR"
 fi
 
-if [ ! -d "$SSL_DIR" ]; then
+if [ -d "$SSL_DIR" ]; then
 	INFO 'Checking if we need to generate any additional SSL CAs and/or keypairs'
 else
 	INFO 'Generating SSL CAs and keypairs'
