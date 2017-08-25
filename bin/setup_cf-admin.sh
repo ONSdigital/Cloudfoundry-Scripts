@@ -42,11 +42,12 @@ CF_ADMIN_USERNAME='$USERNAME'
 CF_ADMIN_PASSWORD='$NEW_PASSWORD'
 EOF
 
-	CHANGES=1
+	NEW_CREDENTIALS=1
 
-	# Re-parse CF admin credentials
-	eval `prefix_vars "$CF_CREDENTIALS"`
 fi
+
+# Re-parse CF admin credentials
+eval `prefix_vars "$CF_CREDENTIALS"`
 
 [ -n "$DONT_SKIP_SSL_VALIDATION" ] || UAA_EXTRA_OPTS='--skip-ssl-validation'
 
@@ -58,7 +59,7 @@ uaac token client get "$UAA_ADMIN_USERNAME" -s "$uaa_admin_client_secret"
 
 # Hmmm... there is a better way
 if uaac user get "$CF_ADMIN_USERNAME" >/dev/null; then
-	if [ -z "$CHANGES" ]; then
+	if [ -z "$NEW_CREDENTIALS" ]; then
 		WARN 'No changes to perform'
 
 		exit 0
