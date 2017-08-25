@@ -19,6 +19,8 @@ SYSTEM_DOMAIN="${6:-system.$EXTERNAL_CA_NAME}"
 SERVICE_DOMAIN="${7:-service.$INTERNAL_CA_NAME}"
 EXTERNAL_DOMAIN="${8:-$EXTERNAL_CA_NAME}"
 
+ONLY_MISSING="${ONLY_MISSING:-true}"
+
 # Append $EXTERNAL_CA_NAME
 EXTERNAL_SSL_NAMES='jwt'
 
@@ -32,7 +34,7 @@ INTERNAL_SERVICE_SSL_NAMES='cloud-controller-ng uaa blobstore'
 INTERNAL_CONSUL_SSL_NAMES='server.dc1 agent.dc1'
 
 # Unqualified names
-INTERNAL_SIMPLE_SSL_NAMES='doppler trafficcontroller metron syslogdrainbinder statsdinjector tps_watcher cc_uploader_cc cc_uploader_mutual router'
+INTERNAL_SIMPLE_SSL_NAMES='doppler cc_trafficcontroller trafficcontroller metron syslogdrainbinder statsdinjector tps_watcher cc_uploader_cc cc_uploader_mutual router'
 
 # Passed through to $CA_TOOL
 export EXTENDED_CRITICAL=
@@ -96,32 +98,44 @@ EOF
 
 # Generate CAs
 for _i in $EXTERNAL_CA_NAME $INTERNAL_CA_NAME; do
+	[ x"$ONLY_MISSING" = x"true" -a -f "$_i/ca/$_i.crt" ] && continue
+
 	"$CA_TOOL" --new-ca --ca-name "$_i" --not-trusted
 done
 
-generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/ca/$INTERNAL_CA_NAME.crt" internal_ca
-generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/ca/$EXTERNAL_CA_NAME.crt" external_ca
+[ x"$ONLY_MISSING" = x"true" -a -f "$INTERNAL_CA_NAME/ca/$INTERNAL_CA_NAME.crt" ] || generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/ca/$INTERNAL_CA_NAME.crt" internal_ca
+[ x"$ONLY_MISSING" = x"true" -a -f "$EXTERNAL_CA_NAME/ca/$EXTERNAL_CA_NAME.crt" ] || generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/ca/$EXTERNAL_CA_NAME.crt" external_ca
 
-# Public facing SSL
-"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "ha-proxy.$SYSTEM_DOMAIN" -s "DNS:*.$APPS_DOMAIN" -s "DNS:*.$SYSTEM_DOMAIN"
-generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/ha-proxy.$SYSTEM_DOMAIN"
+if [ x"$ONLY_MISSING" != x"true" -a ! -f "$EXTERNAL_CA_NAME/client/ha-proxy.$SYSTEM_DOMAIN.crt" ]; then
+	# Public facing SSL
+	"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "ha-proxy.$SYSTEM_DOMAIN" -s "DNS:*.$APPS_DOMAIN" -s "DNS:*.$SYSTEM_DOMAIN"
+	generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/ha-proxy.$SYSTEM_DOMAIN"
+fi
 
-"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "director.$EXTERNAL_DOMAIN" -s "DNS:director.$EXTERNAL_DOMAIN"
-generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/director.$EXTERNAL_DOMAIN"
+if [ x"$ONLY_MISSING" != x"true" -a ! -f "$EXTERNAL_CA_NAME/client/director.$EXTERNAL_DOMAIN.crt" ]; then
+	"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "director.$EXTERNAL_DOMAIN" -s "DNS:director.$EXTERNAL_DOMAIN"
+	generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/director.$EXTERNAL_DOMAIN"
+fi
 
-"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "cf-etcd.$SERVICE_DOMAIN" -s "DNS:cf-etcd.$SERVICE_DOMAIN" -s "DNS:*.cf-etcd.$SERVICE_DOMAIN"
-"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name 'cf-etcd-client' -s "DNS:cf-etcd-client.$SERVICE_DOMAIN"
-generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/cf-etcd.$SERVICE_DOMAIN.crt" NONE NONE _server_crt
-generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/cf-etcd.$SERVICE_DOMAIN.key" NONE NONE _server_key
-generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/cf-etcd-client"
+if [ x"$ONLY_MISSING" != x"true" -a ! -f "$INTERNAL_CA_NAME/client/cf-etcd.$SERVICE_DOMAIN.crt" ]; then
+	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "cf-etcd.$SERVICE_DOMAIN" -s "DNS:cf-etcd.$SERVICE_DOMAIN" -s "DNS:*.cf-etcd.$SERVICE_DOMAIN"
+	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name 'cf-etcd-client' -s "DNS:cf-etcd-client.$SERVICE_DOMAIN"
+	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/cf-etcd.$SERVICE_DOMAIN.crt" NONE NONE _server_crt
+	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/cf-etcd.$SERVICE_DOMAIN.key" NONE NONE _server_key
+	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/cf-etcd-client"
+fi
 
 for i in $EXTERNAL_SSL_NAMES; do
+	[ x"$ONLY_MISSING" = x"true" -f "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME.crt" ] && continue
+
 	"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "$i.$EXTERNAL_CA_NAME"
 
 	generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME"
 done
 
 for i in $EXTERNAL_SSH_NAMES; do
+	[ x"$ONLY_MISSING" = x"true" -f "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME.crt" ] && continue
+
 	"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "$i.$EXTERNAL_CA_NAME" --generate-public-key --generate-public-key-ssh-fingerprint
 
 	generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME.key" ssh_host_key NONE NONE
@@ -130,24 +144,32 @@ for i in $EXTERNAL_SSH_NAMES; do
 done
 
 for i in $INTERNAL_CONSUL_SSL_NAMES; do
+	[ x"$ONLY_MISSING" = x"true" -f "$INTERNAL_CA_NAME/client/$i.$INTERNAL_CA_NAME.crt" ] && continue
+
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "$i.$INTERNAL_CA_NAME"
 
 	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/$i.$INTERNAL_CA_NAME" NONE consul_
 done
 
 for i in $INTERNAL_SIMPLE_SSL_NAMES; do
+	[ x"$ONLY_MISSING" = x"true" -f "$EXTERNAL_CA_NAME/client/$i.crt" ] && continue
+
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "$i"
 
 	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/$i"
 done
 
 for i in $INTERNAL_FULL_SSL_NAMES; do
+	[ x"$ONLY_MISSING" = x"true" -f "$INTERNAL_CA_NAME/client/$i.$INTERNAL_CA_NAME.crt" ] && continue
+
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "$i.$INTERNAL_CA_NAME"
 
 	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/$i.$INTERNAL_CA_NAME"
 done
 
 for i in $INTERNAL_SERVICE_SSL_NAMES; do
+	[ x"$ONLY_MISSING" = x"true" -f "$INTERNAL_CA_NAME/client/$i.$SERVICE_DOMAIN.crt" ] && continue
+
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "$i.$SERVICE_DOMAIN"
 
 	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/$i.$SERVICE_DOMAIN"

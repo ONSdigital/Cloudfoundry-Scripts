@@ -60,18 +60,24 @@ eval DIRECTOR_PASSWORD="\$${ENV_PREFIX}director_password"
 INFO 'Setting Bosh deployment name'
 export ${ENV_PREFIX}bosh_deployment="$DEPLOYMENT_NAME"
 
-if [ ! -d "$SSL_DIR" -o ! -f "$SSL_YML" -o x"$REGENERATE_SSL" = x"true" -o x"$DELETE_SSL_CA" = x"true" ]; then
-	[ -d "$SSL_DIR" ] && rm -rf "$SSL_DIR"
+if [ x"$REGENERATE_SSL" = x"true" -o x"$DELETE_SSL_CA" = x"true" ] && [ -d "$SSL_DIR" ]; then
+	INFO 'Regenerating SSL CAs and keypairs'
+	rm -rf "$SSL_DIR"
+fi
 
+if [ ! -d "$SSL_DIR" ]; then
+	INFO 'Checking if we need to generate any additional SSL CAs and/or keypairs'
+else
 	INFO 'Generating SSL CAs and keypairs'
 	mkdir -p "$SSL_DIR"
-	cd "$SSL_DIR"
-
-	# $SSL_YML may contain spaces
-	OUTPUT_YML="$SSL_YML" "$BASE_DIR/generate-ssl.sh" "$domain_name" "$INTERNAL_DOMAIN"
-
-	cd -
 fi
+
+cd "$SSL_DIR"
+
+# $SSL_YML may contain spaces
+OUTPUT_YML="$SSL_YML" "$BASE_DIR/generate-ssl.sh" "$domain_name" "$INTERNAL_DOMAIN"
+
+cd -
 
 # Just in case
 if [ ! -f "$EXTERNAL_SSL_DIR/client/director.$domain_name.key" -o ! -f "$EXTERNAL_SSL_DIR/client/director.$domain_name.crt" ]; then
