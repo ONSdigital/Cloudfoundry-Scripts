@@ -152,7 +152,7 @@ for i in $INTERNAL_CONSUL_SSL_NAMES; do
 done
 
 for i in $INTERNAL_SIMPLE_SSL_NAMES; do
-	[ x"$ONLY_MISSING" = x"true" -a -f "$EXTERNAL_CA_NAME/client/$i.crt" ] && continue
+	[ x"$ONLY_MISSING" = x"true" -a -f "$INTERNAL_CA_NAME/client/$i.crt" ] && continue
 
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "$i"
 
