@@ -126,7 +126,7 @@ if [ x"$ONLY_MISSING" = x"false" -o ! -f "$INTERNAL_CA_NAME/client/cf-etcd.$SERV
 fi
 
 for i in $EXTERNAL_SSL_NAMES; do
-	[ x"$ONLY_MISSING" = x"true" -f "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME.crt" ] && continue
+	[ x"$ONLY_MISSING" = x"true" -a -f "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME.crt" ] && continue
 
 	"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "$i.$EXTERNAL_CA_NAME"
 
@@ -134,7 +134,7 @@ for i in $EXTERNAL_SSL_NAMES; do
 done
 
 for i in $EXTERNAL_SSH_NAMES; do
-	[ x"$ONLY_MISSING" = x"true" -f "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME.crt" ] && continue
+	[ x"$ONLY_MISSING" = x"true" -a -f "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME.crt" ] && continue
 
 	"$CA_TOOL" --ca-name "$EXTERNAL_CA_NAME" --name "$i.$EXTERNAL_CA_NAME" --generate-public-key --generate-public-key-ssh-fingerprint
 
@@ -144,7 +144,7 @@ for i in $EXTERNAL_SSH_NAMES; do
 done
 
 for i in $INTERNAL_CONSUL_SSL_NAMES; do
-	[ x"$ONLY_MISSING" = x"true" -f "$INTERNAL_CA_NAME/client/$i.$INTERNAL_CA_NAME.crt" ] && continue
+	[ x"$ONLY_MISSING" = x"true" -a -f "$INTERNAL_CA_NAME/client/$i.$INTERNAL_CA_NAME.crt" ] && continue
 
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "$i.$INTERNAL_CA_NAME"
 
@@ -152,7 +152,7 @@ for i in $INTERNAL_CONSUL_SSL_NAMES; do
 done
 
 for i in $INTERNAL_SIMPLE_SSL_NAMES; do
-	[ x"$ONLY_MISSING" = x"true" -f "$EXTERNAL_CA_NAME/client/$i.crt" ] && continue
+	[ x"$ONLY_MISSING" = x"true" -a -f "$EXTERNAL_CA_NAME/client/$i.crt" ] && continue
 
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "$i"
 
@@ -160,7 +160,7 @@ for i in $INTERNAL_SIMPLE_SSL_NAMES; do
 done
 
 for i in $INTERNAL_FULL_SSL_NAMES; do
-	[ x"$ONLY_MISSING" = x"true" -f "$INTERNAL_CA_NAME/client/$i.$INTERNAL_CA_NAME.crt" ] && continue
+	[ x"$ONLY_MISSING" = x"true" -a -f "$INTERNAL_CA_NAME/client/$i.$INTERNAL_CA_NAME.crt" ] && continue
 
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "$i.$INTERNAL_CA_NAME"
 
@@ -168,7 +168,7 @@ for i in $INTERNAL_FULL_SSL_NAMES; do
 done
 
 for i in $INTERNAL_SERVICE_SSL_NAMES; do
-	[ x"$ONLY_MISSING" = x"true" -f "$INTERNAL_CA_NAME/client/$i.$SERVICE_DOMAIN.crt" ] && continue
+	[ x"$ONLY_MISSING" = x"true" -a -f "$INTERNAL_CA_NAME/client/$i.$SERVICE_DOMAIN.crt" ] && continue
 
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "$i.$SERVICE_DOMAIN"
 
