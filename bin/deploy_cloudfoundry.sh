@@ -98,6 +98,8 @@ INFO 'Loading Bosh SSH config'
 eval export `prefix_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"`
 INFO 'Loading Bosh network configuration'
 eval export `prefix_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"`
+INFO 'Setting Bosh registry port'
+export "${ENV_PREFIX}registry_port"="${BOSH_REGISTRY_PORT:-6901}"
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"
