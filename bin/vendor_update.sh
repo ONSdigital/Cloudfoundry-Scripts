@@ -4,6 +4,17 @@ set -e
 
 echo -n TEST | grep -q -- '^-n TEST$' && ECHO=/bin/echo || ECHO=echo
 
+if [ -z "$FOOT_PROTECTION_DISABLED_AND_I_KNOW_WHY" ] && git branch | grep -Eq '^\* master'; then
+	$ECHO "You are on master"
+	$ECHO "Are you probably do not want to create copies of the vendored directories on master"
+	$ECHO "IF YOU REALLY WANT TO DO THIS AND YOU KNOW EXACTLY WHAT WILL HAPPEN THEN RERUN THIS"
+	$ECHO "SCRIPT AS FOLLOWS:"
+	$ECHO "$ export FOOT_PROTECTION_DISABLED_AND_I_KNOW_WHY=true $0 $@"
+
+	exit 1
+fi
+	
+
 for i in `ls vendor/`; do
 	$ECHO -n "Git update: $i? (y/N)"
 	read update
