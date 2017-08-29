@@ -136,7 +136,7 @@ for stack_file in $STACK_FILES; do
 
 	# Always renegerate the parameters file
 	INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
-	[ -z "$STACK_EXISTS" -o ! "$STACK_PARAMETERS" ] && generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
+	[ -z "$STACK_EXISTS" -o ! -f "$STACK_PARAMETERS" ] && generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
 
 	if [ -z "$STACK_EXISTS" ]; then
 		INFO "Creating Cloudformation stack: '$STACK_NAME'"
@@ -156,7 +156,7 @@ for stack_file in $STACK_FILES; do
 	fi
 
 	# Generate outputs
-	parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
+	[ -z "$STACK_EXISTS" -o ! -f "$STACK_OUTPUTS" ] && parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
 
 	unset STACK_EXISTS
 done

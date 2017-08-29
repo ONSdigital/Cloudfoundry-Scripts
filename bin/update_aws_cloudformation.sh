@@ -82,7 +82,7 @@ aws_change_set(){
 		INFO 'Waiting for Cloudformation stack to finish creation'
 		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
 
-		stack_changes='true'
+		local stack_changes=1
 	elif "$AWS" --output text --profile "$AWS_PROFILE" --query "StatusReason == 'The submitted information didn"\\\'"t contain changes. Submit different information to create a change set.'" \
 		cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name" | grep -Eq '^True$'; then
 
@@ -99,8 +99,7 @@ aws_change_set(){
 	fi
 
 
-	# Always regenerate outputs
-	parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
+	[ -n "$stack_changes" -o ! "$stack_outputs" ] && parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
 
 	return 0
 }
