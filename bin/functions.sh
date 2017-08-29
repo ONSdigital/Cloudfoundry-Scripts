@@ -245,7 +245,7 @@ check_cloudformation_stack(){
 	# Is there a better way to query?
 	if "$AWS" --profile "$AWS_PROFILE" --output text --query \
 		"StackSummaries[?StackName == '$stack_name' && (StackStatus == 'CREATE_COMPLETE' || StackStatus == 'UPDATE_COMPLETE' || StackStatus == 'UPDATE_ROLLBACK_COMPLETE')].[StackName]" \
-		cloudformation list-stacks | grep -q "^$stack_name$"; then
+		cloudformation list-stacks | grep -Eq "^$stack_name$"; then
 
  		INFO "Stack found: $stack_name"
 
@@ -256,7 +256,7 @@ check_cloudformation_stack(){
 		local rc=1
 	fi
 
-	return ${rc:-0}
+	return $rc
 }
 
 calculate_dns_ip(){
