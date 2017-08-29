@@ -110,7 +110,7 @@ for stack_file in $STACK_FILES; do
 	if [ -n "$SKIP_EXISTING" -a x"$SKIP_EXISTING" = x"true" ] && stack_exists "$STACK_NAME"; then
 		WARN "Stack already exists, skipping: $STACK_NAME"
 
-		continue
+		STACK_EXISTS=1
 	fi
 
 	[ -f "$AWS_PASSWORD_CONFIG_FILE" ] || echo '# AWS Passwords' >"$AWS_PASSWORD_CONFIG_FILE"
@@ -136,22 +136,24 @@ for stack_file in $STACK_FILES; do
 
 	# Always renegerate the parameters file
 	INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
-	generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
+	[ -z "$STACK_EXISTS" -o ! "$STACK_PARAMETERS" ] && generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
 
-	INFO "Creating Cloudformation stack: '$STACK_NAME'"
-	INFO 'Stack details:'
-	"$AWS" --profile "$AWS_PROFILE"\
-		--output table \
-		cloudformation create-stack \
-		--stack-name "$STACK_NAME" \
-		--template-url "$STACK_URL" \
-		--capabilities CAPABILITY_IAM \
-		--capabilities CAPABILITY_NAMED_IAM \
-		--on-failure DO_NOTHING \
-		--parameters "file://$STACK_PARAMETERS"
+	if [ -z "$STACK_EXISTS" ]; then
+		INFO "Creating Cloudformation stack: '$STACK_NAME'"
+		INFO 'Stack details:'
+		"$AWS" --profile "$AWS_PROFILE"\
+			--output table \
+			cloudformation create-stack \
+			--stack-name "$STACK_NAME" \
+			--template-url "$STACK_URL" \
+			--capabilities CAPABILITY_IAM \
+			--capabilities CAPABILITY_NAMED_IAM \
+			--on-failure DO_NOTHING \
+			--parameters "file://$STACK_PARAMETERS"
 
-	INFO "Waiting for Cloudformation stack to finish creation: '$STACK_NAME'"
-	"$AWS" --profile "$AWS_PROFILE" cloudformation wait stack-create-complete --stack-name "$STACK_NAME" || FATAL 'Failed to create Cloudformation stack'
+		INFO "Waiting for Cloudformation stack to finish creation: '$STACK_NAME'"
+		"$AWS" --profile "$AWS_PROFILE" cloudformation wait stack-create-complete --stack-name "$STACK_NAME" || FATAL 'Failed to create Cloudformation stack'
+	fi
 
 	# Generate outputs
 	parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
