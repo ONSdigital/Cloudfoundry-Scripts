@@ -158,14 +158,20 @@ for stack_file in $STACK_FILES; do
 	fi
 
 	# Generate outputs
-	[ -z "$STACK_EXISTS" -o ! -f "$STACK_OUTPUTS" ] && parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
+	if [ -z "$STACK_EXISTS" -o ! -f "$STACK_OUTPUTS" ]; then
+		parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
+
+		NEW_OUTPUTS=1
+	fi
 
 	unset STACK_EXISTS
 done
 
-INFO 'Configuring DNS settings'
-load_output_vars "$STACK_OUTPUTS_DIR" NONE vpc_cidr
-calculate_dns "$vpc_cidr" >"$STACK_OUTPUTS_DIR/outputs-dns.$STACK_OUTPUTS_SUFFIX"
+if [ -n "$NEW_OUTPUTS" ]; then
+	INFO 'Configuring DNS settings'
+	load_output_vars "$STACK_OUTPUTS_DIR" NONE vpc_cidr
+	calculate_dns "$vpc_cidr" >"$STACK_OUTPUTS_DIR/outputs-dns.$STACK_OUTPUTS_SUFFIX"
+fi
 
 # XXX
 # For bonus points we should really check the local SSH key fingerprint matches the AWS SSH key finger print
@@ -199,9 +205,13 @@ if [ x"$AWS_KEY_EXISTS" != x"true" ]; then
 	"$AWS" --profile "$AWS_PROFILE" ec2 import-key-pair --key-name "$BOSH_SSH_KEY_NAME" --public-key-material "$KEY_DATA"
 fi
 
-INFO 'Creating additional environment configuration'
-cat >"$BOSH_SSH_CONFIG" <<EOF
+if [ ! -f "$BOSH_SSH_CONFIG" ]; then
+	INFO 'Creating additional environment configuration'
+	cat >"$BOSH_SSH_CONFIG" <<EOF
 # Bosh SSH vars
 bosh_ssh_key_name='$BOSH_SSH_KEY_NAME'
 bosh_ssh_key_file='$BOSH_SSH_KEY_FILENAME_RELATIVE'
 EOF
+fi
+
+INFO 'AWS Deployment Complete'

@@ -99,7 +99,11 @@ aws_change_set(){
 	fi
 
 
-	[ -n "$stack_changes" -o ! "$stack_outputs" ] && parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
+	if [ -n "$stack_changes" -o ! "$stack_outputs" ]; then
+		parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
+
+		NEW_OUTPUTS=1
+	fi
 
 	return 0
 }
@@ -159,6 +163,10 @@ for _action in validate update; do
 	done
 done
 
-INFO 'Configuring DNS settings'
-load_output_vars "$STACK_OUTPUTS_DIR" NONE vpc_cidr
-calculate_dns "$vpc_cidr" >"$STACK_OUTPUTS_DIR/outputs-dns.$STACK_OUTPUTS_SUFFIX"
+if [ -n "$NEW_OUTPUTS" ]; then
+	INFO 'Configuring DNS settings'
+	load_output_vars "$STACK_OUTPUTS_DIR" NONE vpc_cidr
+	calculate_dns "$vpc_cidr" >"$STACK_OUTPUTS_DIR/outputs-dns.$STACK_OUTPUTS_SUFFIX"
+fi
+
+INFO 'AWS Deployment Update Complete'
