@@ -173,35 +173,52 @@ if [ -n "$NEW_OUTPUTS" ]; then
 	calculate_dns "$vpc_cidr" >"$STACK_OUTPUTS_DIR/outputs-dns.$STACK_OUTPUTS_SUFFIX"
 fi
 
-# XXX
-# For bonus points we should really check the local SSH key fingerprint matches the AWS SSH key finger print
-#
-# Provide the ability to optionally delete existing AWS SSH key
+# Check if we have an existing AWS SSH key that has the correct name
 "$AWS" --profile "$AWS_PROFILE" ec2 describe-key-pairs --key-names "$BOSH_SSH_KEY_NAME" >/dev/null 2>&1 && AWS_KEY_EXISTS='true'
 
-if [ x"$DELETE_AWS_SSH_KEY" = x"true" ]; then
-	"$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$BOSH_SSH_KEY_NAME"
-
-	AWS_KEY_EXISTS='false'
-fi
-
-if [ x"$REGENERATE_SSH_KEY" = x"true" ]; then
+if [ x"$REGENERATE_SSH_KEY" = x"true" -f "$BOSH_SSH_KEY_FILENAME" ]; then
+	INFO 'Deleting local SSH key'
 	rm -f "$BOSH_SSH_KEY_FILENAME" "$BOSH_SSH_KEY_FILENAME.pub"
-
-	[ x"$AWS_KEY_EXISTS" = x"true" ] && "$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$BOSH_SSH_KEY_NAME"
 fi
 
 # We don't have a local key, so we have to generate one
 if [ ! -f "$BOSH_SSH_KEY_FILENAME" ]; then
 	INFO 'Generating SSH key'
 	[ -n "$SECURE_SSH_KEY" ] && ssh-keygen -f "$BOSH_SSH_KEY_FILENAME" || ssh-keygen -f "$BOSH_SSH_KEY_FILENAME" -P ''
+
+	DELETE_AWS_SSH_KEY='true'
 fi
+
+if [ x"$AWS_KEY_EXISTS" = x"true" -a x"$DELETE_AWS_SSH_KEY" != x"true" ]; then
+	INFO 'Generating local SSH key fingerprint'
+	if ssh-keygen --help 2>&1 | grep -E '^\s*-E'; then
+		# We have a modern version of SSH
+		LOCAL_SSH_FINGERPRINT="`ssh-keygen -E md5 -lf "$BOSH_SSH_KEY_FILENAME.pub" | sed $SED_EXTENDED -e 's/^.*MD5:([^ ]+)( .*$)?$/\1/g'`"
+	else
+		# We have an old version of SSH
+		LOCAL_SSH_FINGERPRINT="`ssh-keygen -lf "$BOSH_SSH_KEY_FILENAME.pub" | awk '{print $2}'`"
+	fi
+
+	INFO 'Obtaining AWS SSH key fingerprint'
+	AWS_SSH_FINGERPRINT="`"$AWS" --profile "$AWS_PROFILE" --output text --query "KeyPairs[?KeyName == '$BOSH_SSH_KEY_NAME'].KeyFingerprint" ec2 describe-key-pairs --key-names "$BOSH_SSH_KEY_NAME"`"
+
+	INFO 'Checking if we need to reupload AWS SSH key'
+	[ x"$AWS_SSH_FINGERPRINT" != x"$LOCAL_SSH_FINGERPRINT" ] && DELETE_AWS_SSH_KEY='true'
+fi
+
+if [ x"$AWS_KEY_EXISTS" = x"true" -a x"$DELETE_AWS_SSH_KEY" = x"true" ]; then
+	INFO 'Deleting AWS SSH key'
+	"$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$BOSH_SSH_KEY_NAME"
+
+	AWS_KEY_EXISTS='false'
+fi
+
 
 [ -f "$BOSH_SSH_KEY_FILENAME" ] || FATAL "SSH key does not exist '$BOSH_SSH_KEY_FILENAME'"
 
 if [ x"$AWS_KEY_EXISTS" != x"true" ]; then
 	INFO "Uploading $BOSH_SSH_KEY_NAME to AWS"
-	KEY_DATA="`cat \"$BOSH_SSH_KEY_FILENAME.pub\"`"
+	KEY_DATA="`cat "$BOSH_SSH_KEY_FILENAME.pub"`"
 	"$AWS" --profile "$AWS_PROFILE" ec2 import-key-pair --key-name "$BOSH_SSH_KEY_NAME" --public-key-material "$KEY_DATA"
 fi
 
