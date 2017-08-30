@@ -56,14 +56,16 @@ if [ -z "$KEEP_SSH_KEY" -o x"$KEEP_SSH_KEY" = x"false" ] && [ -n "$SSH_KEY_EXIST
 fi
 
 # We use older options in find due to possible lack of -printf and/or -regex options
-for _file in `find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort -r` AWS-Bosh-preamble.json; do
-	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$_file"`"
+#for _file in `find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort -r` AWS-Bosh-preamble.json; do
+#	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$_file"`"
 
-	check_cloudformation_stack "$STACK_NAME" || continue
+for _stack in `"$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') && StackStatus != 'DELETE_COMPLETE'].StackName" cloudformation list-stacks |  sed -re 's/\t/\n/g' | sort -r | grep -E "$DEPLOYMENT_NAME-([0-9]+-.*|preamble$)" | awk '{if(/-preamble$/){ f=$0 }else{ print $0 } }END{ print f }'`; do
 
-	INFO "Deleting stack: $s"
-	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-stack --stack-name "$STACK_NAME"
+	check_cloudformation_stack "$_stack" || continue
+
+	INFO "Deleting stack: $_stack"
+	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-stack --stack-name "$_stack"
 
 	INFO 'Waiting for Cloudformation stack to be deleted'
-	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-delete-complete --stack-name "$STACK_NAME"
+	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-delete-complete --stack-name "$_stack"
 done
