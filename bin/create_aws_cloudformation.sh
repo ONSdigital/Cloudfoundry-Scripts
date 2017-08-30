@@ -158,7 +158,7 @@ for stack_file in $STACK_FILES; do
 	fi
 
 	# Generate outputs
-	if [ -z "$STACK_EXISTS" -o ! -f "$STACK_OUTPUTS" ]; then
+	if [ x"$UPDATE_OUTPUTS" = x"true" -o -z "$STACK_EXISTS" -o ! -f "$STACK_OUTPUTS" ]; then
 		parse_aws_cloudformation_outputs "$STACK_NAME" >"$STACK_OUTPUTS"
 
 		NEW_OUTPUTS=1

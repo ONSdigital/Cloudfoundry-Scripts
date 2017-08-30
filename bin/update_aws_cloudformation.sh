@@ -99,7 +99,7 @@ aws_change_set(){
 	fi
 
 
-	if [ -n "$stack_changes" -o ! "$stack_outputs" ]; then
+	if [ x"$UPDATE_OUTPUTS" = x"true" -o -n "$stack_changes" -o ! "$stack_outputs" ]; then
 		parse_aws_cloudformation_outputs "$stack_arn" >"$stack_outputs"
 
 		NEW_OUTPUTS=1
