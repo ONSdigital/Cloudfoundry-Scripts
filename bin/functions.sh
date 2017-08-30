@@ -465,6 +465,12 @@ load_outputs(){
 	INFO "Loading outputs"
 	for _o in `find "$outputs_dir/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")" | awk -F/ '{print $NF}' | sort`; do
 		DEBUG  "Loading '$_o'"
+		if ! grep -Eq '^[^#]' "$outputs_dir/$_o"; then
+			DEBUG "Not loading empty '$_o'"
+
+			continue
+		fi
+
 		eval export `prefix_vars "$outputs_dir/$_o" "$env_prefix"`
 	done
 }
