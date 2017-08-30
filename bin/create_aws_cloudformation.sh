@@ -213,7 +213,7 @@ if [ x"$AWS_KEY_EXISTS" = x"true" -a x"$DELETE_AWS_SSH_KEY" = x"true" ]; then
 	AWS_KEY_EXISTS='false'
 fi
 
-
+# Check if we have a valid key
 [ -f "$BOSH_SSH_KEY_FILENAME" ] || FATAL "SSH key does not exist '$BOSH_SSH_KEY_FILENAME'"
 
 if [ x"$AWS_KEY_EXISTS" != x"true" ]; then
