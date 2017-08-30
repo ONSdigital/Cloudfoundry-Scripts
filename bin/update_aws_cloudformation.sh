@@ -53,7 +53,7 @@ aws_change_set(){
 	fi
 
 	INFO "Creating Cloudformation stack change set: $stack_name"
-	INFO 'Stack details:'
+	INFO 'Changeset details:'
 	sh -c "'$AWS' --profile "$AWS_PROFILE" \
 		--output table \
 		cloudformation create-change-set \
