@@ -55,7 +55,7 @@ if [ -z "$KEEP_SSH_KEY" -o x"$KEEP_SSH_KEY" = x"false" ] && [ -n "$SSH_KEY_EXIST
 	"$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$bosh_ssh_key_name"
 fi
 
-for _stack in `"$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') && StackStatus != 'DELETE_COMPLETE'].StackName" cloudformation list-stacks |  sed -re 's/\t/\n/g' | sort -nr | awk -v prefix="$DEPLOMENT_NAME" 'BEGIN{ re=sprintf("%s-([0-9]+.*|preamble)$",prefix) }{ if($0 ~ re){ if(/-preamble$/){ f=$0 }else{ print $0 } } }END{ print f }'`; do
+for _stack in `"$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') && StackStatus != 'DELETE_COMPLETE'].StackName" cloudformation list-stacks |  sed -re 's/\t/\n/g' | sort -nr | awk -v prefix="$DEPLOYMENT_NAME" 'BEGIN{ re=sprintf("%s-([0-9]+.*|preamble)$",prefix) }{ if($0 ~ re){ if(/-preamble$/){ f=$0 }else{ print $0 } } }END{ print f }'`; do
 	check_cloudformation_stack "$_stack" || continue
 
 	INFO "Deleting stack: $_stack"
