@@ -42,7 +42,9 @@ if [ -n "$s3_buckets" ]; then
 	OLDIFS="$IFS"
 	IFS=","
 	for bucket in $s3_buckets; do
+		IFS="$OLDIFS"
 		empty_bucket "$bucket"
+		IFS=","
 	done
 	IFS="$OLDIFS"
 fi
