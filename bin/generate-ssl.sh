@@ -103,8 +103,8 @@ for _i in $EXTERNAL_CA_NAME $INTERNAL_CA_NAME; do
 	"$CA_TOOL" --new-ca --ca-name "$_i" --not-trusted
 done
 
-[ x"$ONLY_MISSING" = x"true" -a -f "$INTERNAL_CA_NAME/ca/$INTERNAL_CA_NAME.crt" ] || generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/ca/$INTERNAL_CA_NAME.crt" internal_ca
-[ x"$ONLY_MISSING" = x"true" -a -f "$EXTERNAL_CA_NAME/ca/$EXTERNAL_CA_NAME.crt" ] || generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/ca/$EXTERNAL_CA_NAME.crt" external_ca
+grep -Eq '^internal_ca_crt:' "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/ca/$INTERNAL_CA_NAME.crt" internal_ca
+grep -Eq '^external_ca_crt:' "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/ca/$EXTERNAL_CA_NAME.crt" external_ca
 
 if [ x"$ONLY_MISSING" = x"false" -o ! -f "$EXTERNAL_CA_NAME/client/ha-proxy.$SYSTEM_DOMAIN.crt" ]; then
 	# Public facing SSL
