@@ -195,5 +195,11 @@ bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE"
 INFO 'Deploying Bosh'
 bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE"
 
-INFO 'Cloudfoundry VMs'
+INFO 'Bosh VMs'
 "$BOSH" vms
+
+INFO 'Bosh Releases'
+"$BOSH" releases
+
+INFO 'Bosh Stemcells'
+"$BOSH" stemcells

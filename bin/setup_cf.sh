@@ -83,7 +83,7 @@ if [ x"$create_rabbitmq_networks" != x"false" ]; then
 fi
 
 if [ x"$create_elasti_cache_infrastructure" != x"false" ]; then
-	info 'setting up elasticache broker'
+	INFO 'Setting up ElastiCache broker'
 	IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-elasticache-broker.sh" "$DEPLOYMENT_NAME" elasticache-broker
 fi
 
