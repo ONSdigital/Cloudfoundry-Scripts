@@ -26,9 +26,9 @@ export BOSH_CA_CERT
 [ -z "${GATEWAY_HOST:-$BOSH_ENVIRONMENT}" ] && FATAL 'No gateway host available'
 
 INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
-"$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT"
+"$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT" >&2
 
 INFO 'Attempting to login'
-"$BOSH" log-in
+"$BOSH" log-in >&2
 
 "$BOSH" $@

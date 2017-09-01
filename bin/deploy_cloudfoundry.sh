@@ -146,10 +146,10 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 fi
 
 INFO 'Pointing Bosh at newly deployed Bosh'
-"$BOSH" alias-env $BOSH_TTY_OPT -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT"
+"$BOSH" alias-env $BOSH_TTY_OPT -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT" >&2
 
 INFO 'Attempting to login'
-"$BOSH" log-in $BOSH_TTY_OPT
+"$BOSH" log-in $BOSH_TTY_OPT >&2
 
 if [ ! -f "$FULL_STATIC_IPS_YML" -o "$REINTERPOLATE_FULL_STATIC_IPS" = x"true" ]; then
 	cat >"$BOSH_FULL_STATIC_IPS_YML" <<EOF
@@ -198,8 +198,3 @@ bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE"
 INFO 'Bosh VMs'
 "$BOSH" vms
 
-INFO 'Bosh Releases'
-"$BOSH" releases
-
-INFO 'Bosh Stemcells'
-"$BOSH" stemcells

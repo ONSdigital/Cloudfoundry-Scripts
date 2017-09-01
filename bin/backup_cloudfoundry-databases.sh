@@ -27,10 +27,10 @@ export BOSH_CA_CERT
 installed_bin bosh
 
 INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
-"$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT"
+"$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT" >&2
 
 INFO 'Attempting to login'
-"$BOSH" log-in
+"$BOSH" log-in >&2
 
 # Bosh prints everything out to stdout, so we need
 for _e in `"$BOSH" errands | grep -E '^backup-'`; do

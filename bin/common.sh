@@ -69,6 +69,8 @@ EOF
 	CF_CREDENTIALS="$DEPLOYMENT_DIR/cf-credentials-admin.sh"
 	NETWORK_CONFIG_FILE="$DEPLOYMENT_DIR/networks.sh"
 	PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/passwords.sh"
+	RELEASE_CONFIG_FILE="$DEPLOYMENT_DIR/release-config.sh"
+	STEMCELL_CONFIG_FILE="$DEPLOYMENT_DIR/stemcells-config.sh"
 
 	BOSH_LITE_STATIC_IPS_YML="$DEPLOYMENT_DIR/bosh-lite-static-ips.yml"
 	BOSH_FULL_STATIC_IPS_YML="$DEPLOYMENT_DIR/bosh-full-static-ips.yml"
