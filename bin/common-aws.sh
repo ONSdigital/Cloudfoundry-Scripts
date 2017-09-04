@@ -1,6 +1,6 @@
 
 
-DEPLOYMENT_NAME="$1"
+DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 [ -n "$1" ] && shift
 
 # Allow script to be used by non-AWS Cloudformation deployment steps
