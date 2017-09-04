@@ -2,17 +2,17 @@
 FATAL(){
 	# RHEL echo allows -e (interpret escape sequences).
 	# Debian/Ubuntu/et al doesn't as it uses 'dash' as its default shell
-	"$ECHO" -e "`_date`${FATAL_COLOUR}FATAL $@$NORMAL_COLOUR" >&2
+	"$ECHO" -e "`_date` ${FATAL_COLOUR}FATAL $@$NORMAL_COLOUR" >&2
 
 	exit 1
 }
 
 WARN(){
-	"$ECHO" -e "`_date`${WARN_COLOUR}WARN $@$NORMAL_COLOUR" >&2
+	"$ECHO" -e "`_date` ${WARN_COLOUR}WARN $@$NORMAL_COLOUR" >&2
 }
 
 INFO(){
-	"$ECHO" -e "`_date`${INFO_COLOUR}INFO $@$NORMAL_COLOUR" >&2
+	"$ECHO" -e "`_date` ${INFO_COLOUR}INFO $@$NORMAL_COLOUR" >&2
 }
 
 _date(){
