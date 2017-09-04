@@ -17,7 +17,7 @@ record_version(){
 
 	[ -z "$var_name" ] && FATAL 'Missing parameters'
 
-	awk -v item_name="$item_name" -v var_name="$var_name" '{if($1 == item_name){ gsub("\*$","",$2); printf("%s=\"%s\"\n",var_name,$2)}}'
+	awk -v item_name="$item_name" -v var_name="$var_name" '{if($1 == item_name){ gsub("\*$","",$2); printf("%s=\"%s_VERSION\"\n",var_name,$2)}}'
 }
 
 # https://bosh.io/releases/github.com/cloudfoundry/cf-release
@@ -33,7 +33,7 @@ CF_RABBITMQ_VERSION="${6:-$CF_RABBITMQ_VERSION}"
 
 # Stemcell
 # https://bosh.io/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-STEMCELL_URL="${STEMCELL_URL:-https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent}"
+BOSH_STEMCELL_URL="${BOSH_STEMCELL_URL:-https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent}"
 
 # Releases
 CF_URL="${CF_URL:-https://bosh.io/d/github.com/cloudfoundry/cf-release}"
@@ -44,7 +44,7 @@ CF_RABBITMQ_URL="${CF_RABBITMQ_URL:-https://bosh.io/d/github.com/pivotal-cf/cf-r
 #CF_RABBITMQ_BROKER_URL="${CF_RABBITMQ_URL:-https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-broker}"
 
 BOSH_RELEASES='CF DIEGO GARDEN_RUNC CFLINUXFS2 CF_RABBITMQ'
-BOSH_STEMCELLS='STEMCELL'
+BOSH_STEMCELLS='BOSH_STEMCELL'
 
 BOSH_UPLOADS="$BOSH_STEMCELLS $BOSH_RELEASES"
 
@@ -89,7 +89,7 @@ INFO 'Bosh Stemcells'
 
 # Name						Version	OS		CPI	CID                 
 # bosh-aws-xen-hvm-ubuntu-trusty-go_agent	3445.7*	ubuntu-trusty	-	ami-fbaf1a94 light
-for _b in $BOSH_RELEASES; do
+for _b in $BOSH_STEMCELLS; do
 	name="`echo $_b | tr '[[:upper:]]' '[[:lower:]]'`"
 	url="\$${_b}_URL"
 	stemcell="`basename "$url"`"
