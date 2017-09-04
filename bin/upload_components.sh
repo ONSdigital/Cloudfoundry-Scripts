@@ -7,6 +7,8 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
+DEPLOYMENT_NAME="$1"
+
 . "$BASE_DIR/common.sh"
 
 record_version(){

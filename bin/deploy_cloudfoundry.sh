@@ -169,7 +169,7 @@ INFO 'Setting CloudConfig'
 	--vars-store="$BOSH_FULL_VARS_FILE"
 
 # Upload Stemcells & releases
-[ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ] && "$BASE_DIR/upload_components.sh"
+[ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ] && "$BASE_DIR/upload_components.sh" "$DEPLOYMENT_NAME"
 
 # Allow running of a custom script that can do other things (eg upload a local release)
 [ -f "../pre_deploy.sh" -a -x "../pre_deploy.sh" ] && ../pre_deploy.sh
