@@ -25,6 +25,7 @@ CACHE_DIR="$BASE_DIR/../../work"
 DEPLOYMENT_BASE_DIR="$BASE_DIR/../../deployment"
 DEPLOYMENT_BASE_DIR_RELATIVE='deployment'
 BROKER_CONFIG_DIR="$BASE_DIR/../../configs"
+TOP_LEVEL_DIR="$BASE_DIR/../.."
 
 STACK_TEMPLATES_DIRNAME="Templates"
 
@@ -35,6 +36,7 @@ STACK_TEMPLATES_DIRNAME="Templates"
 findpath BASE_DIR "$BASE_DIR"
 findpath CACHE_DIR "$CACHE_DIR"
 findpath DEPLOYMENT_BASE_DIR "$DEPLOYMENT_BASE_DIR"
+findpath TOP_LEVEL_DIR "$TOP_LEVEL_DIR"
 [ -d "$BROKER_CONFIG_DIR" ] && findpath BROKER_CONFIG_DIR "$BROKER_CONFIG_DIR"
 
 # Set prefix for vars that Bosh will suck in

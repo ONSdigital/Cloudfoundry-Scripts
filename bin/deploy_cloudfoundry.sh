@@ -172,7 +172,7 @@ INFO 'Setting CloudConfig'
 [ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ] && "$BASE_DIR/upload_components.sh" "$DEPLOYMENT_NAME"
 
 # Allow running of a custom script that can do other things (eg upload a local release)
-[ -f "pre_deploy.sh" -a -x "pre_deploy.sh" ] && pre_deploy.sh
+[ -f "$TOP_LEVEL_DIR/pre_deploy.sh" -a -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] && "$TOP_LEVEL_DIR/pre_deploy.sh"
 
 if [ x"$NORUN_BOSH_PREAMBLE" != x"true" ] && [ x"$RERUN_BOSH_PREAMBLE" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
 	INFO 'Checking Bosh preamble dry-run'
