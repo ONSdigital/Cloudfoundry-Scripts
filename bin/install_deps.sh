@@ -2,7 +2,7 @@
 #
 # 
 
-set -ex
+set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
@@ -65,7 +65,7 @@ if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
 fi
 
 # If running via Jenkins we can install awscli via pyenv
-if [ -z "$NO_AWS" -a -n "$INSTALL_AWS" ] && ! which aws >/dev/null 2>&1; then
+if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && ! which aws >/dev/null 2>&1; then
 	which pip${PIP_VERSION_SUFFIX:-3} >/dev/null 2>&1 || FATAL "No 'pip' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'?  Or pyenv from within Jenkins?"
 
 	pip${PIP_VERSION_SUFFIX:-3}  install "awscli" --user
