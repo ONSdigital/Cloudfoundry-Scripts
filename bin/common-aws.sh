@@ -42,7 +42,7 @@ STACK_TEMPLATES_DIR="$CLOUDFORMATION_DIR/$STACK_TEMPLATES_DIRNAME"
 [ -z "$CLOUDFORMATION_DIR" ] && FATAL 'No configuration directory supplied'
 [ -d "$CLOUDFORMATION_DIR" ] || FATAL 'Configuration directory does not exist'
 
-if [ -z "$IGNORE_MISSING_CONFIG" ]; then
+if [ -z "$IGNORE_MISSING_CONFIG" -a -z "$NON_AWS_DEPLOY" ]; then
 	[ -z "$AWS_CONFIG_PREFIX" ] && FATAL 'No installation configuration provided'
 
 	[ -f "$STACK_PREAMBLE_FILE" ] || FATAL "Cloudformation stack preamble '$STACK_PREAMBLE_FILE' does not exist"
