@@ -31,7 +31,7 @@ CF_RABBITMQ_VERSION="${6:-$CF_RABBITMQ_VERSION}"
 
 # Stemcell
 # https://bosh.io/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-BOSH_STEMCELL="${STEMCELL_URL:-https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent}"
+STEMCELL_URL="${STEMCELL_URL:-https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent}"
 
 # Releases
 CF_URL="${CF_URL:-https://bosh.io/d/github.com/cloudfoundry/cf-release}"
@@ -54,7 +54,7 @@ for i in $BOSH_UPLOADS; do
 	[ -n "$version" ] && url="$base_url?v=$version" || url="$base_url"
 
 	# Determine upload type
-	echo "$i" | grep -Eq '^RELEASE' && UPLOAD_TYPE=release || UPLOAD_TYPE=stemcell
+	echo "$i" | grep -Eq 'STEMCELL' && UPLOAD_TYPE=stemcell || UPLOAD_TYPE=release
 
 	INFO "Starting upload of $i"
 	"$BOSH" upload-$UPLOAD_TYPE --fix "$url"
