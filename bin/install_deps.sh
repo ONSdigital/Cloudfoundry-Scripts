@@ -64,8 +64,8 @@ if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
 	CHANGES=1
 fi
 
-# If running via Jenkins we can install awscli/azure-cli via pyenv
-if [ -n "$INSTALL_AWS" ]; then
+# If running via Jenkins we can install awscli via pyenv
+if [ -n "$INSTALL_AWS" ] && ! which aws >/dev/null 2>&1; then
 	which pip${PIP_VERSION_SUFFIX:-3} >/dev/null 2>&1 || FATAL "No 'pip' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'?  Or pyenv from within Jenkins?"
 
 	pip${PIP_VERSION_SUFFIX:-3}  install "awscli" --user
