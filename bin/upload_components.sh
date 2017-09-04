@@ -17,7 +17,7 @@ record_version(){
 
 	[ -z "$var_name" ] && FATAL 'Missing parameters'
 
-	awk -v item_name="$item_name" -v var_name="$var_name" 'if($1 == item_name){ gsub("\*$","",$2); printf("%s=\"%s\"\n",var_name,$2) }'
+	awk -v item_name="$item_name" -v var_name="$var_name" '{if($1 == item_name){ gsub("\*$","",$2); printf("%s=\"%s\"\n",var_name,$2)}}'
 }
 
 # https://bosh.io/releases/github.com/cloudfoundry/cf-release
