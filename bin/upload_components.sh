@@ -52,8 +52,8 @@ if [ x"$USE_EXISTING_VERSIONS" != x"false" ]; then
 	[ -f "$RELEASE_CONFIG_FILE" ] && . "$RELEASE_CONFIG_FILE"
 	[ -f "$STEMCELL_CONFIG_FILE" ] && . "$STEMCELL_CONFIG_FILE"
 else
-	[ -f "$RELEASE_CONFIG_FILE" ] && rm "$RELEASE_CONFIG_FILE"
-	[ -f "$STEMCELL_CONFIG_FILE" ] && rm "$STEMCELL_CONFIG_FILE"
+	[ -f "$RELEASE_CONFIG_FILE" ] && echo '# Cloudfoundry Releases' >"$RELEASE_CONFIG_FILE"
+	[ -f "$STEMCELL_CONFIG_FILE" ] && echo '# Cloudfoundry Stemcells' >"$STEMCELL_CONFIG_FILE"
 fi
 	
 
