@@ -138,8 +138,9 @@ fi
 
 aws_change_set "$DEPLOYMENT_NAME-preamble" "$STACK_PREAMBLE_URL" "$STACK_PREAMBLE_OUTPUTS"
 
+
 INFO 'Parsing preamble outputs'
-eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
+. "$STACK_PREAMBLE_OUTPUTS"
 
 INFO 'Copying templates to S3'
 "$AWS" --profile "$AWS_PROFILE" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'

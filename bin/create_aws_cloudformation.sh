@@ -71,7 +71,8 @@ parse_aws_cloudformation_outputs "$DEPLOYMENT_NAME-preamble" >"$STACK_PREAMBLE_O
 
 [ -f "$STACK_PREAMBLE_OUTPUTS" ] || FATAL "No preamble outputs available: $STACK_PREAMBLE_OUTPUTS"
 
-eval `prefix_vars "$STACK_PREAMBLE_OUTPUTS"`
+INFO "Loading: $STACK_PREAMBLE_OUTPUTS"
+. "$STACK_PREAMBLE_OUTPUTS"`
 
 INFO 'Copying templates to S3'
 "$AWS" --profile "$AWS_PROFILE" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'

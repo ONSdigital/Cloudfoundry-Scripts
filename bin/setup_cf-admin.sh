@@ -15,9 +15,10 @@ DONT_SKIP_SSL_VALIDATION="$5"
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
 
+
 eval export `prefix_vars "$PASSWORD_CONFIG_FILE"`
 
-[ -f "$CF_CREDENTIALS" ] && eval `prefix_vars "$CF_CREDENTIALS"`
+[ -f "$CF_CREDENTIALS" ] && . "$CF_CREDENTIALS"
 
 UAA_ADMIN_USERNAME="${UAA_ADMIN_USERNAME:-admin}"
 
@@ -25,7 +26,7 @@ UAA_ADMIN_USERNAME="${UAA_ADMIN_USERNAME:-admin}"
 [ -z "$EMAIL" ] && FATAL 'No email address supplied'
 [ -z "$CF_CREDENTIALS" ] && FATAL 'Unknown CF credentials filename'
 
-# Generate config if it doesn't exist, or if any of the values have changed
+# Generate config if it does not exist, or if any of the values have changed
 if [ ! -f "$CF_CREDENTIALS" ] ||
 	[ -n "$USERNAME" -a -n "$CF_ADMIN_USERNAME" -a x"$CF_ADMIN_USERNAME" != x"$USERNAME" ] ||
 	[ -n "$EMAIL" -a -n "$CF_ADMIN_EMAIL" -a x"$CF_ADMIN_EMAIL" != x"$EMAIL" ] ||
@@ -34,7 +35,7 @@ if [ ! -f "$CF_CREDENTIALS" ] ||
 	# Ensure we have some sort of password
 	[ -z "$PASSWORD" -o -z "$CF_ADMIN_PASSWORD" ] && NEW_PASSWORD="`generate_password`" ||  NEW_PASSWORD="${PASSWORD:-$CF_ADMIN_PASSWORD}"
 
-	# We shouldn't generate this if it alread
+	# We should not generate this if it alread
 	cat >"$CF_CREDENTIALS" <<EOF
 # Cloudfoundry credentials
 CF_ADMIN_EMAIL='$EMAIL'
@@ -42,12 +43,12 @@ CF_ADMIN_USERNAME='$USERNAME'
 CF_ADMIN_PASSWORD='$NEW_PASSWORD'
 EOF
 
-	NEW_CREDENTIALS=1
+	# Re-parse CF admin credentials
+	. "$CF_CREDENTIALS"
 
+	NEW_CREDENTIALS=1
 fi
 
-# Re-parse CF admin credentials
-eval `prefix_vars "$CF_CREDENTIALS"`
 
 [ -n "$DONT_SKIP_SSL_VALIDATION" ] || UAA_EXTRA_OPTS='--skip-ssl-validation'
 

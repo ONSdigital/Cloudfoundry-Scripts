@@ -22,7 +22,7 @@ installed_bin cf
 eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 eval export `prefix_vars "$PASSWORD_CONFIG_FILE"`
 eval export `prefix_vars "$CF_CREDENTIALS"`
-eval export `prefix_vars "$BOSH_SSH_CONFIG"`
+. "$BOSH_SSH_CONFIG"
 
 [ -f "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh" ] && eval export `prefix_vars "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh"`
 

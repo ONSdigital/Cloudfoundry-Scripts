@@ -29,11 +29,13 @@ load_outputs "$STACK_OUTPUTS_DIR"
 if [ -n "$BOSH_SSH_CONFIG" -a -f "$BOSH_SSH_CONFIG" ]; then
 	SSH_KEY_EXISTS=1
 
-	eval export `prefix_vars "$BOSH_SSH_CONFIG"`
+	INFO "Loading: $BOSH_SSH_CONFIG"
+	. "$STACK_PREAMBLE_OUTPUTS"
 fi
 
-if [ -f "$STACK_OUTPUTS_DIR/outputs-preamble.sh" ]; then
-	eval `prefix_vars "$STACK_OUTPUTS_DIR/outputs-preamble.sh"`
+if [ -f "$STACK_PREAMBLE_OUTPUTS" ]; then
+	INFO "Loading: $STACK_PREAMBLE_OUTPUTS"
+	. "$STACK_PREAMBLE_OUTPUTS"
 
 	empty_bucket "$templates_bucket_name"
 fi
