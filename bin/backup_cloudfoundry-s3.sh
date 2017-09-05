@@ -30,13 +30,27 @@ load_outputs "$STACK_OUTPUTS_DIR"
 
 OLDIFS="$IFS"
 IFS=","
-for _s3 in $s3_bucket_resource_names; do
-	var_name="`echo $_s3 | lowercase_aws`"
+for _bucket in $s3_bucket_resource_names; do
+	var_name="`echo $_bucket | lowercase_aws`"
 
 	eval s3_bucket="\$$var_name"
 
+	for _ignore in $S3_BUCKET_IGNORES; do
+		if [ x"$_ignore" = x"$_bucket" ]; then
+			skip=1
+
+			continue
+		fi
+	done
+
+	if [ -n "$skip" ]; then
+		unset skip
+
+		continue
+	fi
+
 	if ! [ -n "$s3_bucket" -a x"$s3_bucket" != x"\$" ]; then
-		WARN "Unable to find bucket name for $_s3"
+		WARN "Unable to find bucket name for $_bucket"
 
 		error=1
 
@@ -45,14 +59,14 @@ for _s3 in $s3_bucket_resource_names; do
 
 	if [ x"$ACTION" = x"backup" ]; then
 		src="s3://$s3_bucket"
-		dst="$SRC_OR_DST/$_s3"
+		dst="$SRC_OR_DST/$_bucket"
 
 		if ! s3_location "$dst" && [ ! -d "$dst" ]; then
 			mkdir -p "$dst"
 		fi
 
 	elif [ x"$ACTION" = x"restore" ]; then
-		src="$SRC_OR_DST/$_s3"
+		src="$SRC_OR_DST/$_bucket"
 		dst="s3://$s3_bucket"
 
 		if ! s3_location "$src" && [ ! -d "$src" ]; then
