@@ -55,7 +55,7 @@ INFO 'Uploading Bosh release(s)'
 for i in $BOSH_UPLOADS; do
 	eval base_url="\$${i}_URL"
 	eval version="\$${i}_VERSION"
-	COMPONENT="`basename $i | sed $SED_EXTENDED -e 's/-release//g'`"
+	COMPONENT="`basename $base_url | sed $SED_EXTENDED -e 's/-release//g'`"
 
 	[ -n "$version" ] && url="$base_url?v=$version" || url="$base_url"
 
