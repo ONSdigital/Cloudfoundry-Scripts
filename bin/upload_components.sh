@@ -78,7 +78,7 @@ for i in $BOSH_UPLOADS; do
 	INFO "Starting upload of $i"
 	"$BOSH" upload-$UPLOAD_TYPE --fix "$url"
 
-	[ x"$USE_EXISTING_VERSIONS" = x"true" ] && "$BOSH" $TYPES | record_version "$COMPONENT" "$i" >>"$OUTPUT_FILE"
+	[ x"$USE_EXISTING_VERSIONS" = x"true" ] || "$BOSH" $TYPES | record_version "$COMPONENT" "$i" >>"$OUTPUT_FILE"
 
 	unset base_url version
 done
