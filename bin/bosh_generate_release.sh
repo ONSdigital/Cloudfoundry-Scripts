@@ -37,6 +37,10 @@ INFO 'Attempting to login'
 
 cd "$RELEASE_DIR"
 
+# Ensure required dirs & files exist
+[ -d "config" ] || mkdir config
+[ -f config/blobs.yml ] || toucxh config/blobs.yml
+
 if [ -n "$3" ]; then
 	shift 2
 
