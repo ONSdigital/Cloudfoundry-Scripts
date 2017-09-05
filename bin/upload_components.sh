@@ -17,7 +17,7 @@ record_version(){
 
 	[ -z "$var_name" ] && FATAL 'Missing parameters'
 
-	awk -v item_name="$item_name" -v var_name="$var_name" '{if($1 == item_name){ gsub("\*$","",$2); printf("%s=\"%s_VERSION\"\n",var_name,$2)}}'
+	awk -v item_name="$item_name" -v var_name="$var_name" '{if($1 == item_name){ gsub("\*$","",$2); printf("%s_VERSION=\"%s\"\n",var_name,$2)}}'
 }
 
 # https://bosh.io/releases/github.com/cloudfoundry/cf-release
@@ -48,18 +48,32 @@ BOSH_STEMCELLS='BOSH_STEMCELL'
 
 BOSH_UPLOADS="$BOSH_STEMCELLS $BOSH_RELEASES"
 
+[ -f "$RELEASE_CONFIG_FILE" ] && rm "$RELEASE_CONFIG_FILE"
+[ -f "$RELEASE_CONFIG_FILE" ] && rm "$STEMCELL_CONFIG_FILE"
+
 INFO 'Uploading Bosh release(s)'
 for i in $BOSH_UPLOADS; do
 	eval base_url="\$${i}_URL"
 	eval version="\$${i}_VERSION"
+	COMPONENT="`basename $i | sed $SED_EXTENDED -e 's/-release//g'`"
 
 	[ -n "$version" ] && url="$base_url?v=$version" || url="$base_url"
 
 	# Determine upload type
-	echo "$i" | grep -Eq 'STEMCELL' && UPLOAD_TYPE=stemcell || UPLOAD_TYPE=release
+	if echo "$i" | grep -Eq 'STEMCELL'; then
+		UPLOAD_TYPE=stemcell
+		TYPES=stemcells
+		OUTPUT_FILE="$STEMCELL_CONFIG_FILE"
+	else
+		UPLOAD_TYPE=release
+		TYPES=releases
+		OUTPUT_FILE="$RELEASE_CONFIG_FILE"
+	fi
 
 	INFO "Starting upload of $i"
 	"$BOSH" upload-$UPLOAD_TYPE --fix "$url"
+
+	"$BOSH" $TYPES | record_version "$COMPONENT" "$i" >>"$OUTPUT_FILE"
 
 	unset base_url version
 done
@@ -70,30 +84,5 @@ echo
 INFO 'Bosh Releases'
 "$BOSH" releases
 
-# Name                  Version   	Commit Hash  
-# cf			272*		5b13d444+    
-# cf-rabbitmq		226.0.0*	d6d9ba21+    
-# cflinuxfs2		1.151.0*	4de03213+    
-# diego			1.25.3*		dc59f5d      
-# garden-runc		1.9.3*		55956f4      
-# postgresql-databases	0+dev.2*	89d48db+     
-# ~			0+dev.1		89d48db+     
-for _b in $BOSH_RELEASES; do
-	name="`echo $_b | tr '[[:upper:]]' '[[:lower:]]'`"
-
-	"$BOSH" releases | record_version "$name" "$_b"
-done >"$RELEASE_CONFIG_FILE"
-
 INFO 'Bosh Stemcells'
 "$BOSH" stemcells
-
-# Name						Version	OS		CPI	CID                 
-# bosh-aws-xen-hvm-ubuntu-trusty-go_agent	3445.7*	ubuntu-trusty	-	ami-fbaf1a94 light
-for _b in $BOSH_STEMCELLS; do
-	name="`echo $_b | tr '[[:upper:]]' '[[:lower:]]'`"
-	url="\$${_b}_URL"
-	stemcell="`basename "$url"`"
-
-	"$BOSH" stemcells | record_version "$stemcell" "$_b"
-done >"$STEMCELL_CONFIG_FILE"
-
