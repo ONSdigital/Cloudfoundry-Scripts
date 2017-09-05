@@ -48,14 +48,13 @@ BOSH_STEMCELLS='BOSH_STEMCELL'
 
 BOSH_UPLOADS="$BOSH_STEMCELLS $BOSH_RELEASES"
 
-if [ x"$USE_EXISTING_VERSIONS" != x"false" ]; then
+if [ x"$USE_EXISTING_VERSIONS" = x"true" ]; then
 	[ -f "$RELEASE_CONFIG_FILE" ] && . "$RELEASE_CONFIG_FILE"
 	[ -f "$STEMCELL_CONFIG_FILE" ] && . "$STEMCELL_CONFIG_FILE"
 else
 	[ -f "$RELEASE_CONFIG_FILE" ] && echo '# Cloudfoundry Releases' >"$RELEASE_CONFIG_FILE"
 	[ -f "$STEMCELL_CONFIG_FILE" ] && echo '# Cloudfoundry Stemcells' >"$STEMCELL_CONFIG_FILE"
 fi
-	
 
 INFO 'Uploading Bosh release(s)'
 for i in $BOSH_UPLOADS; do
@@ -79,7 +78,7 @@ for i in $BOSH_UPLOADS; do
 	INFO "Starting upload of $i"
 	"$BOSH" upload-$UPLOAD_TYPE --fix "$url"
 
-	"$BOSH" $TYPES | record_version "$COMPONENT" "$i" >>"$OUTPUT_FILE"
+	[ x"$USE_EXISTING_VERSIONS" = x"true" ] && "$BOSH" $TYPES | record_version "$COMPONENT" "$i" >>"$OUTPUT_FILE"
 
 	unset base_url version
 done
