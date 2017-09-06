@@ -59,6 +59,7 @@ for _bucket in $s3_bucket_resource_names; do
 	fi
 
 	if [ x"$ACTION" = x"backup" ]; then
+		log_name='Backup'
 		src="s3://$s3_bucket"
 		dst="$SRC_OR_DST/$_bucket"
 
@@ -67,6 +68,7 @@ for _bucket in $s3_bucket_resource_names; do
 		fi
 
 	elif [ x"$ACTION" = x"restore" ]; then
+		log_name='Restore'
 		src="$SRC_OR_DST/$_bucket"
 		dst="s3://$s3_bucket"
 
@@ -87,4 +89,4 @@ for _bucket in $s3_bucket_resource_names; do
 done
 IFS="$OLDIFS"
 
-"${LOG_LEVEL:-INFO}" "Backup ${STATE:-Successful}"
+"${LOG_LEVEL:-INFO}" "$log_name ${STATE:-Successful}"
