@@ -10,8 +10,6 @@ DEPLOYMENT_NAME="$1"
 
 . "$BASE_DIR/common.sh"
 
-set -x
-
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
 [ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"
 [ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh config does not exist: $BOSH_DIRECTOR_CONFIG"

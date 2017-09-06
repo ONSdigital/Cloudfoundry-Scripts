@@ -21,7 +21,6 @@ for i in 1 2 3; do
 done
 
 . "$BASE_DIR/common-aws.sh"
-set -x
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
 [ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"
