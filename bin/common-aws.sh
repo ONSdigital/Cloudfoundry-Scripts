@@ -58,10 +58,10 @@ STACK_PREAMBLE_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-preamble.sh"
 
 if [ -z "$AWS_REGION" ]; then
 	AWS_REGION="$DEFAULT_AWS_REGION"
-else
-	# Do we need to update the config?
-	aws_region "$AWS_REGION"
 fi
+
+# Do we need to update the config?
+aws_region "$AWS_REGION"
 
 # Do we need to update credentials?
 [ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ] && aws_credentials "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
