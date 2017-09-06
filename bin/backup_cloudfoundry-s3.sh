@@ -27,6 +27,8 @@ done
 
 load_outputs "$STACK_OUTPUTS_DIR"
 
+[ -n "$aws_region" ] && aws_region "$aws_region"
+
 OLDIFS="$IFS"
 IFS=","
 for _bucket in $s3_bucket_resource_names; do
