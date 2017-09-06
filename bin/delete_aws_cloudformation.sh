@@ -61,6 +61,9 @@ if [ -z "$KEEP_SSH_KEY" -o x"$KEEP_SSH_KEY" = x"false" ] && [ -n "$SSH_KEY_EXIST
 	"$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$bosh_ssh_key_name"
 fi
 
+# This is slight stupid when there are sub-Cloudformation stacks, as these get deleted as well. We could filter them out, but
+# unless our filtering is very strict & complicated it could incorrectly filter out stacks we want to delete. So, rather than
+# do that, we just delete everything we come across
 for _stack in `"$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') && StackStatus != 'DELETE_COMPLETE'].StackName" cloudformation list-stacks |  sed -re 's/\t/\n/g' | sort -nr | awk -v prefix="$DEPLOYMENT_NAME" 'BEGIN{ re=sprintf("%s-([0-9]+.*|preamble)$",prefix) }{ if($0 ~ re){ if(/-preamble$/){ f=$0 }else{ print $0 } } }END{ print f }'`; do
 	check_cloudformation_stack "$_stack" || continue
 
