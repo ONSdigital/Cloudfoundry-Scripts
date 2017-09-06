@@ -26,6 +26,8 @@ empty_bucket(){
 
 load_outputs "$STACK_OUTPUTS_DIR"
 
+[ -n "$aws_region" ] && aws_region "$aws_region"
+
 if [ -n "$BOSH_SSH_CONFIG" -a -f "$BOSH_SSH_CONFIG" ]; then
 	SSH_KEY_EXISTS=1
 
