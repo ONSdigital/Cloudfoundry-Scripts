@@ -117,6 +117,7 @@ findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 # Bosh doesn't seem to be able to handle templating (eg ((variable))) and variables files at the same time, so we need to expand the variables and then use
 # the output when we do a bosh create-env/deploy
 if [ ! -f "$LITE_STATIC_IPS_YML" -o "$REINTERPOLATE_LITE_STATIC_IPS" = x"true" ]; then
+	# Create the initial YML header
 	cat >"$BOSH_LITE_STATIC_IPS_YML" <<EOF
 ---
 EOF
@@ -142,6 +143,7 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 		FATAL 'Bosh lite deployment failed'
 	fi
 
+	# We may not have created a new Bosh environment
 	NEW_BOSH_ENV='true'
 fi
 
@@ -152,6 +154,7 @@ INFO 'Attempting to login'
 "$BOSH" log-in $BOSH_TTY_OPT >&2
 
 if [ ! -f "$FULL_STATIC_IPS_YML" -o "$REINTERPOLATE_FULL_STATIC_IPS" = x"true" ]; then
+	# Create the initial YML header
 	cat >"$BOSH_FULL_STATIC_IPS_YML" <<EOF
 ---
 EOF
