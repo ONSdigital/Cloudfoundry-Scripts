@@ -31,7 +31,7 @@ CFLINUXFS2_VERSION="${5:-$CFLINUXFS2_VERSION}"
 # https://bosh.io/releases/github.com/pivotal-cf/cf-rabbitmq-release
 CF_RABBITMQ_VERSION="${6:-$CF_RABBITMQ_VERSION}"
 # https://bosh.io/releases/github.com/cloudfoundry/bosh-hm-forwarder-release?all=1
-BOSH_HM_FORWADER_VERSION="${7:-$BOSH_HM_FORWADER_VERSION}"
+BOSH_HM_FORWARDER_VERSION="${7:-$BOSH_HM_FORWARDER_VERSION}"
 # Stemcell
 # https://bosh.io/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 BOSH_STEMCELL_URL="${BOSH_STEMCELL_URL:-https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent}"
@@ -43,7 +43,7 @@ GARDEN_RUNC_URL="${GARDEN_RUNC_URL:-https://bosh.io/d/github.com/cloudfoundry/ga
 CFLINUXFS2_URL="${CFLINUXFS2_URL:-https://bosh.io/d/github.com/cloudfoundry/cflinuxfs2-release}"
 CF_RABBITMQ_URL="${CF_RABBITMQ_URL:-https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-release}"
 #CF_RABBITMQ_BROKER_URL="${CF_RABBITMQ_URL:-https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-broker}"
-BOSH_HM_FORWADER_URL="${BOSH_HM_FORWADER_URL:-https://bosh.io/d/github.com/cloudfoundry/bosh-hm-forwarder-release}"
+BOSH_HM_FORWARDER_URL="${BOSH_HM_FORWARDER_URL:-https://bosh.io/d/github.com/cloudfoundry/bosh-hm-forwarder-release}"
 
 BOSH_RELEASES='CF DIEGO GARDEN_RUNC CFLINUXFS2 CF_RABBITMQ BOSH_HM_FORWARDER'
 BOSH_STEMCELLS='BOSH_STEMCELL'
