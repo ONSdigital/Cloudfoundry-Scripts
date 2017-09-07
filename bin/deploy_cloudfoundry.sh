@@ -184,9 +184,26 @@ if [ x"$NORUN_BOSH_PREAMBLE" != x"true" ] && [ x"$RERUN_BOSH_PREAMBLE" = x"true"
 	INFO 'Deploying Bosh preamble'
 	bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE"
 
+	# For some reason Bosh lists the errands in the preamble manifest and an additional one that has the same name
+	# as the release we install on the errand VMs (2017/09/07)
 	for _e in `"$BOSH" errands`; do
+		# TEMPORARY until the output of 'bosh errands' is fixed and only prints a list of errands
+		if ! awk -v errand="$_e" 'BEGIN{ rc=1 }/^- name:/{if($NF == errand) rc=0 }END{ exit rc }' "$BOSH_PREAMBLE_VARS_FILE"; then
+			WARN "Ignoring non-existant errand: $_e"
+
+			ignored=1
+
+			continue
+		fi
+		# TEMPORARY
+
+		INFO "Running errand: $_e"
 		"$BOSH" run-errand "$_e"
 	done
+
+	# TEMPORARY report when workaround is no longer required
+	[ -z "$ignored" ] && FATAL 'Working around additional errand is no longer required, please remove the sections between TEMPORARY  & TEMPORARY'
+	# TEMPORARY
 
 	INFO 'Deleting Bosh premable deployment'
 	"$BOSH" delete-deployment --force $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
