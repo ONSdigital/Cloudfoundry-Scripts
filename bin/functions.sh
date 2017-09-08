@@ -344,12 +344,11 @@ bosh_env(){
 }
 
 bosh_deploy(){
-	local bosh_deployment_name="$1"
-	local bosh_manifest="$2"
-	local bosh_vars="$3"
-	local extra_opt="$4"
+	local bosh_manifest="$1"
+	local bosh_vars="$2"
+	local extra_opt="$3"
 
-	[ -z "$bosh_manifest" ] && FATAL 'Not enough options'
+	[ -z "$bosh_vars" ] && FATAL 'Not enough options'
 	[ -f "$bosh_manifest" ] || FATAL "Unable to find: $bosh_manifest"
 
 	[ -n "$BOSH_FULL_OPS_FILE" ] && local opts_option="--ops-file='$BOSH_FULL_OPS_FILE'"

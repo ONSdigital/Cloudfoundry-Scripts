@@ -179,10 +179,10 @@ INFO 'Setting CloudConfig'
 
 if [ x"$NORUN_BOSH_PREAMBLE" != x"true" ] && [ x"$RERUN_BOSH_PREAMBLE" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
 	INFO 'Checking Bosh preamble dry-run'
-	bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE" --dry-run
+	bosh_deploy "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE" --dry-run
 
 	INFO 'Deploying Bosh preamble'
-	bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE"
+	bosh_deploy "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE"
 
 	# For some reason Bosh lists the errands in the preamble manifest and an additional one that has the same name
 	# as the release we install on the errand VMs (2017/09/07)
