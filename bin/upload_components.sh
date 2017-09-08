@@ -64,7 +64,7 @@ for i in $BOSH_UPLOADS; do
 	eval version="\$${i}_VERSION"
 	COMPONENT="`basename $base_url | sed $SED_EXTENDED -e 's/-release//g'`"
 
-	[ -n "$version" ] && url="$base_url?v=$version" || url="$base_url"
+	[ -n "$version" -a x"$version" != x"NONE" ] && url="$base_url?v=$version" || url="$base_url"
 
 	# Determine upload type
 	if echo "$i" | grep -Eq 'STEMCELL'; then
