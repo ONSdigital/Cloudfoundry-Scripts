@@ -210,10 +210,10 @@ if [ x"$NORUN_BOSH_PREAMBLE" != x"true" ] && [ x"$RERUN_BOSH_PREAMBLE" = x"true"
 fi
 
 INFO 'Checking Bosh deployment dry-run'
-bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE" --dry-run
+bosh_deploy "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE" --dry-run
 
 INFO 'Deploying Bosh'
-bosh_deploy "$DEPLOYMENT_NAME" "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE"
+bosh_deploy "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE"
 
 INFO 'Bosh VMs'
 "$BOSH" vms
