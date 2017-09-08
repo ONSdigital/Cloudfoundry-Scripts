@@ -188,7 +188,7 @@ if [ x"$NORUN_BOSH_PREAMBLE" != x"true" ] && [ x"$RERUN_BOSH_PREAMBLE" = x"true"
 	# as the release we install on the errand VMs (2017/09/07)
 	for _e in `"$BOSH" errands`; do
 		# TEMPORARY until the output of 'bosh errands' is fixed and only prints a list of errands
-		if ! awk -v errand="$_e" 'BEGIN{ rc=1 }/^- name:/{if($NF == errand) rc=0 }END{ exit rc }' "$BOSH_PREAMBLE_VARS_FILE"; then
+		if ! awk -v errand="$_e" 'BEGIN{ rc=1 }/^- name:/{if($NF == errand) rc=0 }END{ exit rc }' "$BOSH_PREAMBLE_MANIFEST_FILE"; then
 			WARN "Ignoring non-existant errand: $_e"
 
 			ignored=1
