@@ -78,6 +78,7 @@ for i in $BOSH_UPLOADS; do
 	fi
 
 	INFO "Starting upload of $i"
+	# --fix doesn't actually 'fix' it merely replaces any existing file
 	"$BOSH" upload-$UPLOAD_TYPE --fix "$url"
 
 	[ x"$USE_EXISTING_VERSIONS" = x"true" ] || "$BOSH" $TYPES | record_version "$COMPONENT" "$i" >>"$OUTPUT_FILE"

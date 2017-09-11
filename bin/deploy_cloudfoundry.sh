@@ -172,7 +172,12 @@ INFO 'Setting CloudConfig'
 	--vars-store="$BOSH_FULL_VARS_FILE"
 
 # Upload Stemcells & releases
-[ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ] && "$BASE_DIR/upload_components.sh" "$DEPLOYMENT_NAME"
+if [ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
+	# At the moment (2017/09/11) and for a good few months, there has been a problem with some of the uploads:
+	# Task 17 | 10:12:31 | Compiling packages: golang-1.8/63a243be32451af083a062ba2c929c3f2b34f132 (00:03:28)
+        #	L Error: Action Failed get_task: Task b8160a99-e155-4b42-6eb2-cba0ae7488b7 result: Compiling package golang-1.8: Fetching package golang-1.8: Fetching package blob 33dacc88-3647-4469-9183-acfcefe24611: Getting blob from inner blobstore: Checking downloaded blob '33dacc88-3647-4469-9183-acfcefe24611': Expected stream to have digest 'dac8587b4ce06a0f647f0061984d308349af9d08' but was 'c25e7406a45fb901a085edc8a7b1769f6fb543dd'
+	"$BASE_DIR/upload_components.sh" "$DEPLOYMENT_NAME"
+fi
 
 # Allow running of a custom script that can do other things (eg upload a local release)
 [ -f "$TOP_LEVEL_DIR/pre_deploy.sh" -a -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] && "$TOP_LEVEL_DIR/pre_deploy.sh"
