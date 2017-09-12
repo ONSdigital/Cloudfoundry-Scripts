@@ -44,4 +44,10 @@ INFO 'Deleting Bosh Deployment'
 INFO 'Deleting Bosh bootstrap environment'
 bosh_env delete-env || FATAL 'Bosh environment deletion failed'
 
+# It 'should' exist
+if [ -f "$BOSH_LITE_STATE_FILE" ]; then
+	INFO "Removing Bosh state file: $BOSH_LITE_STATE_FILE"
+	rm -f "$BOSH_LITE_STATE_FILE"
+fi
+
 INFO 'Successfully deleted Bosh environment'
