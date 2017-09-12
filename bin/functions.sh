@@ -247,7 +247,7 @@ check_cloudformation_stack(){
 
 	INFO "Checking for existing Cloudformation stack: $stack_name"
 	# Is there a better way to query?
-	if "$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]"
+	if "$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" \
 		cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE | grep -Eq "^$stack_name$"; then
 
  		INFO "Stack found: $stack_name"
