@@ -22,7 +22,7 @@ _date(){
 DEBUG(){
 	[ -z "$DEBUG" -o x"$DEBUG" = x"false" ] && return 0
 
-	"$ECHO" -e "`_date`${DEBUG_COLOUR}DEBUG $@$NORMAL_COLOUR" >&2
+	"$ECHO" -e "`_date` ${DEBUG_COLOUR}DEBUG $@$NORMAL_COLOUR" >&2
 }
 
 calculate_dns(){
