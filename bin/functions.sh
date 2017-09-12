@@ -248,11 +248,15 @@ check_cloudformation_stack(){
 	INFO "Checking for existing Cloudformation stack: $stack_name"
 	# Is there a better way to query?
 	if "$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]"
-		cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE DELETE_FAILED | grep -Eq "^$stack_name$"; then
+		cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE | grep -Eq "^$stack_name$"; then
 
  		INFO "Stack found: $stack_name"
 
 		local rc=0
+	elif "$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" cloudformation list-stacks --stack-status-filter DELETE_FAILED \
+		| grep -Eq "^$stack_name$"; then
+
+		FATAL 'Stack is in DELETE_FAILED state. Please manually fix the issues and finish deleting the stack'
 	else
 		INFO "Stack does not exist: $stack_name"
 
