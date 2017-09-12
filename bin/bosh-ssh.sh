@@ -20,7 +20,7 @@ GATEWAY_HOST="$4"
 [ -f "$BOSH_SSH_CONFIG" ] || FATAL "Bosh SSH config does not exist: $BOSH_SSH_CONFIG"
 [ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh config does not exist: $BOSH_DIRECTOR_CONFIG"
 
- "$BOSH_SSH_CONFIG"
+. "$BOSH_SSH_CONFIG"
 eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 
 # Convert from relative to an absolute path
