@@ -220,6 +220,14 @@ bosh_deploy "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE" --dry-run
 INFO 'Deploying Bosh'
 bosh_deploy "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE"
 
+if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"false" -a -n "$POST_DEPLOY_ERRANDS" ]; then
+	INFO 'Running post deployment smoke tests'
+	for _e in $POST_DEPLOY_ERRANDS; do
+		INFO "Running errand: $_e"
+		"$BOSH" run-errand "$_e"
+	done
+fi
+
 INFO 'Bosh VMs'
 "$BOSH" vms
 
