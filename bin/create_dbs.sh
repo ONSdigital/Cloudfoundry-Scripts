@@ -32,8 +32,8 @@ for i in `seq 0 9`; do
 
 	sh <<EOF
 "$BASE_DIR/create_postgresql_db.sh" --admin-username "$rds_apps_instance_username" --admin-password "$rds_apps_instance_password" \
-        --postgres-hostname "$rds_apps_instance_address" --postgres-port "$rds_apps_instance_port" --new-database-name "$name" \
+	--postgres-hostname "$rds_apps_instance_address" --postgres-port "$rds_apps_instance_port" --new-database-name "$name" \
 	$extensions_opt $password_opt \
-        --ssh-key "$bosh_ssh_key_file" --jump-userhost "vcap@$director_dns"
+	--ssh-key "$bosh_ssh_key_file" --jump-userhost "vcap@$director_dns"
 EOF
 done

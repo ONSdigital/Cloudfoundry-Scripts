@@ -38,14 +38,14 @@ calculate_dns(){
 }
 
 ip_to_decimal(){
-        echo $1 | awk -F. '{sum=$4+($3*256)+($2*256^2)+($1*256^3)}END{printf("%d\n",sum)}'
+	echo $1 | awk -F. '{sum=$4+($3*256)+($2*256^2)+($1*256^3)}END{printf("%d\n",sum)}'
 }
 
 decimal_to_ip(){
 	[ -n "$2" ] && value="`expr $1 + $2`" || value="$1"
 
-        # Urgh
-        echo $value |  awk '{address=$1; for(i=1; i<=4; i++){d[i]=address%256; address-=d[i]; address=address/256;} for(j=1; j<=4; j++){ printf("%d",d[5-j]);if( j==4 ){ printf("\n") }else{ printf(".")}}}'
+	# Urgh
+	echo $value | awk '{address=$1; for(i=1; i<=4; i++){d[i]=address%256; address-=d[i]; address=address/256;} for(j=1; j<=4; j++){ printf("%d",d[5-j]);if( j==4 ){ printf("\n") }else{ printf(".")}}}'
 }
 
 
@@ -235,7 +235,7 @@ stack_exists(){
 
 	[ -z "$stack_name" ] && FATAL 'No stack name provided'
 
-	"$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name' &&  StackStatus != 'DELETE_COMPLETE'].StackName" \
+	"$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name' && StackStatus != 'DELETE_COMPLETE'].StackName" \
 		cloudformation list-stacks | grep -Eq "^$stack_name"
 }
 
@@ -333,7 +333,7 @@ bosh_env(){
 			--vars-file='$SSL_YML' \
 			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
 			--vars-store='$BOSH_LITE_VARS_FILE'"
-        fi
+	fi
 
 	sh -c "'$BOSH' '$action_option' '$BOSH_LITE_MANIFEST_FILE' \
 		$BOSH_INTERACTIVE_OPT \
@@ -366,7 +366,7 @@ bosh_deploy(){
 			--vars-file='$SSL_YML' \
 			--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
 			--vars-store='$bosh_vars'"
-        fi
+	fi
 
 	sh -c "'$BOSH' deploy '$bosh_manifest' \
 		$extra_opt \
@@ -470,7 +470,7 @@ load_outputs(){
 
 	INFO "Loading outputs"
 	for _o in `find "$outputs_dir/" -mindepth 1 -maxdepth 1 "(" -not -name outputs-preamble.sh -and -name \*.sh ")" | awk -F/ '{print $NF}' | sort`; do
-		DEBUG  "Loading '$_o'"
+		DEBUG "Loading '$_o'"
 		if ! grep -Eq '^[^#]' "$outputs_dir/$_o"; then
 			DEBUG "Not loading empty '$_o'"
 

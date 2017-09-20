@@ -33,7 +33,7 @@ if [ ! -f "$CF_CREDENTIALS" ] ||
 	[ -n "$PASSWORD" -a -n "$CF_ADMIN_PASSWORD" -a x"$CF_ADMIN_PASSWORD" != x"$PASSWORD" ]; then
 
 	# Ensure we have some sort of password
-	[ -z "$PASSWORD" -o -z "$CF_ADMIN_PASSWORD" ] && NEW_PASSWORD="`generate_password`" ||  NEW_PASSWORD="${PASSWORD:-$CF_ADMIN_PASSWORD}"
+	[ -z "$PASSWORD" -o -z "$CF_ADMIN_PASSWORD" ] && NEW_PASSWORD="`generate_password`" || NEW_PASSWORD="${PASSWORD:-$CF_ADMIN_PASSWORD}"
 
 	# We should not generate this if it alread
 	cat >"$CF_CREDENTIALS" <<EOF

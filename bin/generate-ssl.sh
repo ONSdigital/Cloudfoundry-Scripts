@@ -40,7 +40,7 @@ INTERNAL_SIMPLE_SSL_NAMES='doppler cc_trafficcontroller trafficcontroller metron
 export EXTENDED_CRITICAL=
 export ORGANISATION
 
-[ -z "$OUTPUT_YML"  ] && FATAL 'OUTPUT_YML not supplied'
+[ -z "$OUTPUT_YML" ] && FATAL 'OUTPUT_YML not supplied'
 [ -z "$EXTERNAL_CA_NAME" ] && FATAL 'EXTERNAL_CA_NAME not supplied'
 [ -z "$INTERNAL_CA_NAME" ] && FATAL 'INTERNAL_CA_NAME not supplied'
 

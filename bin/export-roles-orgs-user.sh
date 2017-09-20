@@ -9,7 +9,7 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting|$)/'`; do
 
 	cf target -o "$org" 2>&1 >/dev/null
 
-	cf spaces  | awk -v org="$org" '!/^(name|Getting|No.*found|$)/{
+	cf spaces | awk -v org="$org" '!/^(name|Getting|No.*found|$)/{
 		gsub(" *","")
 		printf("cf create-space \"%s\" -o \"%s\"\n",$1,org)
 	}' >>02_create-space.sh

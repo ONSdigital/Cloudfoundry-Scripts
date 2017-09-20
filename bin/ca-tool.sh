@@ -235,7 +235,7 @@ if [ -n "$NAME" ]; then
 			ssh-keygen -i -m PKCS8 -f "client/$NAME.pub" >"client/$NAME.ssh-pub"
 
 			INFO 'Computing SSH public key fingerprint'
-			if ssh-keygen --help 2>&1 | grep -E '^\s*-E'; then
+			if ssh-keygen --help 2>&1 | grep -qE -- '-E fingerprint_hash'; then
 				# We have a modern version of SSH
 				ssh-keygen -E md5 -lf "client/$NAME.ssh-pub" | sed -re 's/^.*MD5:([^ ]+)( .*$)?$/\1/g' >"client/$NAME.ssh-fingerprint"
 			else

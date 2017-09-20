@@ -58,7 +58,7 @@ fi
 
 # If running via Jenkins we install cf-uaac via rbenv
 if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
-	which gem >/dev/null 2>&1 || FATAL "No Ruby 'gem' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'?  Or rbenv from within Jenkins?" 
+	which gem >/dev/null 2>&1 || FATAL "No Ruby 'gem' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or rbenv from within Jenkins?" 
 	gem install cf-uaac
 
 	CHANGES=1
@@ -66,9 +66,9 @@ fi
 
 # If running via Jenkins we can install awscli via pyenv
 if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && ! which aws >/dev/null 2>&1; then
-	which pip${PIP_VERSION_SUFFIX:-3} >/dev/null 2>&1 || FATAL "No 'pip' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'?  Or pyenv from within Jenkins?"
+	which pip${PIP_VERSION_SUFFIX:-3} >/dev/null 2>&1 || FATAL "No 'pip' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or pyenv from within Jenkins?"
 
-	pip${PIP_VERSION_SUFFIX:-3}  install "awscli" --user
+	pip${PIP_VERSION_SUFFIX:-3} install "awscli" --user
 
 	[ -f ~/.local/bin/aws ] || FATAL "AWS cli failed to install"
 
