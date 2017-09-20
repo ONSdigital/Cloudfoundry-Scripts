@@ -78,6 +78,9 @@ EOF
 	BOSH_FULL_STATIC_IPS_YML="$DEPLOYMENT_DIR/bosh-full-static-ips.yml"
 
 	AWS_PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/aws-passwords.sh"
+
+	# Load the environment config if we have been given one
+	[ -f "$DEPLOYMENT_DIR/environment.sh" ] && . "$DEPLOYMENT_DIR/environment.sh"
 fi
 
 # Set secure umask - the default permissions for ~/.bosh/config are wide open
