@@ -41,7 +41,7 @@ fi
 
 if [ -z "$SKIP_EXISTING" -o x"$SKIP_EXISTING" != x"true" ] || ! stack_exists "$PREAMBLE_STACK"; then
 	INFO 'Checking for existing Cloudformation stack'
-	"$AWS" --profile "$AWS_PROFILE" --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') &&  StackStatus != 'DELETE_COMPLETE'].StackName" \
+	"$AWS" --profile "$AWS_PROFILE" --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') && StackStatus != 'DELETE_COMPLETE'].StackName" \
 		cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack(s) exists'
 
 	INFO 'Validating Cloudformation Preamble Template'
@@ -192,13 +192,7 @@ fi
 
 if [ x"$AWS_KEY_EXISTS" = x"true" -a x"$DELETE_AWS_SSH_KEY" != x"true" ]; then
 	INFO 'Generating local SSH key fingerprint'
-	if ssh-keygen --help 2>&1 | grep -E '^\s*-E'; then
-		# We have a modern version of SSH
-		LOCAL_SSH_FINGERPRINT="`ssh-keygen -E md5 -lf "$BOSH_SSH_KEY_FILENAME.pub" | sed $SED_EXTENDED -e 's/^.*MD5:([^ ]+)( .*$)?$/\1/g'`"
-	else
-		# We have an old version of SSH
-		LOCAL_SSH_FINGERPRINT="`ssh-keygen -lf "$BOSH_SSH_KEY_FILENAME.pub" | awk '{print $2}'`"
-	fi
+	LOCAL_SSH_FINGERPRINT="`openssl pkey -in "$BOSH_SSH_KEY_FILENAME" -pubout -outform DER | openssl md5 -c | awk '{print $NF}'`"
 
 	INFO 'Obtaining AWS SSH key fingerprint'
 	AWS_SSH_FINGERPRINT="`"$AWS" --profile "$AWS_PROFILE" --output text --query "KeyPairs[?KeyName == '$BOSH_SSH_KEY_NAME'].KeyFingerprint" ec2 describe-key-pairs --key-names "$BOSH_SSH_KEY_NAME"`"
