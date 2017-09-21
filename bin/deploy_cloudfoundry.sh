@@ -181,7 +181,7 @@ if [ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
 fi
 
 # Allow running of a custom script that can do other things (eg upload a local release)
-[ x "$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" -a -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] && "$TOP_LEVEL_DIR/pre_deploy.sh"
+[ x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" -a -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] && "$TOP_LEVEL_DIR/pre_deploy.sh"
 
 if [ x"$NORUN_BOSH_PREAMBLE" != x"true" ] && [ x"$RERUN_BOSH_PREAMBLE" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
 	INFO 'Checking Bosh preamble dry-run'
