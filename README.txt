@@ -39,7 +39,7 @@ Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfo
 - deploy_cloudfoundry.sh
   - Deploys Cloudfoundry - this actually deploys any Bosh manifests, but has so far been soley used to deploy various parts of Cloudfoundry
 - display_cf_vms.sh
-  - Wraps ```bosh vms``` to provide a continually updated list of instances
+  - Wraps `bosh vms` to provide a continually updated list of instances
 - emergency_delete_aws_stack.sh
   - Very simple/stupid script that deletes any AWS Cloudformation stacks that match a given prefix
 - export-roles-orgs-user.sh
