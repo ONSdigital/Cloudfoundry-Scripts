@@ -4,22 +4,22 @@ Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfo
 
 
 - backup\_cloudfoundry-databases.sh
-  - Run errands from https://github.com/ONSdigital/postgresql-databases-release.  This backs up the databases within Cloudfoundry
-    - Parameters:
-    ..1. Deployment Name
+  - Run errands from https://github.com/ONSdigital/postgresql-databases-release.  This only backs up PostgreSQL databases.  Any database can be backed up, as long as the instance running the errand can reach the database
+    - Parameters
+      1. Deployment Name
 
 - backup\_cloudfoundry-s3.sh
   - Backup various internal Bosh/Cloudfoundry buckets to another S3 bucket.  This uses subdirectories that are named after the S3 source bucket
     -  Parameters
-    ..1. Deployment Name
-    ..2. [backup|restore]
-    ..3. [s3://destinaion|dir\_destination]
+      1. Deployment Name
+      2. [backup|restore]
+      3. [s3://destinaion|dir\_destination]
 
 - bosh-cmd.sh
   - Helper script that pulls in the correct configuration to run the Bosh CLI
     - Parameters
-    ..1. Deployment Name
-    ..n+. Parametes to pass directly to the Bosh CLI
+      1. Deployment Name
+      n+. Parametes to pass directly to the Bosh CLI
 
 - bosh-env.sh
   - Called by the various setup\_cf-\* scripts to set some required variables
@@ -27,10 +27,10 @@ Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfo
 - bosh-ssh.sh
   - Helper script to call the Bosh CLI with the correct options to allow SSH'ing onto a given host
     - Parameters
-    ..1. Deployment Name
-    ..2. Destination SSH Host
-    ..3. [Gateway User]
-    ..4. [Gateway Host]
+      1. Deployment Name
+      2. Destination SSH Host
+      3. [Gateway User]
+      4. [Gateway Host]
 
 - bosh\_generate\_release.sh
   - Script to generate a release for upload onto Bosh
