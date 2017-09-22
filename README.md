@@ -33,10 +33,10 @@ Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfo
 - ca-tool.sh
   - Generic script that creates CA and key pairs signed by the CA
     - Parameters: `--ca-name|-C CA_Name [--new-ca|-N] [--update-ca] [--name|-n Name] [--update-name] [--key-size|-k]
-                  [--not-basic-critical|-b] [--not-extended-critical|-c]
-                  [--organisation|-o Organisation_Part1 ... Organisation_PartN]
-                  [--generate-public-key|-p] [--generate-public-key-ssh-fingerprint|-f]
-                  [--subject-alt-names|-s Subject_Alt_Name_Part1 ...Subject_Alt_Name_PartN] [--not-trusted|-t]`
+                      [--not-basic-critical|-b] [--not-extended-critical|-c]
+                      [--organisation|-o Organisation_Part1 ... Organisation_PartN]
+                      [--generate-public-key|-p] [--generate-public-key-ssh-fingerprint|-f]
+                      [--subject-alt-names|-s Subject_Alt_Name_Part1 ...Subject_Alt_Name_PartN] [--not-trusted|-t]`
 
 - cf\_delete.sh
   - Simple script to login to Cloudfoundry and delete the named app
