@@ -4,12 +4,15 @@ Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfo
 
 
 - backup\_cloudfoundry-databases.sh
-  - Run errands from https://github.com/ONSdigital/postgresql-databases-release.  This only backs up PostgreSQL databases.  Any database can be backed up, as long as the instance running the errand can reach the database
+  - Run errands from https://github.com/ONSdigital/postgresql-databases-release.  This only backs up PostgreSQL
+    databases.  Any database can be backed up, as long as the instance running the errand can reach the database
     - Parameters
       1. Deployment Name
 
 - backup\_cloudfoundry-s3.sh
-  - Backup various internal Bosh/Cloudfoundry buckets to another S3 bucket.  This uses subdirectories that are named after the S3 source bucket
+  - Backup various internal Bosh/Cloudfoundry buckets to another S3 bucket.  This uses subdirectories that are named
+    after
+    the S3 source bucket
     -  Parameters
       1. Deployment Name
       2. [backup|restore]
@@ -57,7 +60,8 @@ Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfo
 - delete\_cloudfoundry.sh
   - Delete a Bosh deployment and delete the Bosh initial environment
 - deploy\_cloudfoundry.sh
-  - Deploys Cloudfoundry - this actually deploys any Bosh manifests, but has so far been soley used to deploy various parts of Cloudfoundry
+  - Deploys Cloudfoundry - this actually deploys any Bosh manifests, but has so far been soley used to deploy various
+    parts of Cloudfoundry
 - display\_cf\_vms.sh
   - Wraps `bosh vms` to provide a continually updated list of instances
 - emergency\_delete\_aws\_stack.sh
@@ -69,7 +73,8 @@ Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfo
 - functions.sh
   - General functions used by the various scripts
 - generate-ssl.sh
-  - Wrapper script around ca-tool.sh that creates the various CAs & keypairs required by Cloudfoundry.  Everything is outputted into a YML file that can be sucked in by Bosh
+  - Wrapper script around ca-tool.sh that creates the various CAs & keypairs required by Cloudfoundry.  Everything is
+    outputted into a YML file that can be sucked in by Bosh
 - install\_deps.sh
   - Script to install various dependencies (eg awscli, cf-uaac)
 - install\_packages-EL.sh
