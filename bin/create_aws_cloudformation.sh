@@ -62,8 +62,6 @@ if [ -z "$SKIP_EXISTING" -o x"$SKIP_EXISTING" != x"true" ] || ! stack_exists "$P
 
 	INFO 'Waiting for Cloudformation stack to finish creation'
 	"$AWS" --profile "$AWS_PROFILE" cloudformation wait stack-create-complete --stack-name "$DEPLOYMENT_NAME-preamble" || FATAL 'Failed to create Cloudformation preamble stack'
-
-	GENERATE_PREAMBLE_OUTPUT=true
 fi
 
 # Always generate outputs
