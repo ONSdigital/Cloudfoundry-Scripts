@@ -53,4 +53,3 @@ INFO 'Attempting to login'
 "$BOSH" log-in >&2
 
 "$BOSH" ssh --gw-private-key="$bosh_ssh_key_file" --gw-user="$GATEWAY_USER" --gw-host "${GATEWAY_HOST:-$BOSH_ENVIRONMENT}" "$SSH_HOST"
-set +x
