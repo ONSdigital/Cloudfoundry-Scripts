@@ -1,6 +1,8 @@
 # AWS/Bosh/Cloudfoundry Scripts
 
-Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfoundry.
+Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfoundry.  Most of the parameters are
+position dependant. Most of the time, if a parameter is not critical it can be set to NONE and it will be ignored -
+but please check in the script if this is supported.
 
 
 - backup\_cloudfoundry-databases.sh
@@ -40,18 +42,31 @@ Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfo
 
 - cf\_delete.sh
   - Simple script to login to Cloudfoundry and delete the named app
+    - Parameters: `Deployment_Name CF_App`
+
 - cf\_push.sh
   - Simple script to login to Cloudfoundry and push the named app
+    - Parameters: `Deployment_Name CF_App [CF_Space] [CF_Organisation]`
+
 - common-aws.sh
   - Common parts for the various AWS scripts
+
 - common-bosh.sh
   - Common parts for the various Bosh scripts
+
 - common.sh
   - Common parts for the various scripts
+
 - create\_aws\_cloudformation.sh
   - Creates an AWS infrastructure using various Cloudformation Templates
+    - Parameters: `Deployment_Name [AWS_Config_Prefix] [Hosted_Zone] [AWS_Region] [AWS_Access_Key_ID] [AWS_Secret_Access_Key]`
+    - Environmental variables: `HOSTED_ZONE, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEBUG=true|false, AWS_PROFILE, CLOUDFORMATION_DIR, IGNORE_MISSING_CONFIG=true|false
+                                SKIP_STACK_OUTPUTS_DIR, SKIP_EXISTING=true|false, REGENERATE_SSH_KEY=true|false, DELETE_AWS_SSH_KEY=true|false`
+
 - create\_dbs.sh
   - Reads the named Bosh manifest and creates the named databases
+    - Parameters: `Deployment_Name [Bosh_Full_Manifest_Name] [Bosh_Cloud_Config_Manifest_Name] [Bosh_Lite_Manifest_Name] [Bosh_Preamble_Manifest_Name] [Bosh_Static_IPs_Manifest_Name]
+                   [Manifests_Dir] [Internal_Domain]`
 - create\_postgresql\_db.sh
   - Create the named database and user
 - delete\_aws\_cloudformation.sh
