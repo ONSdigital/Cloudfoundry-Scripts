@@ -6,37 +6,37 @@ Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfo
 - backup\_cloudfoundry-databases.sh
   - Run errands from https://github.com/ONSdigital/postgresql-databases-release.  This only backs up PostgreSQL
     databases.  Any database can be backed up, as long as the instance running the errand can reach the database
-    - Parameters: `Deployment\_ Name`
+    - Parameters: `Deployment_Name`
 
 - backup\_cloudfoundry-s3.sh
   - Backup various internal Bosh/Cloudfoundry buckets to another S3 bucket.  This uses subdirectories that are named
     after
     the S3 source bucket
-    -  Parameters: `Deployment\_Name \[backup|restore] [s3://destinaion|dir\_destination]`
+    -  Parameters: `Deployment_Name [backup|restore] [s3://destinaion|dir_destination]`
 
 - bosh-cmd.sh
   - Helper script that pulls in the correct configuration to run the Bosh CLI. Any parameters after the *Deployment
     Name* are passed directly to the Bosh CLI
-    - Parameters: `Deployment\_Name [Parameter-1 ... Parameter-N]`
+    - Parameters: `Deployment_Name [Parameter-1 ... Parameter-N]`
 
 - bosh-env.sh
   - Called by the various setup\_cf-\* scripts to set some required variables
 
 - bosh-ssh.sh
   - Helper script to call the Bosh CLI with the correct options to allow SSH'ing onto a given host
-    - Parameters: `Deployment\_Name Destination SSH\_Host [Gateway\_User] \[Gateway\_Host\]`
+    - Parameters: `Deployment_Name Destination SSH_Host [Gateway_User] [Gateway_Host]`
 
 - bosh\_generate\_release.sh
   - Script to generate a release for upload onto Bosh
-    - Parameters: `Deployment\_Name Release\_Directory [Blob\_1 ... Blob\_N]`
+    - Parameters: `Deployment_Name Release_Directory [Blob_1 ... Blob_N]`
 
 - ca-tool.sh
   - Generic script that creates CA and key pairs signed by the CA
-    - Parameters: `--ca-name|-C CA\_Name \[--new-ca|-N\] \[--update-ca\] \[--name|-n Name\] \[--update-name\] \[--key-size|-k\]
-                  \[--not-basic-critical|-b\] \[--not-extended-critical|-c\]
-                  \[--organisation|-o Organisation\_Part1 ... Organisation\_PartN\]
-                  \[--generate-public-key|-p\] \[--generate-public-key-ssh-fingerprint|-f\]
-                  \[--subject-alt-names|-s Subject\_Alt\_Name\_Part1 ...Subject\_Alt\_Name\_PartN\] \[--not-trusted|-t\]`
+    - Parameters: `--ca-name|-C CA_Name [--new-ca|-N] [--update-ca] [--name|-n Name] [--update-name] [--key-size|-k]
+                  [--not-basic-critical|-b] [--not-extended-critical|-c]
+                  [--organisation|-o Organisation_Part1 ... Organisation_PartN]
+                  [--generate-public-key|-p] [--generate-public-key-ssh-fingerprint|-f]
+                  [--subject-alt-names|-s Subject_Alt_Name_Part1 ...Subject_Alt_Name_PartN] [--not-trusted|-t]`
 
 - cf\_delete.sh
   - Simple script to login to Cloudfoundry and delete the named app
