@@ -10,10 +10,8 @@ BASE_DIR="`dirname \"$0\"`"
 
 DEPLOYMENT_NAME="$1"
 CF_APP="$2"
-CF_SPACE="${3:-Test}"
-CF_ORG="${4:-$organisation}"
 
-NO_SKIP_SSL_VALIDATION="$5"
+NO_SKIP_SSL_VALIDATION="$3"
 
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
