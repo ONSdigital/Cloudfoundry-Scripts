@@ -28,10 +28,10 @@ findpath BOSH_CA_CERT "$BOSH_CA_CERT"
 export BOSH_CA_CERT
 
 case "$OPTION" in
-	v*|vitals)
+	v*|vitals|--vitals)
 		BOSH_OPTS="--vitals"
 		;;
-	f*|failing)
+	f*|failing|--failing)
 		BOSH_OPTS="--ps -f"
 		;;
 	*)
