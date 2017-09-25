@@ -15,7 +15,7 @@ if [ -z "$FOOT_PROTECTION_DISABLED_AND_I_KNOW_WHY" ] && git branch | grep -Eq '^
 fi
 	
 
-for i in `ls vendor/`; do
+for i in ${@:-`ls vendor/`}; do
 	$ECHO -n "Git update: $i? (y/N)"
 	read update
 
