@@ -26,10 +26,10 @@ for i in `seq 1 $#`; do
 			ADMIN_PASSWORD="$2"
 			;;
 		--postgres-hostname|--postgresql-hostname)
-			POSTGRES_HOSTNAME="$2"
+			POSTGRESQL_HOSTNAME="$2"
 			;;
 		--postgres-port|--postgresql-port)
-			DATABASE_PORT="$2"
+			POSTGRESQL_PORT="$2"
 			;;
 		--new-database-name)
 			NEW_DATABASE_NAME="$2"
@@ -86,12 +86,12 @@ if [ -n "$ADMIN_PASSWORD" ]; then
 	VARS="PGPASSWORD='$ADMIN_PASSWORD'"
 fi
 
-if [ -n "$POSTGRES_HOSTNAME" ]; then
-	PSQL_HOST_OPT="-h'$POSTGRES_HOSTNAME'"
+if [ -n "$POSTGRESQL_HOSTNAME" ]; then
+	PSQL_HOST_OPT="-h'$POSTGRESQL_HOSTNAME'"
 fi
 
-if [ -n "$POSTGRES_PORT" ]; then
-	PSQL_PORT_OPT="-p'$POSTGRES_PORT'"
+if [ -n "$POSTGRESQL_PORT" ]; then
+	PSQL_PORT_OPT="-p'$POSTGRESQL_PORT'"
 fi
 
 if [ -n "$ADMIN_DATABASE" ]; then
