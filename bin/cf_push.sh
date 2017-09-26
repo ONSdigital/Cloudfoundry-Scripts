@@ -11,9 +11,9 @@ BASE_DIR="`dirname \"$0\"`"
 
 DEPLOYMENT_NAME="$1"
 APP_NAME="$2"
-CF_ORG="${3:-$organisation}"
+CF_ORGANISATION="${3:-$organisation}"
 CF_SPACE="${4:-Test}"
-DIRECTOR="$5"
+DIRECTORY="$5"
 
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
@@ -31,7 +31,7 @@ if [ -z "$APP_NAME" ]; then
 	[ -z "$APP_NAME" ] && FATAL 'Unable to determine application name from manifest.yml'
 fi
 
-"$CF" target -o "$CF_ORG" -s "$CF_SPACE"
+"$CF" target -o "$CF_ORGANISATION" -s "$CF_SPACE"
 
 if "$CF" app "$APP_NAME" >/dev/null 2>&1; then
 	WARN "Deleting existing app: $APP_NAME"
