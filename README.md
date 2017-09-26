@@ -6,31 +6,30 @@ but please check in the script if this is supported.
 
 
 - backup\_cloudfoundry-databases.sh
-  - Run errands from https://github.com/ONSdigital/postgresql-databases-release.  This only backs up PostgreSQL
-    databases.  Any database can be backed up, as long as the instance running the errand can reach the database
-    - Parameters: `Deployment_Name`
+  - Run backup errands.
+    - Parameters: `DEPLOYMENT_NAME`
 
 - backup\_cloudfoundry-s3.sh
   - Backup various internal Bosh/Cloudfoundry buckets to another S3 bucket.  This uses subdirectories that are named
     after
     the S3 source bucket
-    -  Parameters: `Deployment_Name [backup|restore] [s3://destinaion|dir_destination]`
+    -  Parameters: `DEPLOYMENT_NAME [backup|restore] [s3://destinaion|dir_destination]`
 
 - bosh-cmd.sh
   - Helper script that pulls in the correct configuration to run the Bosh CLI. Any parameters after the *Deployment
     Name* are passed directly to the Bosh CLI
-    - Parameters: `Deployment_Name [Parameter-1 ... Parameter-N]`
+    - Parameters: `DEPLOYMENT_NAME [Parameter-1 ... Parameter-N]`
 
 - bosh-env.sh
   - Called by the various setup\_cf-\* scripts to set some required variables
 
 - bosh-ssh.sh
   - Helper script to call the Bosh CLI with the correct options to allow SSH'ing onto a given host
-    - Parameters: `Deployment_Name Destination SSH_Host [Gateway_User] [Gateway_Host]`
+    - Parameters: `DEPLOYMENT_NAME Destination SSH_Host [Gateway_User] [Gateway_Host]`
 
 - bosh\_generate\_release.sh
   - Script to generate a release for upload onto Bosh
-    - Parameters: `Deployment_Name Release_Directory [Blob_1 ... Blob_N]`
+    - Parameters: `DEPLOYMENT_NAME Release_Directory [Blob_1 ... Blob_N]`
 
 - ca-tool.sh
   - Generic script that creates CA and key pairs signed by the CA
@@ -42,11 +41,11 @@ but please check in the script if this is supported.
 
 - cf\_delete.sh
   - Simple script to login to Cloudfoundry and delete the named app
-    - Parameters: `Deployment_Name CF_App`
+    - Parameters: `DEPLOYMENT_NAME CF_App`
 
 - cf\_push.sh
   - Simple script to login to Cloudfoundry and push the named app
-    - Parameters: `Deployment_Name CF_App [CF_Space] [CF_Organisation]`
+    - Parameters: `DEPLOYMENT_NAME CF_APP [CF_SPACE] [CF_ORGANISATION]`
 
 - common-aws.sh
   - Common parts for the various AWS scripts
@@ -59,13 +58,13 @@ but please check in the script if this is supported.
 
 - create\_aws\_cloudformation.sh
   - Creates an AWS infrastructure using various Cloudformation Templates
-    - Parameters: `Deployment_Name [AWS_Config_Prefix] [Hosted_Zone] [AWS_Region] [AWS_Access_Key_ID] [AWS_Secret_Access_Key]`
+    - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
     - Environmental variables: `HOSTED_ZONE, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEBUG=true|false, AWS_PROFILE, CLOUDFORMATION_DIR, IGNORE_MISSING_CONFIG=true|false
                                 SKIP_STACK_OUTPUTS_DIR, SKIP_EXISTING=true|false, REGENERATE_SSH_KEY=true|false, DELETE_AWS_SSH_KEY=true|false`
 
 - create\_dbs.sh
   - Reads the named Bosh manifest and creates the named databases
-    - Parameters: `Deployment_Name [Bosh_Full_Manifest_Name]`
+    - Parameters: `DEPLOYMENT_NAME [Bosh_Full_Manifest_Name]`
 
 - create\_postgresql\_db.sh
   - Create the named database and user
@@ -78,7 +77,7 @@ but please check in the script if this is supported.
 
 - delete\_aws\_cloudformation.sh
   - Delete a group of AWS Cloudformation stacks
-    - Parameters: `Deployment_Name [AWS_Config_Prefix] [Hosted_Zone] [AWS_Region] [AWS_Access_Key_ID] [AWS_Secret_Access_Key]`
+    - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
     - Environmental Variables: `AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEBUG=true|false, AWS_PROFILE,
                                 CLOUDFORMATION_DIR, BOSH_SSH_CONFIG, KEEP_SSH_KEY`
 
@@ -130,7 +129,7 @@ but please check in the script if this is supported.
 
 - install\_deps.sh
   - Script to install various dependencies (eg awscli, cf-uaac)
-    - Parameters: `[INSTALL_AWS]` 
+    - Parameters: `[INSTALL_AWS]`
     - Environmental Variables: `BOSH_CLI_VERSION BOSH_GITHUB_RELEASE_URL BOSH_CLI_RELEASE_TYPE CF_CLI_VERSION CF_GITHUB_RELEASE_URL
                                 CF_CLI_RELEASE_TYPE NO_AWS PIP_VERSION_SUFFIX`
 
@@ -140,7 +139,7 @@ but please check in the script if this is supported.
 - process\_cidrs.sh
   - Script to generate various network related config, eg CIDR sizes, static/reserved IP ranges
     - Parameters: `NETWORK_NAME CIDR`
-    - Environmental Variables: `DEFAULT_DEFAULT_ROUTE_OFFEST DEFAULT_RESERVED_START_OFFSET DEFAULT_RESERVED_SIZE 
+    - Environmental Variables: `DEFAULT_DEFAULT_ROUTE_OFFEST DEFAULT_RESERVED_START_OFFSET DEFAULT_RESERVED_SIZE
                                 ${NETWORK_NAME}_DEFAULT_ROUTE_OFFSET ${NETWORK_NAME}_RESERVED_START_OFSET
                                 ${NETWORK_NAME}_RESERVED_SIZE ${NETWORK_NAME}_STATIC_START_OFFSET
                                 ${NETWORK_NAME}_STATIC_SIZE`
@@ -178,7 +177,7 @@ but please check in the script if this is supported.
 
 - update\_aws\_cloudformation.sh
   - Update an existing set of AWS Cloudformation templates
-    - Parameters: `Deployment_Name [AWS_Config_Prefix] [Hosted_Zone] [AWS_Region] [AWS_Access_Key_ID] [AWS_Secret_Access_Key]`
+    - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
     - Environmental Variables: `HOSTED_ZONE, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEBUG=true|false, AWS_PROFILE,
                                 CLOUDFORMATION_DIR, IGNORE_MISSING_CONFIG=true|false SKIP_STACK_OUTPUTS_DIR, SKIP_MISSING,
                                 SKIP_STACK_PREAMBLE_OUTPUTS_CHECK`
