@@ -18,15 +18,15 @@ empty_bucket(){
 
 	[ -n "$1" ] || FATAL 'No bucket name provided'
 
-	if "$AWS" --profile "$AWS_PROFILE" --output text --query "Buckets[?Name == '$bucket_name'].Name" s3api list-buckets | grep -Eq "^$bucket_name$"; then
+	if "$AWS" --output text --query "Buckets[?Name == '$bucket_name'].Name" s3api list-buckets | grep -Eq "^$bucket_name$"; then
 		INFO "Emptying bucket: $bucket_name"
-		"$AWS" --profile "$AWS_PROFILE" s3 rm --recursive "s3://$bucket_name"
+		"$AWS" s3 rm --recursive "s3://$bucket_name"
 	fi
 }
 
 load_outputs "$STACK_OUTPUTS_DIR"
 
-[ -n "$aws_region" ] && aws_region "$aws_region"
+[ -n "$aws_region" ] && export AWS_DEFAULT_REGION="$aws_region"
 
 if [ -n "$BOSH_SSH_CONFIG" -a -f "$BOSH_SSH_CONFIG" ]; then
 	SSH_KEY_EXISTS=1
@@ -55,21 +55,21 @@ fi
 
 # Provide the ability to optionally delete existing AWS SSH key
 if [ -z "$KEEP_SSH_KEY" -o x"$KEEP_SSH_KEY" = x"false" ] && [ -n "$SSH_KEY_EXISTS" -a -n "$bosh_ssh_key_name" ] && \
-	"$AWS" --profile "$AWS_PROFILE" ec2 describe-key-pairs --key-names "$bosh_ssh_key_name" >/dev/null 2>&1; then
+	"$AWS" ec2 describe-key-pairs --key-names "$bosh_ssh_key_name" >/dev/null 2>&1; then
 
 	INFO "Deleting SSH key: '$bosh_ssh_key_name'"
-	"$AWS" --profile "$AWS_PROFILE" ec2 delete-key-pair --key-name "$bosh_ssh_key_name"
+	"$AWS" ec2 delete-key-pair --key-name "$bosh_ssh_key_name"
 fi
 
 # This is slight stupid when there are sub-Cloudformation stacks, as these get deleted as well. We could filter them out, but
 # unless our filtering is very strict & complicated it could incorrectly filter out stacks we want to delete. So, rather than
 # do that, we just delete everything we come across
-for _stack in `"$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') && StackStatus != 'DELETE_COMPLETE'].StackName" cloudformation list-stacks | sed -re 's/\t/\n/g' | sort -nr | awk -v prefix="$DEPLOYMENT_NAME" 'BEGIN{ re=sprintf("%s-([0-9]+.*|preamble)$",prefix) }{ if($0 ~ re){ if(/-preamble$/){ f=$0 }else{ print $0 } } }END{ print f }'`; do
+for _stack in `"$AWS" --output text --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') && StackStatus != 'DELETE_COMPLETE'].StackName" cloudformation list-stacks | sed -re 's/\t/\n/g' | sort -nr | awk -v prefix="$DEPLOYMENT_NAME" 'BEGIN{ re=sprintf("%s-([0-9]+.*|preamble)$",prefix) }{ if($0 ~ re){ if(/-preamble$/){ f=$0 }else{ print $0 } } }END{ print f }'`; do
 	check_cloudformation_stack "$_stack" || continue
 
 	INFO "Deleting stack: $_stack"
-	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-stack --stack-name "$_stack"
+	"$AWS" cloudformation delete-stack --stack-name "$_stack"
 
 	INFO 'Waiting for Cloudformation stack to be deleted'
-	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-delete-complete --stack-name "$_stack"
+	"$AWS" cloudformation wait stack-delete-complete --stack-name "$_stack"
 done

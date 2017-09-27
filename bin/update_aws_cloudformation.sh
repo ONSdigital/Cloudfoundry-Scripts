@@ -35,7 +35,7 @@ aws_change_set(){
 
 	if [ x"$update_validate" = x"validate" ]; then
 		INFO "Validating Cloudformation template: $stack_url"
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation validate-template $template_option "$stack_url"
+		"$AWS" cloudformation validate-template $template_option "$stack_url"
 
 		return $?
 	fi
@@ -54,8 +54,7 @@ aws_change_set(){
 
 	INFO "Creating Cloudformation stack change set: $stack_name"
 	INFO 'Changeset details:'
-	sh -c "'$AWS' --profile "$AWS_PROFILE" \
-		--output table \
+	sh -c "'$AWS' \
 		cloudformation create-change-set \
 		--stack-name '$stack_arn' \
 		--change-set-name '$change_set_name' \
@@ -66,36 +65,36 @@ aws_change_set(){
 
 	# Changesets only have three states: CREATE_IN_PROGRESS, CREATE_COMPLETE & FAILED. 
 	INFO "Waiting for Cloudformation changeset to be created: $change_set_name"
-	"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name" >/dev/null 2>&1 || :
+	"$AWS" cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name" >/dev/null 2>&1 || :
 
 	INFO 'Checking changeset status'
-	if "$AWS" --output text --profile "$AWS_PROFILE" --query \
+	if "$AWS" --output text --query \
 		"Status == 'CREATE_COMPLETE' && ExecutionStatus == 'AVAILABLE'" \
 		cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name" | grep -Eq '^True$'; then
 
 		INFO 'Stack change set details:'
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS" cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
 		INFO "Starting Cloudformation changeset: $change_set_name"
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS" cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
 		INFO 'Waiting for Cloudformation stack to finish creation'
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
+		"$AWS" cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
 
 		local stack_changes=1
-	elif "$AWS" --output text --profile "$AWS_PROFILE" --query "StatusReason == 'The submitted information didn"\\\'"t contain changes. Submit different information to create a change set.'" \
+	elif "$AWS" --output text --query "StatusReason == 'The submitted information didn"\\\'"t contain changes. Submit different information to create a change set.'" \
 		cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name" | grep -Eq '^True$'; then
 
 		WARN "Changeset did not contain any changes: $change_set_name"
 
 		WARN "Deleting empty changeset: $change_set_name"
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS" cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 	else
 		WARN "Changeset failed to create"
-		"$AWS" --output table --profile "$AWS_PROFILE" cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS" cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
 		WARN "Deleting failed changeset: $change_set_name"
-		"$AWS" --profile "$AWS_PROFILE" --output table cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS" cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 	fi
 
 
@@ -126,7 +125,7 @@ INFO 'Obtaining current stack region'
 load_output_vars "$STACK_OUTPUTS_DIR" NONE aws_region
 if [ -n "$aws_region" ]; then
 	INFO "Checking if we need to update AWS region to $aws_region"
-	aws_region "$aws_region"
+	export AWS_DEFAULT_REGION="$aws_region"
 else
 	WARN "Unable to find region from previous stack outputs"
 fi
@@ -143,7 +142,7 @@ INFO 'Parsing preamble outputs'
 . "$STACK_PREAMBLE_OUTPUTS"
 
 INFO 'Copying templates to S3'
-"$AWS" --profile "$AWS_PROFILE" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
+"$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
 
 # Now we can set the main stack URL
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"

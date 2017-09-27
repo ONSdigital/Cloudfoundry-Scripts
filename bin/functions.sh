@@ -58,43 +58,6 @@ stack_file_name(){
 	echo "$deployment_name-`echo $stack_file | sed $SED_EXTENDED -e "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
 }
 
-# Quite long winded, but we need to ensure we don't trample over any customised config
-aws_region(){
-	local new_aws_region="$1"
-
-	local current_region="`\"$AWS\" --profile \"$AWS_PROFILE\" configure get region`"
-
-	# Do we need to update the config?
-	if [ -n "$new_aws_region" -a x"$current_region" != x"$new_aws_region" ]; then
-		if ! "$AWS" --profile "$AWS_PROFILE" configure get region | grep -qE "^$new_aws_region"; then
-			INFO 'Updating AWS CLI region configuration'
-			"$AWS" --profile "$AWS_PROFILE" configure set region "$new_aws_region"
-			"$AWS" --profile "$AWS_PROFILE" configure set output text
-		fi
-	elif [ -z "$new_aws_region" ]; then
-		echo "$current_region"
-	fi
-}
-
-# Quite long winded, but we need to ensure we don't trample over any customised config
-aws_credentials(){
-	local new_aws_access_key_id="$1"
-	local new_aws_secret_access_key="$2"
-
-	if [ -n "$new_aws_access_key_id" ]; then
-		if ! "$AWS" --profile "$AWS_PROFILE" configure get aws_access_key_id | grep -qE "^$new_aws_access_key_id"; then
-			INFO 'Updating AWS CLI Access Key ID configuration'
-			"$AWS" --profile "$AWS_PROFILE" configure set aws_access_key_id "$new_aws_access_key_id"
-		fi
-	fi
-	if [ -n "$new_aws_secret_access_key" ]; then
-		if ! "$AWS" --profile "$AWS_PROFILE" configure get aws_secret_access_key | grep -qE "^$new_aws_secret_access_key"; then
-			INFO 'Updating AWS CLI Secret Access Key configuration'
-			"$AWS" --profile "$AWS_PROFILE" configure set aws_secret_access_key "$new_aws_secret_access_key"
-		fi
-	fi
-}
-
 find_aws(){
 	if which aws >/dev/null 2>&1; then
 		AWS="`which aws`"
@@ -131,7 +94,7 @@ parse_aws_cloudformation_outputs(){
 	# Debian's Awk (mawk) doesn't have gensub(), so we can't do this easily/cleanly
 	#
 	# Basically we convert camelcase variable names to underscore seperated names (eg FooBar -> foo_bar)
-	"$AWS" --profile "$AWS_PROFILE" --output text --query 'Stacks[*].[Parameters[*].[ParameterKey,ParameterValue],Outputs[*].[OutputKey,OutputValue]]' \
+	"$AWS" --output text --query 'Stacks[*].[Parameters[*].[ParameterKey,ParameterValue],Outputs[*].[OutputKey,OutputValue]]' \
 		cloudformation describe-stacks --stack-name "$stack" | perl -a -F'\t' -ne 'defined($F[1]) || next;
 		chomp($F[1]);
 		$F[0] =~ s/([a-z0-9])([A-Z])/\1_\2/g;
@@ -235,7 +198,7 @@ stack_exists(){
 
 	[ -z "$stack_name" ] && FATAL 'No stack name provided'
 
-	"$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name' && StackStatus != 'DELETE_COMPLETE'].StackName" \
+	"$AWS" --output text --query "StackSummaries[?StackName == '$stack_name' && StackStatus != 'DELETE_COMPLETE'].StackName" \
 		cloudformation list-stacks | grep -Eq "^$stack_name"
 }
 
@@ -247,13 +210,13 @@ check_cloudformation_stack(){
 
 	INFO "Checking for existing Cloudformation stack: $stack_name"
 	# Is there a better way to query?
-	if "$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" \
+	if "$AWS" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" \
 		cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE | grep -Eq "^$stack_name$"; then
 
  		INFO "Stack found: $stack_name"
 
 		local rc=0
-	elif "$AWS" --profile "$AWS_PROFILE" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" cloudformation list-stacks --stack-status-filter DELETE_FAILED \
+	elif "$AWS" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" cloudformation list-stacks --stack-status-filter DELETE_FAILED \
 		| grep -Eq "^$stack_name$"; then
 
 		FATAL 'Stack is in DELETE_FAILED state. Please manually fix the issues and finish deleting the stack'

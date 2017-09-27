@@ -26,8 +26,8 @@ if [ -z "$STACK_PREFIX" ]; then
 	exit 1
 fi
 
-for i in `$AWS --profile "$AWS_PROFILE" --output text --query "StackSummaries[?starts_with(StackName,'$STACK_PREFIX') && StackStatus != 'DELETE_COMPLETE'].StackName" cloudformation list-stacks | sed -re 's/\t/\n/g' | sed -re '/n-[A-Z0-9]{12,13}$/d'`; do
-	$AWS --profile "$AWS_PROFILE" cloudformation delete-stack --stack-name $i
+for i in `$AWS --output text --query "StackSummaries[?starts_with(StackName,'$STACK_PREFIX') && StackStatus != 'DELETE_COMPLETE'].StackName" cloudformation list-stacks | sed -re 's/\t/\n/g' | sed -re '/n-[A-Z0-9]{12,13}$/d'`; do
+	$AWS cloudformation delete-stack --stack-name $i
 
-	$AWS --profile "$AWS_PROFILE" cloudformation wait stack-delete-complete --stack-name $i
+	$AWS cloudformation wait stack-delete-complete --stack-name $i
 done

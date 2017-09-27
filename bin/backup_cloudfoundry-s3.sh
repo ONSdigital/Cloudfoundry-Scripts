@@ -27,7 +27,7 @@ done
 
 load_outputs "$STACK_OUTPUTS_DIR"
 
-[ -n "$aws_region" ] && aws_region "$aws_region"
+[ -n "$aws_region" ] && export AWS_DEFAULT_REGION="$aws_region"
 
 OLDIFS="$IFS"
 IFS=","
@@ -85,7 +85,7 @@ for _bucket in $s3_bucket_resource_names; do
 		FATAL "Unknown action: $ACTION"
 	fi
 
-	"$AWS" --profile "$AWS_PROFILE" s3 sync --acl bucket-owner-full-control --delete "$src" "$dst"
+	"$AWS" s3 sync --acl bucket-owner-full-control --delete "$src" "$dst"
 done
 IFS="$OLDIFS"
 

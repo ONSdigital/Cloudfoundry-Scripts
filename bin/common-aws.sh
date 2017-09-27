@@ -13,10 +13,12 @@ if [ -z "$NON_AWS_DEPLOY" ]; then
 fi
 
 
-# Configure AWS client
-AWS_REGION="${1:-$AWS_REGION}"
-AWS_ACCESS_KEY_ID="${2:-$AWS_ACCESS_KEY_ID}"
-AWS_SECRET_ACCESS_KEY="${3:-$AWS_SECRET_ACCESS_KEY}"
+# Set AWS specific variables (http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html)
+export AWS_DEFAULT_REGION="${1:-${AWS_DEFAULT_REGION:-$AWS_REGION}}"
+export AWS_ACCESS_KEY_ID="${2:-$AWS_ACCESS_KEY_ID}"
+export AWS_SECRET_ACCESS_KEY="${3:-$AWS_SECRET_ACCESS_KEY}"
+export AWS_PROFILE="${AWS_PROFILE:-default}"
+export AWS_DEFAULT_OUTPUT="${AWS_DEFAULT_OUTPUT:-table}"
 
 . "$BASE_DIR/common.sh"
 
@@ -24,11 +26,23 @@ find_aws
 
 [ x"$AWS_DEBUG" = x"true" ] && AWS_DEBUG_OPTION='--debug'
 
-AWS_PROFILE="${AWS_PROFILE:-default}"
+if [ -z "$AWS_DEFAULT_REGION" ]; then
+	[ -f ~/.aws/config ] && CONFIGURED_AWS_REGION="`"$AWS" configure get region`"
+t
+	# Provide a default - these should come from a configuration/defaults file
+	DEFAULT_AWS_REGION="${DEFAULT_AWS_REGION:-${CONFIGURED_AWS_REGION:-eu-central-1}}"
+fi
 
-CONFIGURED_AWS_REGION="`aws_region`"
-# Provide a default - these should come from a configuration/defaults file
-DEFAULT_AWS_REGION="${DEFAULT_AWS_REGION:-${CONFIGURED_AWS_REGION:-eu-central-1}}"
+# Do we need to update credentials?
+if [ -z "$AWS_ACCESS_KEY_ID" -o -z "$AWS_SECRET_ACCESS_KEY" ]; then
+	[ -f ~/.aws/credentials ] || FATAL 'No AWS_ACCESS_KEY_ID and/or AWS_SECRET_ACCESS_KEY provided and no AWS credentials (~/.aws/credentials),'
+
+	[ -z "$AWS_ACCESS_KEY_ID" ] && AWS_ACCESS_KEY_ID="`"$AWS" configure get aws_access_key_id`"
+	[ -z "$AWS_SECRET_ACCESS_KEY" ] && AWS_SECRET_ACCESS_KEY="`"$AWS" configure get aws_secret_access_key`"
+
+	[ -z "$AWS_ACCESS_KEY_ID" ] && FATAL 'No AWS_ACCESS_KEY_ID'
+	[ -z "$AWS_SECRET_ACCESS_KEY" ] && FATAL 'No AWS_SECRET_ACCESS_KEY'
+fi
 
 # CLOUDFORMATION_DIR may be given as a relative directory
 findpath CLOUDFORMATION_DIR "${CLOUDFORMATION_DIR:-AWS-Cloudformation}"
@@ -56,16 +70,5 @@ STACK_PARAMETERS_SUFFIX='json'
 STACK_PREAMBLE_URL="file://$STACK_PREAMBLE_FILE"
 STACK_PREAMBLE_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-preamble.sh"
 
-if [ -z "$AWS_REGION" ]; then
-	AWS_REGION="$DEFAULT_AWS_REGION"
-fi
 
-# Do we need to update the config?
-aws_region "$AWS_REGION"
 
-# Do we need to update credentials?
-[ -n "$AWS_ACCESS_KEY_ID" -a -n "$AWS_SECRET_ACCESS_KEY" ] && aws_credentials "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY"
-
-INFO 'Checking we have the required configuration'
-[ -f ~/.aws/config ] || FATAL 'No AWS config (~/.aws/config)'
-[ -f ~/.aws/credentials ] || FATAL 'No AWS credentials (~/.aws/credentials)'
