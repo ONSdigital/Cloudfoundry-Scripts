@@ -1,13 +1,14 @@
 #!/bin/sh
 #
+# Run 'bosh create-release' and 'bosh upload-release' to create and upload the given release
 #
 
 set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-DEPLOYMENT_NAME="$1"
-RELEASE_DIR="$2"
+DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
+RELEASE_DIR="${2:-$RELEASE_DIR}"
 
 RELEASE_BLOB_DESTINATION="${RELEASE_BLOB_DESTINATION:-blobs}"
 
@@ -27,13 +28,11 @@ findpath BOSH_CA_CERT "$BOSH_CA_CERT"
 
 export BOSH_CA_CERT
 
-[ -z "${GATEWAY_HOST:-$BOSH_ENVIRONMENT}" ] && FATAL 'No gateway host available'
-
 INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
-"$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT"
+"$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT" >&2
 
 INFO 'Attempting to login'
-"$BOSH" log-in
+"$BOSH" log-in >&2
 
 cd "$RELEASE_DIR"
 

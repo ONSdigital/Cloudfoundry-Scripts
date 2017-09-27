@@ -8,44 +8,56 @@ but please check in the script if this is supported.
 - backup\_cloudfoundry-databases.sh
   - Run backup errands.
     - Parameters: `DEPLOYMENT_NAME`
+    - Environmental Variables: `DEPLOYMENT_NAME`
 
 - backup\_cloudfoundry-s3.sh
   - Backup various internal Bosh/Cloudfoundry buckets to another S3 bucket.  This uses subdirectories that are named
     after
     the S3 source bucket
-    -  Parameters: `DEPLOYMENT_NAME [backup|restore] [s3://destinaion|dir_destination]`
+    - Parameters: `DEPLOYMENT_NAME ACTION=backup|restore SRC_OR_DST=s3://destinaion|dir_destination`
+    - Environmental Variables: `DEPLOYMENT_NAME ACTION SRC_OR_DST`
+    - Defaults: `ACTION='backup' SRC_OR_DST='s3_backets'`
 
 - bosh-cmd.sh
-  - Helper script that pulls in the correct configuration to run the Bosh CLI. Any parameters after the *Deployment
-    Name* are passed directly to the Bosh CLI
-    - Parameters: `DEPLOYMENT_NAME [Parameter-1 ... Parameter-N]`
+  - Helper script that pulls in the correct configuration to run the Bosh CLI. Any parameters after the *DEPLOYMENT_NAME*
+    are passed directly to the Bosh CLI
+    - Parameters: `DEPLOYMENT_NAME [Parameter1 ... ParameterN]`
+    - Environmental Variables: `DEPLOYMENT_NAME`
 
 - bosh-env.sh
   - Called by the various setup\_cf-\* scripts to set some required variables
 
 - bosh-ssh.sh
   - Helper script to call the Bosh CLI with the correct options to allow SSH'ing onto a given host
-    - Parameters: `DEPLOYMENT_NAME Destination SSH_Host [Gateway_User] [Gateway_Host]`
+    - Parameters: `DEPLOYMENT_NAME SSH_HOST [GATEWAY_USER] [GATEWAY_HOST]`
+    - Defaults: `GATEWAY_USER='vcap' GATEWAY_HOST='$director_dns'`
 
 - bosh\_generate\_release.sh
   - Script to generate a release for upload onto Bosh
-    - Parameters: `DEPLOYMENT_NAME Release_Directory [Blob_1 ... Blob_N]`
+    - Parameters: `DEPLOYMENT_NAME RELEASE_DIR [Blob_1 ... Blob_N]`
+    - Environmental Variables: `DEPLOYMENT_NAME RELEASE_DIR RELEASE_BLOB_DESTINATION`
+    - Defaults: `RELEASE_BLOB_DESTINATION='blobs'`
 
 - ca-tool.sh
   - Generic script that creates CA and key pairs signed by the CA
-    - Parameters: `--ca-name|-C CA_Name [--new-ca|-N] [--update-ca] [--name|-n Name] [--update-name] [--key-size|-k]
+    - Parameters: `--ca-name|-C CA_NAME [--new-ca|-N] [--update-ca] [--name|-n NAME] [--update-name] [--key-size|-k KEY_SIZE]
                       [--not-basic-critical|-b] [--not-extended-critical|-c]
                       [--organisation|-o Organisation_Part1 ... Organisation_PartN]
                       [--generate-public-key|-p] [--generate-public-key-ssh-fingerprint|-f]
                       [--subject-alt-names|-s Subject_Alt_Name_Part1 ...Subject_Alt_Name_PartN] [--not-trusted|-t]`
+    - Environmental Variables: `KEY_SIZE HASH_TYPE ORGANISTAION VALID_DAYS CA_NAME NEW_CA NAME UPDATE_NAME GENERATE_PUBLIC_KEY
+                                GENERATE_PUBLIC_KEY_SSH_FINGER_PRINT`
+    - Defaults: `KEY_SIZE='4096' HASH_TYPE='sha512' ORGANISTAION='Organisation' VALID_DAYS='3650'`
 
 - cf\_delete.sh
   - Simple script to login to Cloudfoundry and delete the named app
-    - Parameters: `DEPLOYMENT_NAME CF_App`
+    - Parameters: `DEPLOYMENT_NAME CF_APP`
+    - Environmental Variables: `DEPLOYMENT_NAME CF_APP`
 
 - cf\_push.sh
   - Simple script to login to Cloudfoundry and push the named app
     - Parameters: `DEPLOYMENT_NAME CF_APP [CF_SPACE] [CF_ORGANISATION]`
+    - Environmental Variables: `DEPLOYMENT_NAME CF_APP CF_SPACE CF_ORGANISATION`
 
 - common-aws.sh
   - Common parts for the various AWS scripts
@@ -59,12 +71,16 @@ but please check in the script if this is supported.
 - create\_aws\_cloudformation.sh
   - Creates an AWS infrastructure using various Cloudformation Templates
     - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
-    - Environmental variables: `HOSTED_ZONE, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEBUG=true|false, AWS_PROFILE, CLOUDFORMATION_DIR, IGNORE_MISSING_CONFIG=true|false
-                                SKIP_STACK_OUTPUTS_DIR, SKIP_EXISTING=true|false, REGENERATE_SSH_KEY=true|false, DELETE_AWS_SSH_KEY=true|false`
+    - Environmental variables: `DEPLOYMENT_NAME AWS_CONFIG_PREFIX HOSTED_ZONE AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
+                                AWS_DEBUG AWS_PROFILE CLOUDFORMATION_DIR IGNORE_MISSING_CONFIG SKIP_STACK_OUTPUTS_DIR
+                                SKIP_EXISTING REGENERATE_SSH_KEY DELETE_AWS_SSH_KEY`
+    - Defaults: `AWS_CONFIG_PREFIX='AWS-Bosh' AWS_REGION='eu-central-1' AWS_DEBUG=false AWS_PROFILE=default
+                 CLOUDFORMATION_DIR='Cloudformation' IGNORE_MISSING='true' SKIP_EXISTING='true'`
+                 
 
 - create\_dbs.sh
   - Reads the named Bosh manifest and creates the named databases
-    - Parameters: `DEPLOYMENT_NAME [Bosh_Full_Manifest_Name]`
+    - Environmental Variables: `BOSH_FULL_MANIFEST_FILE`
 
 - create\_postgresql\_db.sh
   - Create the named database and user
@@ -78,8 +94,8 @@ but please check in the script if this is supported.
 - delete\_aws\_cloudformation.sh
   - Delete a group of AWS Cloudformation stacks
     - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
-    - Environmental Variables: `AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEBUG=true|false, AWS_PROFILE,
-                                CLOUDFORMATION_DIR, BOSH_SSH_CONFIG, KEEP_SSH_KEY`
+    - Environmental Variables: `AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEBUG=true|false AWS_PROFILE
+                                CLOUDFORMATION_DIR BOSH_SSH_CONFIG KEEP_SSH_KEY`
 
 - delete\_cloudfoundry.sh
   - Delete a Bosh deployment and delete the Bosh initial environment
@@ -178,8 +194,8 @@ but please check in the script if this is supported.
 - update\_aws\_cloudformation.sh
   - Update an existing set of AWS Cloudformation templates
     - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
-    - Environmental Variables: `HOSTED_ZONE, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEBUG=true|false, AWS_PROFILE,
-                                CLOUDFORMATION_DIR, IGNORE_MISSING_CONFIG=true|false SKIP_STACK_OUTPUTS_DIR, SKIP_MISSING,
+    - Environmental Variables: `HOSTED_ZONE AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEBUG=true|false AWS_PROFILE
+                                CLOUDFORMATION_DIR IGNORE_MISSING_CONFIG=true|false SKIP_STACK_OUTPUTS_DIR SKIP_MISSING
                                 SKIP_STACK_PREAMBLE_OUTPUTS_CHECK`
 
 - upload\_components.sh

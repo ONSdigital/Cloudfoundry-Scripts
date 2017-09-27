@@ -12,7 +12,7 @@ s3_location(){
 	echo $1 | grep -Eq '^s3://'
 }
 
-DEPLOYMENT_NAME="$1"
+DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 ACTION="${2:-backup}"
 SRC_OR_DST="${3:-s3_backups}"
 

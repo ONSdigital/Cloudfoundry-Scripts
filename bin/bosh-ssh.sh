@@ -31,6 +31,10 @@ GATEWAY="${GATEWAY_HOST:-$BOSH_ENVIRONMENT}"
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"
+
+# ... and export it for Bosh
+export BOSH_CA_CERT
+
 # Store existing path, in case the full path contains spaces
 bosh_ssh_key_file_org="$bosh_ssh_key_file"
 findpath bosh_ssh_key_file "$bosh_ssh_key_file"

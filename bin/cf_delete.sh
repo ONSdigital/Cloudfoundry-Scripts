@@ -8,8 +8,8 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-DEPLOYMENT_NAME="$1"
-CF_APP="$2"
+DEPLOYMENT_NAME="${1:-$CF_DEPLOYMENT}"
+CF_APP="${2:-$CF_APP}"
 
 NO_SKIP_SSL_VALIDATION="$3"
 
