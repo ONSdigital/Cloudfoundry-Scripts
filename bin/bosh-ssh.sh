@@ -1,15 +1,16 @@
 #!/bin/sh
 #
+# Call 'bosh ssh' with the correct options to bounce onto the given host
 #
 
 set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-DEPLOYMENT_NAME="$1"
-SSH_HOST="$2"
-GATEWAY_USER="${3:-vcap}"
-GATEWAY_HOST="$4"
+DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
+SSH_HOST="${2:-$SSH_HOST}"
+GATEWAY_USER="${3:-$GATEWAY_USER}"
+GATEWAY_HOST="${4:-$GATEWAY_HOST}"
 
 . "$BASE_DIR/common.sh"
 
@@ -22,6 +23,11 @@ GATEWAY_HOST="$4"
 
 . "$BOSH_SSH_CONFIG"
 eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
+
+GATEWAY="${GATEWAY_HOST:-$BOSH_ENVIRONMENT}"
+[ -z "$GATEWAY_USER" ] && GATEWAY_USER='vcap'
+
+[ -z "$GATEWAY" ] && FATAL 'No gateway host available'
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"
@@ -42,14 +48,10 @@ if echo "$bosh_ssh_key_file" | grep -q " "; then
 	bosh_ssh_key_file="$bosh_ssh_key_file_org"
 fi
 
-export BOSH_CA_CERT
-
-[ -z "${GATEWAY_HOST:-$BOSH_ENVIRONMENT}" ] && FATAL 'No gateway host available'
-
 INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
 "$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT" >&2
 
 INFO 'Attempting to login'
 "$BOSH" log-in >&2
 
-"$BOSH" ssh --gw-private-key="$bosh_ssh_key_file" --gw-user="$GATEWAY_USER" --gw-host "${GATEWAY_HOST:-$BOSH_ENVIRONMENT}" "$SSH_HOST"
+"$BOSH" ssh --gw-private-key="$bosh_ssh_key_file" --gw-user="$GATEWAY_USER" --gw-host "$GATEWAY" "$SSH_HOST"
