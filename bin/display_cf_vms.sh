@@ -7,11 +7,15 @@ set -e
 BASE_DIR="`dirname \"$0\"`"
 
 
-DEPLOYMENT_NAME="$1"
+DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 # vitals|failing
-OPTION="${2:-vitals}"
-INTERVAL="${3:-5}"
-OUTPUT_TYPE="${4:-tty}"
+OPTION="${2:-$OPTION}"
+INTERVAL="${3:-$INTERVAL}"
+OUTPUT_TYPE="${4:-$OUTPUT_TYPE}"
+
+[ -z "$OPTION" ] && OPTION='vitals'
+[ -z "$INTERVAL" ] && INTERVAL='5'
+[ -z "$OUTPUT_TYPE" ] && OUTPUT_TYPE='tty'
 
 . "$BASE_DIR/common.sh"
 

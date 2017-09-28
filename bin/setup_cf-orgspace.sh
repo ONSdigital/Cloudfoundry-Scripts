@@ -6,7 +6,7 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-DEPLOYMENT_NAME="$1"
+DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 ORG_NAME="${2:-$organisation}"
 SPACE_NAME="${3:-Test}"
 

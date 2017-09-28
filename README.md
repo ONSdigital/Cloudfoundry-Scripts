@@ -111,8 +111,10 @@ but please check in the script if this is supported.
     - Parameters: `DEPLOYMENT_NAME [BOSH_FULL_MANIFEST_PREFIX] [BOSH_CLOUD_MANIFEST_PREFIX] [BOSH_LITE_MANIFEST_NAME]
                   [BOSH_PREAMBLE_MANIFEST_NAME] [BOSH_STATIC_IPS_PREFIX] [INTERNAL_DOMAIN]`
     - Environmental Variables: `BOSH_LITE_OPS_FILE_NAME BOSH_FULL_OPS_FILE_NAME INTERACTIVE NO_FORCE_TTY`
-    - Defaults: `INTERACTIVE=false 
-
+    - Defaults: `INTERACTIVE=false NO_FORCE_TTY=false BOSH_FULL_MANIFEST_PREFIX='Bosh-Template'
+                 BOSH_CLOUD_MANIFEST_PREFIX='$BOSH_FULL_MANIFEST_PREFIX-AWS-CloudConfig' BOSH_LITE_MANIFEST_NAME='Bosh-Template'
+                 BOSH_PREAMBLE_MANIFEST_NAME='Bosh-Template-preamble' BOSH_STATIC_IPS_PREFIX='Bosh-static-ips'
+                 MANIFESTS_DIR='Bosh-Manifests' INTERNAL_DOMAIN='cf.internal'`
 
 - deploy\_cloudfoundry.sh
   - Deploys Cloudfoundry - this actually deploys any Bosh manifests, but has so far been soley used to deploy various
@@ -123,14 +125,25 @@ but please check in the script if this is supported.
                                 DELETE_BOSH_STATE REGENERATE_PASSWORDS REGENERATE_NETWORKS_CONFIG REGENERATE_SSL
                                 DELETE_SSL_CA REGENERATE_BOSH_CONFIG REINTERPOLATE_LITE_STATIC_IPS REINTERPOLATE_FULL_STATIC_IPS
                                 REUPLOAD_COMPONENTS NORUN_PREDEPLOY NORUN_BOSH_PREAMBLE SKIP_POST_DEPLOY_ERRANDS`
+    - Defaults: `INTERACTIVE=false NO_FORCE_TTY=false BOSH_FULL_MANIFEST_PREFIX='Bosh-Template'
+                BOSH_CLOUD_MANIFEST_PREFIX='$BOSH_FULL_MANIFEST_PREFIX-AWS-CloudConfig' BOSH_LITE_MANIFEST_NAME='Bosh-Template'
+                BOSH_PREAMBLE_MANIFEST_NAME='Bosh-Template-preamble' BOSH_STATIC_IPS_PREFIX='Bosh-static-ips'
+                MANIFESTS_DIR='Bosh-Manifests' INTERNAL_DOMAIN='cf.internal' DELETE_BOSH_ENV=false REGENERATE_PASSWORDS=false
+                REGENERATE_NETWORKS_CONFIG=false REGENERATE_BOSH_CONFIG=false REINTERPOLATE_LITE_STATIC_IPS=false
+                DELETE_BOSH_ENV=false REGENERATE_BOSH_ENV=false REINTERPOLATE_FULL_STATIC_IPS=false REUPLOAD_COMPONENTS=false
+                NORUN_PREDEPLOY=false NORUN_BOSH_PREAMBLE=false SKIP_POST_DEPLOY_ERRANDS=false`
 
 - display\_cf\_vms.sh
   - Wraps `bosh vms` to provide a continually updated list of instances
     - Parameters: `DEPLOYMENT_NAME [--failing|failing|f|--vitals|vitals|v] [INTERVAL] [OUTPUT_TYPE]`
+    - Environmental Variables: `DEPLOYMENT_NAME OPTION INTERVAL OUTPUT_TYPE BOSH_OPTS`
+    - Defaults: `OPTION='vitals' INTERVAL=5 OUTPUT_TYPE='tty'`
 
 - emergency\_delete\_aws\_stack.sh
   - Very simple/stupid script that deletes any AWS Cloudformation stacks that match a given prefix
-    - Parameters: `STACK_PREFIX [AWS_PROFILE]`
+    - Parameters: `STACK_PREFIX`
+    - Environmental Variables: `AWS_PROFILE`
+    - Defaults: `AWS_PROFILE='default'`
 
 - export-roles-orgs-user.sh
   - Simple script that exports users, organisations, spaces and roles from a given Cloudfoundry
@@ -152,12 +165,15 @@ but please check in the script if this is supported.
     outputted into a YML file that can be sucked in by Bosh
     - Parameters: `[EXTERNAL_CA_NAME] [INTERNAL_CA_NAME] [OUTPUT_YML] [ORGANISATION] [APPS_DOMAIN] [SYSTEM_DOMAIN] [SERVICE_DOMAIN]
                    [EXTERNAL_DOMAIN] [ONLY_MISSING]`
+    - Environmental Variables: `EXTERNAL_CA_NAME INTERNAL_CA_NAME OUTPUT_YML ORGANISATION ONLY_MISSING`
+    - Defaults: `ONLY_MISSING=true`
 
 - install\_deps.sh
   - Script to install various dependencies (eg awscli, cf-uaac)
     - Parameters: `[INSTALL_AWS]`
     - Environmental Variables: `BOSH_CLI_VERSION BOSH_GITHUB_RELEASE_URL BOSH_CLI_RELEASE_TYPE CF_CLI_VERSION CF_GITHUB_RELEASE_URL
                                 CF_CLI_RELEASE_TYPE NO_AWS PIP_VERSION_SUFFIX`
+    - Defaults: `INSTALL_AWS=true`
 
 - install\_packages-EL.sh
   - Script to install various packages on Redhat/CentOS that then allow install\_deps.sh to run
@@ -169,34 +185,40 @@ but please check in the script if this is supported.
                                 ${NETWORK_NAME}_DEFAULT_ROUTE_OFFSET ${NETWORK_NAME}_RESERVED_START_OFSET
                                 ${NETWORK_NAME}_RESERVED_SIZE ${NETWORK_NAME}_STATIC_START_OFFSET
                                 ${NETWORK_NAME}_STATIC_SIZE`
-
-- setup\_cf-admin.sh
-  - Create a basic Cloudfoundry admin user
-    - Parameters: `DEPLOYMENT_NAME USERNAME EMAIL PASSWORD DONT_SKIP_SSL_VALIDATION`
-
-- setup\_cf-elasticache-broker.sh
-  - Upload the Cloudfoundry ElastiCache brokerA
-    - Parameters:
-
-- setup\_cf-orgspace.sh
-  - Create a Cloudfoundry organisation and space
-    - Parameters: `DEPLOYMENT_NAME [ORG_NAME] [SPACE_NAME]`
-
-- setup\_cf-rds-broker.sh
-  - Upload the Cloudfoundry RDS broker
-    - Parameters: `DEPLOYMENT_NAME RDS_BROKER_DB_NAME RDS_BROKER_NAME CF_ORG`
-    - Environmental Variables: `RDS_BROKER_DB_NAME RDS_BROKER_NAME DEFAULT_RDS_BROKER_DB_NAME DEFAULT_RDS_BROKER_NAME IGNORE_EXISTING
-                                SERVICES_SPACE`
-
-- setup\_cf-service-broker.sh
-  - Generic script to setup a Cloudfoundry service broker
-    - Parameters: `DEPLOYMENT_NAME [SERVICE_NAME] [SERVICE_USERNAME] [SERVICE_PASSWORD] [SERVICE_URL]`
-    - Environmental Variables: `SERVICE_NAME SERVICE_USERNAME SERVICE_PASSWORD SERVICE_URL DONT_SKIP_SSL_VALIDATION IGNORE_EXISTING`
+    - Defaults: `DEFAULT_DEFAULT_ROUTE_OFFEST=1 DEFAULT_RESERVED_START_OFFSET=1 DEFAULT_RESERVED_SIZE=10`
 
 - setup\_cf.sh
   - Script that calls the variopus setup\_cf-\* scripts to configure a deployed Cloudfoundry instance
     - Parameters: `DEPLOYMENT_NAME [EMAIL_ADDRESS] [ORG_NAME] [TEST_SPACE] [DONT_SKIP_SSL_VALIDATION]`
     - Environmental Variables: `SKIP_TESTS`
+    - Defaults: `EMAIL_ADDRESS='NONE' ORG_NAME="$organisation" TEST_SPACE='Test'`
+
+- setup\_cf-admin.sh
+  - Create a basic Cloudfoundry admin user
+    - Parameters: `DEPLOYMENT_NAME USERNAME EMAIL PASSWORD DONT_SKIP_SSL_VALIDATION`
+    - Defaults: `EMAIL_ADDRESS=NONE ORG_NAME="$organisation" TEST_SPACE='Test' DONT_SKIP_SSL_VALIDATION=false`
+
+- setup\_cf-elasticache-broker.sh
+  - Upload the Cloudfoundry ElastiCache brokerA
+    - Parameters: `DEPLOYMENT_NAME BROKER_NAME`
+    - Defaults: `BROKER_NAME='elasticache'`
+
+- setup\_cf-orgspace.sh
+  - Create a Cloudfoundry organisation and space
+    - Parameters: `DEPLOYMENT_NAME [ORG_NAME] [SPACE_NAME]`
+    - Defaults: `ORG_NAME="$organisation" SPACE_NAME='Test'`
+
+- setup\_cf-rds-broker.sh
+  - Upload the Cloudfoundry RDS broker
+    - Parameters: `DEPLOYMENT_NAME RDS_BROKER_DB_NAME RDS_BROKER_NAME CF_ORG`
+    - Environmental Variables: `DEPLOYMENT_NAME RDS_BROKER_DB_NAME RDS_BROKER_NAME DEFAULT_RDS_BROKER_DB_NAME DEFAULT_RDS_BROKER_NAME IGNORE_EXISTING
+                                SERVICES_SPACE`
+    - Defaults: `RDS_BROKER_DB_NAME='rds_broker' RDS_BROKER_NAME='rds_broker' SERVICES_SPACE='Services'`
+
+- setup\_cf-service-broker.sh
+  - Generic script to setup a Cloudfoundry service broker
+    - Parameters: `DEPLOYMENT_NAME [SERVICE_NAME] [SERVICE_USERNAME] [SERVICE_PASSWORD] [SERVICE_URL]`
+    - Environmental Variables: `DEPLOYMENT_NAME SERVICE_NAME SERVICE_USERNAME SERVICE_PASSWORD SERVICE_URL DONT_SKIP_SSL_VALIDATION IGNORE_EXISTING`
 
 - template.sh
   - Base template
@@ -206,7 +228,9 @@ but please check in the script if this is supported.
     - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
     - Environmental Variables: `HOSTED_ZONE AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEBUG=true|false AWS_PROFILE
                                 CLOUDFORMATION_DIR IGNORE_MISSING_CONFIG=true|false SKIP_STACK_OUTPUTS_DIR SKIP_MISSING
-                                SKIP_STACK_PREAMBLE_OUTPUTS_CHECK`
+                                SKIP_STACK_PREAMBLE_OUTPUTS_CHECK SKIP_STACK_PREAMBLE_OUTPUTS_CHECK`
+    - Defaults: `AWS_CONFIG_PREFIX='AWS-Bosh' AWS_REGION='eu-central-1' AWS_DEBUG=false AWS_PROFILE='default'
+                 CLOUDFORMATION_DIR='Cloudformation' SKIP_MISSING='false' SKIP_STACK_PREAMBLE_OUTPUTS_CHECK='false'`
 
 - upload\_components.sh
   - Upload various Cloudfoundry releases and stemcells.  Also records the uploaded versions
