@@ -19,10 +19,10 @@ VALID_DAYS="${VALID_DAYS:-3650}"
 SAN="IGNORED"
 
 # We allow unsetting of this, if required
-TRUST_OPT="-trustout"
+TRUST_OPT="${TRUST_OPT:--trustout}"
 # Trailing comma is critical
-BASIC_USAGE='critical,'
-EXTENDED_USAGE='critical,'
+BASIC_USAGE="${BASIC_USAGE:-critical,}"
+EXTENDED_USAGE="${EXTENDED_USAGE:-critical,}"
 
 for i in $@; do
 	case "$i" in

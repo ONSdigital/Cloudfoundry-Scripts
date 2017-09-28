@@ -45,9 +45,11 @@ but please check in the script if this is supported.
                       [--organisation|-o Organisation_Part1 ... Organisation_PartN]
                       [--generate-public-key|-p] [--generate-public-key-ssh-fingerprint|-f]
                       [--subject-alt-names|-s Subject_Alt_Name_Part1 ...Subject_Alt_Name_PartN] [--not-trusted|-t]`
-    - Environmental Variables: `KEY_SIZE HASH_TYPE ORGANISTAION VALID_DAYS CA_NAME NEW_CA NAME UPDATE_NAME GENERATE_PUBLIC_KEY
-                                GENERATE_PUBLIC_KEY_SSH_FINGER_PRINT`
-    - Defaults: `KEY_SIZE='4096' HASH_TYPE='sha512' ORGANISTAION='Organisation' VALID_DAYS='3650'`
+    - Environmental Variables: `KEY_SIZE HASH_TYPE ORGANISTAION VALID_DAYS CA_NAME NEW_CA=[1] NAME UPDATE_NAME=[1]'
+                                GENERATE_PUBLIC_KEY=[1] GENERATE_PUBLIC_KEY_SSH_FINGER_PRINT=[1] TRUST_OPT BASIC_USAGE
+                                EXTENDED_USAGE`
+    - Defaults: `KEY_SIZE='4096' HASH_TYPE='sha512' ORGANISTAION='Organisation' VALID_DAYS='3650' TRUST_OPT='--trustout'
+                 BASIC_USAGE='critical,' EXTENDED_USAGE='critical,'`
 
 - cf\_delete.sh
   - Simple script to login to Cloudfoundry and delete the named app
@@ -58,6 +60,7 @@ but please check in the script if this is supported.
   - Simple script to login to Cloudfoundry and push the named app
     - Parameters: `DEPLOYMENT_NAME CF_APP [CF_SPACE] [CF_ORGANISATION]`
     - Environmental Variables: `DEPLOYMENT_NAME CF_APP CF_SPACE CF_ORGANISATION`
+    - Defaults: `CF_APP='Test' CF_ORGANISATION="$organisation"`
 
 - common-aws.sh
   - Common parts for the various AWS scripts
@@ -72,11 +75,12 @@ but please check in the script if this is supported.
   - Creates an AWS infrastructure using various Cloudformation Templates
     - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
     - Environmental variables: `DEPLOYMENT_NAME AWS_CONFIG_PREFIX HOSTED_ZONE AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
-                                AWS_DEBUG AWS_PROFILE CLOUDFORMATION_DIR IGNORE_MISSING_CONFIG SKIP_STACK_OUTPUTS_DIR
-                                SKIP_EXISTING REGENERATE_SSH_KEY DELETE_AWS_SSH_KEY`
-    - Defaults: `AWS_CONFIG_PREFIX='AWS-Bosh' AWS_REGION='eu-central-1' AWS_DEBUG=false AWS_PROFILE=default
-                 CLOUDFORMATION_DIR='Cloudformation' IGNORE_MISSING='true' SKIP_EXISTING='true'`
-                 
+                                AWS_DEBUG=true|false AWS_PROFILE CLOUDFORMATION_DIR IGNORE_MISSING_CONFIG=true|false
+                                SKIP_STACK_OUTPUTS_DIR=true|false SKIP_EXISTING=true|false REGENERATE_SSH_KEY=true|false
+                                DELETE_AWS_SSH_KEY=true|false`
+    - Defaults: `AWS_CONFIG_PREFIX='AWS-Bosh' AWS_REGION='eu-central-1' AWS_DEBUG=false AWS_PROFILE='default'
+                 CLOUDFORMATION_DIR='Cloudformation' IGNORE_MISSING=true SKIP_EXISTING=true REGENERATE_SSH_KEY=false
+                 DELETE_AWS_SSH_KEY=false AWS_DEBUG=false`
 
 - create\_dbs.sh
   - Reads the named Bosh manifest and creates the named databases
@@ -90,18 +94,24 @@ but please check in the script if this is supported.
                    [--postgres-port POSTGRESQL_PORT] [--postgresql-port POSTGRESQL_PORT]
                    [--new-database-username NEW_DATABASE_USERNAME] [--new-database-password NEW_DATABASE_PASSWORD]
                    [--jump-userhost JUMP_USERHOST] [--ssh-key SSH_KEY] [--extensions EXTENSIONS]`
+    - Environmental Variables: `ADMIN_DATABASE_NAME ADMIN_USERNAME ADMIN_PASSWORD POSTGRESQL_HOSTNAME POSTGRESQL_PORT
+                                NEW_DATABASE_NAME NEW_DATABASE_USERNAME NEW_DATABASE_PASSWORD JUMP_USERHOST SSH_KEY
+                                EXTENSIONS`
+    - Defaults: `ADMIN_DATABASE_NAME='postgres' ADMIN_USERNAME='postgres'`
 
 - delete\_aws\_cloudformation.sh
   - Delete a group of AWS Cloudformation stacks
     - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
     - Environmental Variables: `AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEBUG=true|false AWS_PROFILE
                                 CLOUDFORMATION_DIR BOSH_SSH_CONFIG KEEP_SSH_KEY`
+    - Defaults: `AWS_REGION='eu-central-1' AWS_DEBUG=false KEEP_SSH_KEY=false AWS_CONFIG_PREFIX='AWS-Bosh' AWS_PROFILE='default'`
 
 - delete\_cloudfoundry.sh
   - Delete a Bosh deployment and delete the Bosh initial environment
     - Parameters: `DEPLOYMENT_NAME [BOSH_FULL_MANIFEST_PREFIX] [BOSH_CLOUD_MANIFEST_PREFIX] [BOSH_LITE_MANIFEST_NAME]
                   [BOSH_PREAMBLE_MANIFEST_NAME] [BOSH_STATIC_IPS_PREFIX] [INTERNAL_DOMAIN]`
     - Environmental Variables: `BOSH_LITE_OPS_FILE_NAME BOSH_FULL_OPS_FILE_NAME INTERACTIVE NO_FORCE_TTY`
+    - Defaults: `INTERACTIVE=false 
 
 
 - deploy\_cloudfoundry.sh

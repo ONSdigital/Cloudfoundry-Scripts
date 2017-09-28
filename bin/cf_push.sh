@@ -9,11 +9,14 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-DEPLOYMENT_NAME="$1"
-APP_NAME="$2"
-CF_ORGANISATION="${3:-$organisation}"
-CF_SPACE="${4:-Test}"
-DIRECTORY="$5"
+DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
+APP_NAME="${2:-$APP_NAME}"
+CF_ORGANISATION="${3:-$CF_ORGANISATION}"
+CF_SPACE="${4:-$CF_SPACE}"
+DIRECTORY="${5:-$DIRECTORY}"
+
+[ -z "$CF_ORGANISATION" ] && CF_ORGANISATION="$organisation"
+[ -z "$CF_SPACE" ] && CF_SPACE='Test'
 
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"

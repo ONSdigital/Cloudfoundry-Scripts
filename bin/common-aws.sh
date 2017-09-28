@@ -28,7 +28,7 @@ find_aws
 
 if [ -z "$AWS_DEFAULT_REGION" ]; then
 	[ -f ~/.aws/config ] && CONFIGURED_AWS_REGION="`"$AWS" configure get region`"
-t
+
 	# Provide a default - these should come from a configuration/defaults file
 	DEFAULT_AWS_REGION="${DEFAULT_AWS_REGION:-${CONFIGURED_AWS_REGION:-eu-central-1}}"
 fi
