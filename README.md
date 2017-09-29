@@ -4,6 +4,16 @@ Various scripts to handle the life cycle of AWS Cloudformation, Bosh and Cloudfo
 position dependant. Most of the time, if a parameter is not critical it can be set to NONE and it will be ignored -
 but please check in the script if this is supported.
 
+Generally, the way to get a full deployment of Cloudfoundry is to run the following:
+- `create_aws_cloudformation.sh`
+- `deploy_cloudfoundry.sh`
+
+Currently, the deploying Cloudfoundry (using `deploy_cloudfoundry.sh`) fails first time due to some problems with
+package compilation.  The the script is re-run with `REUPLOAD_COMPONENTS=true` then the deployment generally
+completes.
+
+
+## Scripts
 
 - backup\_cloudfoundry-databases.sh
   - Run backup errands.
