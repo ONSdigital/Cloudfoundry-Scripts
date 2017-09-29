@@ -9,7 +9,7 @@ Generally, the way to get a full deployment of Cloudfoundry is to run the follow
 - `deploy_cloudfoundry.sh`
 
 Currently, the deploying Cloudfoundry (using `deploy_cloudfoundry.sh`) fails first time due to some problems with
-package compilation.  The the script is re-run with `REUPLOAD_COMPONENTS=true` then the deployment generally
+package compilation.  If the script is re-run with `REUPLOAD_COMPONENTS=true` then the deployment generally
 completes.
 
 
