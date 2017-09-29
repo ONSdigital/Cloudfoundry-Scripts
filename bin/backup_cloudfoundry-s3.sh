@@ -1,5 +1,6 @@
 #!/bin/sh
 #
+# Backup/restore all of a deployments S3 buckets to/from the shared backup S3 bucket
 #
 
 set -e
@@ -29,6 +30,11 @@ load_outputs "$STACK_OUTPUTS_DIR"
 
 [ -n "$aws_region" ] && export AWS_DEFAULT_REGION="$aws_region"
 
+# s3_bucket_resource_names contains a list of variable names that are then
+# expanded to give the real bucket name. We do this so we so we can logically
+# backup/restore them to/from the shared S3 bucket
+# eg
+# dropletbucket -> dropletbucket-21490hdj -> backups up to shared_bucket/deployment_name/dropletbucket
 OLDIFS="$IFS"
 IFS=","
 for _bucket in $s3_bucket_resource_names; do
@@ -58,6 +64,7 @@ for _bucket in $s3_bucket_resource_names; do
 		continue
 	fi
 
+	# The shared bucket name is either the source or the destination
 	if [ x"$ACTION" = x"backup" ]; then
 		log_name='Backup'
 		src="s3://$s3_bucket"

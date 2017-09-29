@@ -13,27 +13,18 @@ GATEWAY_USER="${3:-$GATEWAY_USER}"
 GATEWAY_HOST="${4:-$GATEWAY_HOST}"
 
 . "$BASE_DIR/common.sh"
+. "$BASE_DIR/common-bosh-login.sh"
 
 [ -z "$SSH_HOST" ] && FATAL 'No host to ssh onto'
 
-[ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
-[ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"
 [ -f "$BOSH_SSH_CONFIG" ] || FATAL "Bosh SSH config does not exist: $BOSH_SSH_CONFIG"
-[ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh config does not exist: $BOSH_DIRECTOR_CONFIG"
 
 . "$BOSH_SSH_CONFIG"
-eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
 
 GATEWAY="${GATEWAY_HOST:-$BOSH_ENVIRONMENT}"
 [ -z "$GATEWAY_USER" ] && GATEWAY_USER='vcap'
 
 [ -z "$GATEWAY" ] && FATAL 'No gateway host available'
-
-# Convert from relative to an absolute path
-findpath BOSH_CA_CERT "$BOSH_CA_CERT"
-
-# ... and export it for Bosh
-export BOSH_CA_CERT
 
 # Store existing path, in case the full path contains spaces
 bosh_ssh_key_file_org="$bosh_ssh_key_file"
@@ -51,11 +42,5 @@ if echo "$bosh_ssh_key_file" | grep -q " "; then
 
 	bosh_ssh_key_file="$bosh_ssh_key_file_org"
 fi
-
-INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
-"$BOSH" alias-env -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT" >&2
-
-INFO 'Attempting to login'
-"$BOSH" log-in >&2
 
 "$BOSH" ssh --gw-private-key="$bosh_ssh_key_file" --gw-user="$GATEWAY_USER" --gw-host "$GATEWAY" "$SSH_HOST"
