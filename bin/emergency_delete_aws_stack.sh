@@ -4,15 +4,15 @@
 
 STACK_PREFIX="$1"
 
-AWS_PROFILE="${AWS_PROFILE:-default}"
-
 if [ -n "$AWS" ]; then
 	echo "Using $AWS cli"
 
 elif which aws >/dev/null 2>1; then
 	AWS='aws'
+
 elif [ -x ~/.local/bin/aws ]; then
 	AWS=~/.local/bin/aws
+
 elif [ -z "$AWS" -o ! -x "$AWS" ]; then
 	echo Unable to find AWS CLI
 	echo 'Set AWS to full filename, including path, of the AWS CLI, eg AWS=/opt/bin/aws'

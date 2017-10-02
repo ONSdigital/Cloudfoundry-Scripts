@@ -141,8 +141,7 @@ for stack_file in $STACK_FILES; do
 	if [ -z "$STACK_EXISTS" ]; then
 		INFO "Creating Cloudformation stack: '$STACK_NAME'"
 		INFO 'Stack details:'
-		"$AWS" --profile "$AWS_PROFILE"\
-			cloudformation create-stack \
+		"$AWS" cloudformation create-stack \
 			--stack-name "$STACK_NAME" \
 			--template-url "$STACK_URL" \
 			--capabilities CAPABILITY_IAM \
