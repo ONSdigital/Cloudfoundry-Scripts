@@ -1,0 +1,19 @@
+<html>
+	<head>
+		<title>Environmental Variables</title>
+		<style type="text/css">
+			tr:nth-child(odd) {{ "{" }} background-color: #eeeeee; {{ "}" }}
+			tr:nth-child(even) {{ "{" }}  background-color: #dddddd; {{ "}" }}
+			td {{ "{" }} vertical-align: top; {{ "}" }}
+		 </style>
+	</head>
+	<body>
+		<h1>Environmental Variables</h1>
+		<table>
+			<tr><th>Name</th><th>Value</th></tr>
+{% for k, v in vars %}
+			<tr><td>{{ k | safe }}</td><td><pre>{{ ( json.dumps(json.loads(v), sort_keys=true, indent=2) if re.search('^[\{\[].*[\}\]]$',v) else v ) | safe }}</pre></td></tr>
+{% endfor %}
+		</table>
+	</body>
+</html>
