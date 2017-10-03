@@ -10,7 +10,7 @@ BASE_DIR="`dirname \"$0\"`"
 DEPLOYMENT_NAME="$1"
 
 . "$BASE_DIR/common.sh"
-. "$BASE_DIR/common-bosh-login"
+. "$BASE_DIR/common-bosh-login.sh"
 
 shift
 
