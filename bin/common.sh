@@ -26,6 +26,7 @@ DEPLOYMENT_BASE_DIR="$BASE_DIR/../../deployment"
 DEPLOYMENT_BASE_DIR_RELATIVE='deployment'
 BROKER_CONFIG_DIR="$BASE_DIR/../../configs/brokers"
 DEPLOYMENTS_CONFIG_DIR="$BASE_DIR/../../configs/deployments"
+OPS_FILES_CONFIG_DIR="$BASE_DIR/../../configs/ops-files"
 TOP_LEVEL_DIR="$BASE_DIR/../.."
 
 STACK_TEMPLATES_DIRNAME="Templates"
@@ -41,6 +42,7 @@ findpath TOP_LEVEL_DIR "$TOP_LEVEL_DIR"
 
 [ -d "$BROKER_CONFIG_DIR" ] && findpath BROKER_CONFIG_DIR "$BROKER_CONFIG_DIR"
 [ -d "$DEPLOYMENTS_CONFIG_DIR" ] && findpath DEPLOYMENTS_CONFIG_DIR "$DEPLOYMENTS_CONFIG_DIR"
+[ -d "$OPS_FILES_CONFIG_DIR" ] && findpath OPS_FILES_CONFIG_DIR "$OPS_FILES_CONFIG_DIR"
 
 # Set prefix for vars that Bosh will suck in
 ENV_PREFIX_NAME='CF_BOSH'
