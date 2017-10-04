@@ -24,9 +24,9 @@ fi
 CACHE_DIR="$BASE_DIR/../../work"
 DEPLOYMENT_BASE_DIR="$BASE_DIR/../../deployment"
 DEPLOYMENT_BASE_DIR_RELATIVE='deployment'
-BROKER_CONFIG_DIR="$BASE_DIR/../../configs/brokers"
-DEPLOYMENTS_CONFIG_DIR="$BASE_DIR/../../configs/deployments"
-OPS_FILES_CONFIG_DIR="$BASE_DIR/../../configs/ops-files"
+BROKER_CONFIG_DIR="$BASE_DIR/../../config/brokers"
+DEPLOYMENTS_CONFIG_DIR="$BASE_DIR/../../config/deployments"
+OPS_FILES_CONFIG_DIR="$BASE_DIR/../../config/ops-files"
 TOP_LEVEL_DIR="$BASE_DIR/../.."
 
 STACK_TEMPLATES_DIRNAME="Templates"
