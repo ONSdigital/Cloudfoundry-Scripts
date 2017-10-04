@@ -82,7 +82,12 @@ EOF
 	AWS_PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/aws-passwords.sh"
 
 	# Load the environment config if we have been given one
-	[ -f "$CONFIGS_DIR/deployments/$DEPLOYMENT_NAME/environment.sh" ] && . "$CONFIGS_DIR/deployments/$DEPLOYMENT_NAME/environment.sh"
+	if [ -f "$CONFIGS_DIR/deployments/$DEPLOYMENT_NAME/environment.sh" ]; then
+		# We want the vars in this script to be exported so that any subscript can see them, but we don't want to have all vars available
+		# to all subscripts, so we turn it off again afterwards
+		set -a
+		. "$CONFIGS_DIR/deployments/$DEPLOYMENT_NAME/environment.sh"
+		set +a
 fi
 
 # Set secure umask - the default permissions for ~/.bosh/config are wide open
