@@ -88,6 +88,7 @@ EOF
 		set -a
 		. "$CONFIGS_DIR/deployments/$DEPLOYMENT_NAME/environment.sh"
 		set +a
+	fi
 fi
 
 # Set secure umask - the default permissions for ~/.bosh/config are wide open
