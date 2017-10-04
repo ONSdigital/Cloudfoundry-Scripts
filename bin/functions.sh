@@ -284,7 +284,8 @@ bosh_int(){
 bosh_env(){
 	local action_option=$1
 
-	[ -n "$BOSH_LITE_OPS_FILE" ] && local opts_option="--ops-file='$BOSH_LITE_OPS_FILE'"
+	[ -n "$PUBLIC_BOSH_LITE_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_LITE_OPS_FILE'"
+	[ -n "$PRIVATE_BOSH_LITE_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_LITE_OPS_FILE'"
 
 	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
 		sh -c "'$BOSH' interpolate '$BOSH_LITE_MANIFEST_FILE' \
@@ -317,7 +318,8 @@ bosh_deploy(){
 	[ -z "$bosh_vars" ] && FATAL 'Not enough options'
 	[ -f "$bosh_manifest" ] || FATAL "Unable to find: $bosh_manifest"
 
-	[ -n "$BOSH_FULL_OPS_FILE" ] && local opts_option="--ops-file='$BOSH_FULL_OPS_FILE'"
+	[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_FULL_OPS_FILE'"
+	[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_FULL_OPS_FILE'"
 
 	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
 		sh -c "'$BOSH' interpolate '$bosh_manifest' \

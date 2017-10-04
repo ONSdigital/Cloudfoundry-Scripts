@@ -27,6 +27,8 @@ DEPLOYMENT_BASE_DIR_RELATIVE='deployment'
 BROKER_CONFIG_DIR="$BASE_DIR/../../configs"
 TOP_LEVEL_DIR="$BASE_DIR/../.."
 
+CONFIGS_DIR="$TOP_LEVEL_DIR/config"
+
 STACK_TEMPLATES_DIRNAME="Templates"
 
 # These need to exist for findpath() to work
@@ -80,7 +82,7 @@ EOF
 	AWS_PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/aws-passwords.sh"
 
 	# Load the environment config if we have been given one
-	[ -f "$DEPLOYMENT_DIR/environment.sh" ] && . "$DEPLOYMENT_DIR/environment.sh"
+	[ -f "$CONFIGS_DIR/deployments/$DEPLOYMENT_NAME/environment.sh" ] && . "$CONFIGS_DIR/deployments/$DEPLOYMENT_NAME/environment.sh"
 fi
 
 # Set secure umask - the default permissions for ~/.bosh/config are wide open
