@@ -320,8 +320,10 @@ bosh_deploy(){
 	[ -z "$bosh_vars" ] && FATAL 'Not enough options'
 	[ -f "$bosh_manifest" ] || FATAL "Unable to find: $bosh_manifest"
 
-	[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_FULL_OPS_FILE'"
-	[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_FULL_OPS_FILE'"
+	if [ x"$extra_opt" != x'NO_OPS_FILES' -a x"$4" != x"NO_OPS_FILES" ]; then
+		[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_FULL_OPS_FILE'"
+		[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_FULL_OPS_FILE'"
+	fi
 
 	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
 		sh -c "'$BOSH' interpolate '$bosh_manifest' \
