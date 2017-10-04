@@ -24,10 +24,9 @@ fi
 CACHE_DIR="$BASE_DIR/../../work"
 DEPLOYMENT_BASE_DIR="$BASE_DIR/../../deployment"
 DEPLOYMENT_BASE_DIR_RELATIVE='deployment'
-BROKER_CONFIG_DIR="$BASE_DIR/../../configs"
+BROKER_CONFIG_DIR="$BASE_DIR/../../configs/brokers"
+DEPLOYMENTS_CONFIG_DIR="$BASE_DIR/../../configs/deployments"
 TOP_LEVEL_DIR="$BASE_DIR/../.."
-
-CONFIGS_DIR="$TOP_LEVEL_DIR/config"
 
 STACK_TEMPLATES_DIRNAME="Templates"
 
@@ -39,7 +38,9 @@ findpath BASE_DIR "$BASE_DIR"
 findpath CACHE_DIR "$CACHE_DIR"
 findpath DEPLOYMENT_BASE_DIR "$DEPLOYMENT_BASE_DIR"
 findpath TOP_LEVEL_DIR "$TOP_LEVEL_DIR"
+
 [ -d "$BROKER_CONFIG_DIR" ] && findpath BROKER_CONFIG_DIR "$BROKER_CONFIG_DIR"
+[ -d "$DEPLOYMENTS_CONFIG_DIR" ] && findpath DEPLOYMENTS_CONFIG_DIR "$DEPLOYMENTS_CONFIG_DIR"
 
 # Set prefix for vars that Bosh will suck in
 ENV_PREFIX_NAME='CF_BOSH'
@@ -82,11 +83,11 @@ EOF
 	AWS_PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/aws-passwords.sh"
 
 	# Load the environment config if we have been given one
-	if [ -f "$CONFIGS_DIR/deployments/$DEPLOYMENT_NAME/environment.sh" ]; then
+	if [ -f "$DEPLOYMENTS_CONFIG_DIR/$DEPLOYMENT_NAME/environment.sh" ]; then
 		# We want the vars in this script to be exported so that any subscript can see them, but we don't want to have all vars available
 		# to all subscripts, so we turn it off again afterwards
 		set -a
-		. "$CONFIGS_DIR/deployments/$DEPLOYMENT_NAME/environment.sh"
+		. "$DEPLOYMENTS_CONFIG_DIR/$DEPLOYMENT_NAME/environment.sh"
 		set +a
 	fi
 fi
