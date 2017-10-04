@@ -153,9 +153,14 @@ for _action in validate update; do
 		STACK_URL="$templates_bucket_http_url/$_file"
 		STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
 
-		if [ x"$_action" = x"update" -a -f "$STACK_PARAMETERS" ]; then
-			INFO "Updating $STACK_NAME parameters"
-			update_parameters_file "$CLOUDFORMATION_DIR/$_file" "$STACK_PARAMETERS"
+		if [ x"$_action" = x"update" ]; then
+			if [ -f "$STACK_PARAMETERS" ]; then
+				INFO "Updating $STACK_NAME parameters"
+				update_parameters_file "$CLOUDFORMATION_DIR/$_file" "$STACK_PARAMETERS"
+			else
+                		INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
+				generate_parameters_file "$CLOUDFORMATION_DIR/$_file" >"$STACK_PARAMETERS"
+			fi
 		fi
 
 		aws_change_set "$STACK_NAME" "$STACK_URL" "$STACK_OUTPUTS" "$STACK_PARAMETERS" --template-url $_action || FATAL "Failed to $_action stack: $STACK_NAME, $_file"
