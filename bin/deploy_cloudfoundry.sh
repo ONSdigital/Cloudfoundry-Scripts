@@ -187,6 +187,7 @@ if [ x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
 	"$TOP_LEVEL_DIR/pre_deploy.sh"
 fi
 
+# Not sure if it'd make more sense to reverse this logic and have an explicit run preamble
 if [ x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then
 	INFO 'Checking Bosh preamble dry-run'
 	bosh_deploy "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE" --dry-run NO_OPS_FILES
