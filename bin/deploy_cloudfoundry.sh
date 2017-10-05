@@ -234,6 +234,8 @@ if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"false" -a -n "$POST_DEPLOY_ERRANDS" ]; th
 	done
 fi
 
+post_deploy_scripts CF
+
 INFO 'Bosh VMs'
 "$BOSH" vms
 

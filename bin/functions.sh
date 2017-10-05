@@ -25,6 +25,14 @@ DEBUG(){
 	"$ECHO" -e "`_date` ${DEBUG_COLOUR}DEBUG $@$NORMAL_COLOUR" >&2
 }
 
+post_deploy_scripts(){
+	local subdir="$1"
+
+	[ -d "$POST_DEPLOY_SCRIPTS_DIR/$subdir" ] || return 0
+
+	find "$POST_DEPLOY_SCRIPTS_DIR/$subdir" -maxdepth 1 -mindepth 1 -exec {} \;
+}
+
 calculate_dns(){
 	local vpc_cidr="$1"
 

@@ -221,4 +221,6 @@ bosh_ssh_key_file='$BOSH_SSH_KEY_FILENAME_RELATIVE'
 EOF
 fi
 
+post_deploy_scripts AWS
+
 INFO 'AWS Deployment Complete'
