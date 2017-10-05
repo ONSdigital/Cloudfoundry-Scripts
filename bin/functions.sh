@@ -325,6 +325,9 @@ bosh_deploy(){
 		[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_FULL_OPS_FILE'"
 	fi
 
+	[ x"$extra_opt" = x"x'NO_OPS_FILES" ] && unset extra_opt
+	[ x"$4" = x"x'NO_OPS_FILES" ] && unset 4
+
 	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
 		sh -c "'$BOSH' interpolate '$bosh_manifest' \
 			$BOSH_INTERACTIVE_OPT \
