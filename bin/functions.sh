@@ -326,7 +326,6 @@ bosh_deploy(){
 	fi
 
 	[ x"$extra_opt" = x'NO_OPS_FILES' ] && unset extra_opt
-	[ x"$4" = x'NO_OPS_FILES' ] && unset 4
 
 	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
 		sh -c "'$BOSH' interpolate '$bosh_manifest' \
