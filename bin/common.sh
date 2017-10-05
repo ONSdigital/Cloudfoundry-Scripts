@@ -21,14 +21,16 @@ fi
 # Add ability to debug commands
 [ -n "$DEBUG" -a x"$DEBUG" != x"false" ] && set -x
 
-CACHE_DIR="$BASE_DIR/../../work"
-DEPLOYMENT_BASE_DIR="$BASE_DIR/../../deployment"
-DEPLOYMENT_BASE_DIR_RELATIVE='deployment'
-BROKER_CONFIG_DIR="$BASE_DIR/../../config/brokers"
-DEPLOYMENTS_CONFIG_DIR="$BASE_DIR/../../config/deployments"
-OPS_FILES_CONFIG_DIR="$BASE_DIR/../../config/ops-files"
-POST_DEPLOY_SCRIPTS_DIR="$BASE_DIR/../../config/post-scripts"
 TOP_LEVEL_DIR="$BASE_DIR/../.."
+findpath TOP_LEVEL_DIR "$TOP_LEVEL_DIR"
+
+CACHE_DIR="$TOP_LEVEL_DIR/work"
+DEPLOYMENT_BASE_DIR="$TOP_LEVEL_DIR/deployment"
+DEPLOYMENT_BASE_DIR_RELATIVE='deployment'
+BROKER_CONFIG_DIR="$TOP_LEVEL_DIR/config/brokers"
+DEPLOYMENTS_CONFIG_DIR="$TOP_LEVEL_DIR/config/deployments"
+OPS_FILES_CONFIG_DIR="$TOP_LEVEL_DIR/config/ops-files"
+POST_DEPLOY_SCRIPTS_DIR="$TOP_LEVEL_DIR/config/post-scripts"
 
 STACK_TEMPLATES_DIRNAME="Templates"
 
@@ -37,14 +39,6 @@ STACK_TEMPLATES_DIRNAME="Templates"
 [ -d "$DEPLOYMENT_BASE_DIR" ] || mkdir -p "$DEPLOYMENT_BASE_DIR"
 
 findpath BASE_DIR "$BASE_DIR"
-findpath CACHE_DIR "$CACHE_DIR"
-findpath DEPLOYMENT_BASE_DIR "$DEPLOYMENT_BASE_DIR"
-findpath TOP_LEVEL_DIR "$TOP_LEVEL_DIR"
-findpath POST_DEPLOY_SCRIPTS_DIR "$POST_DEPLOY_SCRIPTS_DIR"
-
-[ -d "$BROKER_CONFIG_DIR" ] && findpath BROKER_CONFIG_DIR "$BROKER_CONFIG_DIR"
-[ -d "$DEPLOYMENTS_CONFIG_DIR" ] && findpath DEPLOYMENTS_CONFIG_DIR "$DEPLOYMENTS_CONFIG_DIR"
-[ -d "$OPS_FILES_CONFIG_DIR" ] && findpath OPS_FILES_CONFIG_DIR "$OPS_FILES_CONFIG_DIR"
 
 # Set prefix for vars that Bosh will suck in
 ENV_PREFIX_NAME='CF_BOSH'
