@@ -45,6 +45,9 @@ if [ -z "$AWS_ACCESS_KEY_ID" -o -z "$AWS_SECRET_ACCESS_KEY" ]; then
 	[ -z "$AWS_SECRET_ACCESS_KEY" ] && FATAL 'No AWS_SECRET_ACCESS_KEY'
 fi
 
+# Local/non-public Cloudformation additions
+LOCAL_CLOUDFORMATION_DIR="$TOP_LEVEL_DIR/config/aws-cloudformation"
+
 # CLOUDFORMATION_DIR may be given as a relative directory
 findpath CLOUDFORMATION_DIR "${CLOUDFORMATION_DIR:-AWS-Cloudformation}"
 

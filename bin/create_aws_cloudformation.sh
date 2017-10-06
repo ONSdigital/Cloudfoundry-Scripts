@@ -24,9 +24,10 @@ BOSH_SSH_KEY_FILENAME_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssh-key"
 # We use older options in find due to possible lack of -printf and/or -regex options
 STACK_FILES="`find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
 STACK_TEMPLATES_FILES="`find "$CLOUDFORMATION_DIR/Templates" -mindepth 1 -maxdepth 1 -name "*.json" | awk -F/ '{printf("%s/%s\n",$(NF-1),$NF)}' | sort`"
+[ -d "$LOCAL_CLOUDFORMATION_DIR" ] && STACK_LOCAL_FILES="`find "$LOCAL_CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "*.json" | awk -F/ '{printf("%s/%s\n",$(NF-1),$NF)}' | sort`"
 
 cd "$CLOUDFORMATION_DIR"
-validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES $STACK_TEMPLATES_FILES
+validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES $STACK_TEMPLATES_FILES $STACK_LOCAL_FILES
 cd - >/dev/null
 
 if [ ! -d "$STACK_OUTPUTS_DIR" ]; then
@@ -74,7 +75,7 @@ INFO "Loading: $STACK_PREAMBLE_OUTPUTS"
 INFO 'Copying templates to S3'
 "$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
 
-for stack_file in $STACK_FILES; do
+for stack_file in $STACK_FILES $STACK_LOCAL_FILES; do
 	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
 	STACK_URL="$templates_bucket_http_url/$stack_file"
 

@@ -114,6 +114,7 @@ fi
 # We use older options in find due to possible lack of -printf and/or -regex options
 STACK_FILES="`find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
 STACK_TEMPLATES_FILES="`find "$CLOUDFORMATION_DIR/Templates" -mindepth 1 -maxdepth 1 -name "*.json" | awk -F/ '{printf("%s/%s\n",$(NF-1),$NF)}' | sort`"
+[ -d "$LOCAL_CLOUDFORMATION_DIR" ] && STACK_LOCAL_FILES="`find "$LOCAL_CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "*.json" | awk -F/ '{printf("%s/%s\n",$(NF-1),$NF)}' | sort`"
 
 cd "$CLOUDFORMATION_DIR" >/dev/null
 validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES $STACK_TEMPLATES_FILES
@@ -147,7 +148,7 @@ INFO 'Copying templates to S3'
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
 for _action in validate update; do
-	for _file in $STACK_FILES; do
+	for _file in $STACK_FILES $STACK_LOCAL_FILES; do
 		STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$_file"`"
 		STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 		STACK_URL="$templates_bucket_http_url/$_file"
