@@ -30,7 +30,8 @@ post_deploy_scripts(){
 
 	[ -d "$POST_DEPLOY_SCRIPTS_DIR/$subdir" ] || return 0
 
-	find "$POST_DEPLOY_SCRIPTS_DIR/$subdir" -maxdepth 1 -mindepth 1 -exec {} \;
+	INFO "Running $subdir post deployment scripts"
+	find "$POST_DEPLOY_SCRIPTS_DIR/$subdir" -maxdepth 1 -mindepth 1 -exec /bin/sh "{}" \;
 }
 
 calculate_dns(){
