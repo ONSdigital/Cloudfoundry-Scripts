@@ -147,7 +147,7 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 	NEW_BOSH_ENV='true'
 fi
 
-INFO 'Pointing Bosh at newly deployed Bosh'
+INFO 'Pointing Bosh client at newly deployed Bosh Director'
 "$BOSH" alias-env $BOSH_TTY_OPT -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT" >&2
 
 INFO 'Attempting to login'
