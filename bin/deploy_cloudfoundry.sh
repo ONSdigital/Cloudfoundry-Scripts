@@ -226,12 +226,17 @@ bosh_deploy "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE" --dry-run
 INFO 'Deploying Bosh'
 bosh_deploy "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE"
 
-if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"false" -a -n "$POST_DEPLOY_ERRANDS" ]; then
+if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"true" -a -n "$POST_DEPLOY_ERRANDS" ]; then
 	INFO 'Running post deployment smoke tests'
 	for _e in $POST_DEPLOY_ERRANDS; do
 		INFO "Running errand: $_e"
 		"$BOSH" run-errand "$_e"
 	done
+elif [ x"$SKIP_POST_DEPLOY_ERRANDS" = x"true" ]; then
+	INFO 'Skipping run of post deploy errands' 
+
+elif [ -z "$POST_DEPLOY_ERRANDS" ]; then
+	INFO 'No post deploy errands to run'
 fi
 
 post_deploy_scripts CF
