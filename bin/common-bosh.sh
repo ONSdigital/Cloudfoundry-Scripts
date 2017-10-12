@@ -56,7 +56,7 @@ findpath MANIFESTS_DIR "$MANIFESTS_DIR"
 for i in PRIVATE_BOSH_LITE_OPS_FILENAME PRIVATE_BOSH_FULL_OPS_FILENAME PUBLIC_BOSH_LITE_OPS_FILE_NAME PUBLIC_BOSH_FULL_OPS_FILE_NAME; do
 	eval var_name="\$$i"
 
-	[ -n "$var_name" -a ! -f "$OPS_FILES_CONFIG_DIR/$var_name" ] || FATAL "$OPS_FILES_CONFIG_DIR/$var_name does not exist"
+	[ -n "$var_name" -a ! -f "$OPS_FILES_CONFIG_DIR/$var_name" ] && FATAL "$OPS_FILES_CONFIG_DIR/$var_name does not exist"
 done
 
 #
