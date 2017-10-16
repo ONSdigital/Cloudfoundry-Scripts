@@ -53,10 +53,20 @@ findpath MANIFESTS_DIR "$MANIFESTS_DIR"
 
 # Private, per deployment, ops files, eq for installation specific operartions
 # Publically available ops files, eg adjustments for VMware
-for i in PRIVATE_BOSH_LITE_OPS_FILENAME PRIVATE_BOSH_FULL_OPS_FILENAME PUBLIC_BOSH_LITE_OPS_FILE_NAME PUBLIC_BOSH_FULL_OPS_FILE_NAME; do
-	eval var_name="\$$i"
+for i in Lite Full; do
+	for j in PUBLIC PRIVATE; do
+		upper="`echo $i | tr '[[:lower:]]' '[[:upper:]]'`"
 
-	[ -n "$var_name" -a ! -f "$OPS_FILES_CONFIG_DIR/$var_name" ] && FATAL "$OPS_FILES_CONFIG_DIR/$var_name does not exist"
+		eval file_name="\$${j}_BOSH_${upper}_OPS_FILENAME"
+
+		[ x"$j" = x"PUBLIC" ] && file="$MANIFESTS_DIR/Bosh-$i-Manifests/$file_name" || file="$OPS_FILES_CONFIG_DIR/$file_name"
+
+		if [ -n "$file_name" ]; then
+			[ ! -f "$file" ] && FATAL "$file does not exist"
+
+			eval "${j}_BOSH_${upper}_OPS_FILE"="$file"
+		fi
+	done
 done
 
 #
@@ -70,13 +80,14 @@ BOSH_FULL_STATIC_IPS_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_FULL_STATIC_
 # Check for required config
 [ -d "$MANIFESTS_DIR" ] || FATAL "$MANIFESTS_DIR directory does not exist"
 [ -d "$STACK_OUTPUTS_DIR" ] || FATAL "Cloud outputs directory '$STACK_OUTPUTS_DIR' does not exist"
+#
 [ -f "$BOSH_LITE_MANIFEST_FILE" ] || FATAL "Bosh Lite manifest file '$BOSH_LITE_MANIFEST_FILE' does not exist"
 [ -f "$BOSH_LITE_STATIC_IPS_FILE" ] || FATAL "Bosh Lite static IPs file '$BOSH_LITE_STATIC_IPS_FILE' does not exist"
-[ -n "$BOSH_LITE_OPS_FILE_NAME" -a ! -f "$BOSH_LITE_OPS_FILE" ] && FATAL "Bosh Lite Ops file '$BOSH_LITE_OPS_FILE' does not exist"
+#
 [ -f "$BOSH_PREAMBLE_MANIFEST_FILE" ] || FATAL "Bosh manifest file '$BOSH_PREAMBLE_MANIFEST_FILE' does not exist"
+#
 [ -f "$BOSH_FULL_MANIFEST_FILE" ] || FATAL "Bosh manifest file '$BOSH_FULL_MANIFEST_FILE' does not exist"
 [ -f "$BOSH_FULL_STATIC_IPS_FILE" ] || FATAL "Bosh static IPs file '$BOSH_FULL_STATIC_IPS_FILE' does not exist"
-[ -n "$BOSH_FULL_OPS_FILE_NAME" -a ! -f "$BOSH_FULL_OPS_FILE" ] && FATAL "Bosh Ops file '$BOSH_FULL_OPS_FILE' does not exist"
 
 # Run non-interactively?
 [ x"$INTERACTIVE" = x'true' ] || BOSH_INTERACTIVE_OPT="--non-interactive"
