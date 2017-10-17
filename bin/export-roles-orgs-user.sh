@@ -20,17 +20,18 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 	}' >>02_create-space.sh
 
 	echo '. finding users'
-	cf org-users -a "$org" | awk '!/^(USERS|Getting)?$/{
+	# Doing the password generation inside of awk seems to repeating passwords: first 4-ish will be the same
+	# second 5-ish will be the same, thrid 8-ish will be the same & last 32 (+?) will be the same
+	password="`head /dev/urandom | tr -dc '[:alnum:]' | head -c 16`"
+	cf org-users -a "$org" | awk -v password="$password" '!/^(USERS|Getting)?$/{
 		gsub(" *","")
-		"head /dev/urandom | tr -dc \"[:alnum:]\" | head -c 16" | getline password
 		printf("cf create-user \"%s\" \"%s\"\n",$1,password)
 	}' >>03_create-users.sh
-
 
 	for space in `cf spaces 2>&1 | awk '!/^(name|Getting .*|No .*|FAILED)?$/'`; do
 		echo ". inspecting space: $space"
 
-		echo '.. inspecting space rolls'
+		echo '.. inspecting space roles'
 		cf space-users "$org" "$space" | awk -v org="$org" -v space="$space" '!/^(name|Getting .*|No .*)?$/{
 			gsub("^ *","")
 			if($0 ~ /SPACE MANAGER/){
