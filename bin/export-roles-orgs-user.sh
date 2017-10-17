@@ -20,19 +20,18 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 	}' >>02_create-space.sh
 
 	echo '. finding users'
-	# Doing the password generation inside of awk seems to repeating passwords: first 4-ish will be the same
-	# second 5-ish will be the same, thrid 8-ish will be the same & last 32 (+?) will be the same
-	password="`head /dev/urandom | tr -dc '[:alnum:]' | head -c 16`"
-	cf org-users -a "$org" | awk -v password="$password" '!/^(USERS|Getting)?$/{
+	# This seems to generate repeating passwords: first 4-ish will be the same, second 5-ish will be the same,
+	# third 8-ish will be the same & last 32 (+?) will be the same
+	cf org-users -a "$org" | awk '!/^(USERS|Getting .*|FAILED|No .*|\s*(cf_)?admin)?$/{
 		gsub(" *","")
-		printf("cf create-user \"%s\" \"%s\"\n",$1,password)
-	}' >>03_create-users.sh
+		print $1
+	}' >>users
 
 	for space in `cf spaces 2>&1 | awk '!/^(name|Getting .*|No .*|FAILED)?$/'`; do
 		echo ". inspecting space: $space"
 
 		echo '.. inspecting space roles'
-		cf space-users "$org" "$space" | awk -v org="$org" -v space="$space" '!/^(name|Getting .*|No .*)?$/{
+		cf space-users "$org" "$space" | awk -v org="$org" -v space="$space" '!/^(name|Getting .*|No .*|\s*(cf_)?admin)?$/{
 			gsub("^ *","")
 			if($0 ~ /SPACE MANAGER/){
 				role="SpaceManager"
@@ -47,7 +46,7 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 	done
 
 	echo '. finding organisation roles'
-	cf org-users "$org" 2>&1 | awk -v org="$org" '!/^(USERS|Getting|No.*found)?$/{
+	cf org-users "$org" 2>&1 | awk -v org="$org" '!/^(USERS|Getting .*|No .*|FAILED|\s*(cf_)?admin)?$/{
 		gsub("^ *","")
 		if($0 ~ /ORG MANAGER/){
 			role="OrgManager"
@@ -61,4 +60,18 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 	}' >>05_org-roles.sh
 done
 
-ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh 06_services.sh
+awk '{
+	a[$1]++
+}END{
+	cmd="openssl rand -base64 16 | sed \"s/==//g\""
+	for(i in a){
+		cmd | getline password
+		close(cmd)
+		printf("cf create-user \"%s\" \"%s\"\n",i,password)
+	}
+}' users | sort -k 3 >03_create-users.sh
+
+rm -f users
+
+ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh
+
