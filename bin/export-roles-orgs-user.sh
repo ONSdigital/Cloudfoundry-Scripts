@@ -1,28 +1,37 @@
 #!/bin/sh
 
+export CF_COLOR=false 
+
 for i in 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh; do
 	[ -f "$i" ] && rm -f "$i"
 done
 
-for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting|$)/'`; do
+for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`; do
+	echo "Inspecting Organisation: $org"
+
 	echo "cf create-org \"$org\"" >>01_create-org.sh
 
 	cf target -o "$org" 2>&1 >/dev/null
 
-	cf spaces | awk -v org="$org" '!/^(name|Getting|No.*found|$)/{
+	echo '. finding spaces'
+	cf spaces | awk -v org="$org" '!/^(name|Getting .*|No .*|FAILED)?$/{
 		gsub(" *","")
 		printf("cf create-space \"%s\" -o \"%s\"\n",$1,org)
 	}' >>02_create-space.sh
-	
-	cf org-users -a "$org" | awk '!/^(USERS|Getting|$)/{
+
+	echo '. finding users'
+	cf org-users -a "$org" | awk '!/^(USERS|Getting)?$/{
 		gsub(" *","")
 		"head /dev/urandom | tr -dc \"[:alnum:]\" | head -c 16" | getline password
 		printf("cf create-user \"%s\" \"%s\"\n",$1,password)
 	}' >>03_create-users.sh
 
 
-	for space in `cf spaces | awk '!/^(name|Getting|No.*found|$)/'`; do
-		cf space-users "$org" "$space" | awk -v org="$org" -v space="$space" '!/^(name|Getting|No.*found|$)/{
+	for space in `cf spaces 2>&1 | awk '!/^(name|Getting .*|No .*|FAILED)?$/'`; do
+		echo ". inspecting space: $space"
+
+		echo '.. inspecting space rolls'
+		cf space-users "$org" "$space" | awk -v org="$org" -v space="$space" '!/^(name|Getting .*|No .*)?$/{
 			gsub("^ *","")
 			if($0 ~ /SPACE MANAGER/){
 				role="SpaceManager"
@@ -36,7 +45,8 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting|$)/'`; do
 		}' >>04_space-roles.sh
 	done
 
-	cf org-users "$org" | awk -v org="$org" '!/^(USERS|Getting|No.*found|$)/{
+	echo '. finding organisation roles'
+	cf org-users "$org" 2>&1 | awk -v org="$org" '!/^(USERS|Getting|No.*found)?$/{
 		gsub("^ *","")
 		if($0 ~ /ORG MANAGER/){
 			role="OrgManager"
@@ -50,4 +60,4 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting|$)/'`; do
 	}' >>05_org-roles.sh
 done
 
-ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh
+ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh 06_services.sh
