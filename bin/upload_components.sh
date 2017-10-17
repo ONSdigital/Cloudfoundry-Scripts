@@ -32,6 +32,8 @@ CFLINUXFS2_VERSION="${5:-$CFLINUXFS2_VERSION}"
 CF_RABBITMQ_VERSION="${6:-$CF_RABBITMQ_VERSION}"
 # https://bosh.io/releases/github.com/cloudfoundry/cf-smoke-tests-release
 CF_SMOKE_TEST_VERSION="${7:-$CF_SMOKE_TEST_VERSION}"
+# https://bosh.io/releases/github.com/cloudfoundry-community/admin-ui-boshrelease?all=1
+ADMIN_UI_VERSION="${9:-$ADMIN_UI_VERSION}"
 # Stemcell
 # https://bosh.io/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 BOSH_STEMCELL_URL="${BOSH_STEMCELL_URL:-https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent}"
@@ -44,8 +46,9 @@ CFLINUXFS2_URL="${CFLINUXFS2_URL:-https://bosh.io/d/github.com/cloudfoundry/cfli
 CF_RABBITMQ_URL="${CF_RABBITMQ_URL:-https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-release}"
 #CF_RABBITMQ_BROKER_URL="${CF_RABBITMQ_URL:-https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-broker}"
 CF_SMOKE_TEST_URL="${CF_SMOKE_TEST_URL:-https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release}"
+ADMIN_UI_URL="${ADMIN_UI_URL:-https://bosh.io/d/github.com/cloudfoundry-community/admin-ui-boshrelease}"
 
-BOSH_RELEASES='CF DIEGO GARDEN_RUNC CFLINUXFS2 CF_RABBITMQ CF_SMOKE_TEST'
+BOSH_RELEASES='CF DIEGO GARDEN_RUNC CFLINUXFS2 CF_RABBITMQ CF_SMOKE_TEST ADMIN_UI'
 BOSH_STEMCELLS='BOSH_STEMCELL'
 
 BOSH_UPLOADS="$BOSH_STEMCELLS $BOSH_RELEASES"
