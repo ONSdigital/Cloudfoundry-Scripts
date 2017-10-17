@@ -87,13 +87,13 @@ if [ x"$create_elasti_cache_infrastructure" != x"false" ]; then
 	IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-elasticache-broker.sh" "$DEPLOYMENT_NAME" elasticache-broker
 fi
 
-if [ -d "security_groups" ]; then
+if [ -d "config/security_groups" ]; then
 	INFO 'Setting up Security Groups'
 
-	for _s in `ls security_groups`; do
+	for _s in `ls config/security_groups`; do
 		group_name="`echo $security_group | sed $SED_EXTENDED -e 's/\.json$//g'`"
 		INFO "... $group_name"
 
-		"$CF" create-security-group "$group_name" "security_groups/$_s"
+		"$CF" create-security-group "$group_name" "config/security_groups/$_s"
 	done
 fi
