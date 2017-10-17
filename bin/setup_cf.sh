@@ -94,6 +94,6 @@ if [ -d "security_groups" ]; then
 		group_name="`echo $security_group | sed $SED_EXTENDED -e 's/\.json$//g'`"
 		INFO "... $group_name"
 
-		"$CF" "$group_name" "security_groups/$_s"
+		"$CF" create-security-group "$group_name" "security_groups/$_s"
 	done
 fi
