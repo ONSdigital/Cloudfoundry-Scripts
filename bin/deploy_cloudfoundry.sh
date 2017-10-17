@@ -145,6 +145,9 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 
 	# We may not have created a new Bosh environment
 	NEW_BOSH_ENV='true'
+
+	# These can be disabled later if required
+	RUN_PREDEPLOY='true' RUN_BOSH_PREAMBLE='true'
 fi
 
 INFO 'Pointing Bosh client at newly deployed Bosh Director'
@@ -178,17 +181,18 @@ if [ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
 	#	L Error: Action Failed get_task: Task b8160a99-e155-4b42-6eb2-cba0ae7488b7 result: Compiling package golang-1.8: Fetching package golang-1.8: Fetching package blob 33dacc88-3647-4469-9183-acfcefe24611: Getting blob from inner blobstore: Checking downloaded blob '33dacc88-3647-4469-9183-acfcefe24611': Expected stream to have digest 'dac8587b4ce06a0f647f0061984d308349af9d08' but was 'c25e7406a45fb901a085edc8a7b1769f6fb543dd'
 	# https://github.com/cloudfoundry/cf-release/issues/1239
 	"$BASE_DIR/upload_components.sh" "$DEPLOYMENT_NAME"
+
 fi
 
 # Allow running of a custom script that can do other things (eg upload a local release)
-if [ x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
+if [ x"$RUN_PREDEPLOY" = x"true" -a x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
 	[ -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] || chmod +x "$TOP_LEVEL_DIR/pre_deploy.sh"
 
 	"$TOP_LEVEL_DIR/pre_deploy.sh"
 fi
 
 # Not sure if it'd make more sense to reverse this logic and have an explicit run preamble
-if [ x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then
+if [ x"$RUN_BOSH_PREAMBLE" = x"true" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then
 	INFO 'Checking Bosh preamble dry-run'
 	bosh_deploy "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE" --dry-run NO_OPS_FILES
 
