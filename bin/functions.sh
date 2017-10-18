@@ -318,6 +318,7 @@ bosh_env(){
 	[ -n "$PRIVATE_BOSH_LITE_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_LITE_OPS_FILE'"
 
 	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
+		WARN 'Showing interpolated manifest'
 		sh -c "'$BOSH_CLI' interpolate '$BOSH_LITE_MANIFEST_FILE' \
 			$BOSH_TTY_OPT \
 			$opts_option \
@@ -354,6 +355,7 @@ bosh_deploy(){
 	[ x"$extra_opt" = x'NO_OPS_FILES' ] && unset extra_opt
 
 	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
+		WARN 'Showing interpolated manifest'
 		sh -c "'$BOSH_CLI' interpolate '$bosh_manifest' \
 			$BOSH_TTY_OPT \
 			$opts_option \
