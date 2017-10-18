@@ -184,11 +184,14 @@ INFO 'Setting CloudConfig'
 
 # Set release and stemcell versions
 # Should we be supporting an OPS file?
-for component_version in `"$BOSH_CLI" interpolate "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version:/{gsub("\\\(|\\\)",""); print $NF}'`; do
+for component_version in `"$BOSH_CLI" interpolate "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version:/{gsub("(\\\(|\\\))",""); print $NF}'`; do
 	# ADMIN_UI_VERSION
 	upper="`echo "$component_version" | tr '[[:lower:]]' '[[:upper:]]'`"
 
+	# eg CF_RELEASE=277
 	eval upper_value="\$$upper"
+
+	# eg cf_release=277
 	eval lower_value="\$$component_version"
 
 	if [ -n "$upper_value" ]; then
@@ -205,7 +208,7 @@ for component_version in `"$BOSH_CLI" interpolate "$BOSH_FULL_MANIFEST_FILE" --p
 	fi
 
 	# Set the version for consumption by Bosh
-	eval "$ENV_PREFIX$component_version"="$version"
+	export "$ENV_PREFIX$component_version"="$version"
 done
 
 # Upload Stemcells & releases
