@@ -106,11 +106,15 @@ INFO 'Loading Bosh network configuration'
 eval export `prefix_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"`
 
 if [ x"$USE_EXISTING_VERSIONS" = x"true" ]; then
-	INFO 'Loading Bosh release versions'
-	. "$RELEASE_CONFIG_FILE"
+	if [ -f "$RELEASE_CONFIG_FILE" ]; then
+		INFO 'Loading Bosh release versions'
+		. "$RELEASE_CONFIG_FILE"
+	fi
 
-	INFO 'Loading Bosh stemell versions'
-	. "$STEMCELL_CONFIG_FILE"
+	if [ -f "$STEMCELL_CONFIG_FILE" ]; then
+		INFO 'Loading Bosh stemell versions'
+		. "$STEMCELL_CONFIG_FILE"
+	fi
 fi
 
 # Convert from relative to an absolute path
