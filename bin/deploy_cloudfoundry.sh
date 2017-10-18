@@ -251,8 +251,11 @@ if [ x"$RUN_BOSH_PREAMBLE" = x"true" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; th
 	"$BOSH_CLI" delete-deployment --force $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
 fi
 
-INFO 'Checking Bosh deployment dry-run'
-bosh_deploy "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE" --dry-run
+# This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'
+if [ x"$RUN_DRY_RUN" = x'true' ]; then
+	INFO 'Checking Bosh deployment dry-run'
+	bosh_deploy "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE" --dry-run
+fi
 
 INFO 'Deploying Bosh'
 bosh_deploy "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE"
@@ -271,11 +274,12 @@ elif [ -z "$POST_DEPLOY_ERRANDS" ]; then
 fi
 
 # Save stemcell and release versions
-for i in stemcells release; do
+for i in stemcell release do
+	INFO "Recording $i(s) versions"
 	[ x"$i" = x"release" ] && OUTPUT_FILE="$RELEASE_CONFIG_FILE" || OUTPUT_FILE="$STEMCELL_CONFIG_FILE"
 
-	"$BOSH_CLI" $i | awk -v type="$i" 'BEGIN{
-		printf("# Cloudfoundry %s\n",type)
+	"$BOSH_CLI" ${i}s | awk -v type="$i" 'BEGIN{
+		printf("# Cloudfoundry %ss\n",type)
 	}{
 		if($1 ~ /^[a-z]/)
 			printf("%s='\''%s'\''\n",$1,$2)
