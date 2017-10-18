@@ -62,7 +62,7 @@ aws_change_set(){
 		$template_option '$stack_url' \
 		$aws_opts"
 
-	# Changesets only have three states: CREATE_IN_PROGRESS, CREATE_COMPLETE & FAILED. 
+	# Changesets only have three states: CREATE_IN_PROGRESS, CREATE_COMPLETE & FAILED.
 	INFO "Waiting for Cloudformation changeset to be created: $change_set_name"
 	"$AWS_CLI" cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name" >/dev/null 2>&1 || :
 

@@ -36,4 +36,4 @@ fi
 
 "$BOSH_CLI" create-release --force
 
-"$BOSH_CLI" upload-release --rebase 
+"$BOSH_CLI" upload-release --rebase

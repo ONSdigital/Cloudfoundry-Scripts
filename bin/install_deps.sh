@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# 
+#
 
 set -e
 
@@ -58,7 +58,7 @@ fi
 
 # If running via Jenkins we install cf-uaac via rbenv
 if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
-	which gem >/dev/null 2>&1 || FATAL "No Ruby 'gem' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or rbenv from within Jenkins?" 
+	which gem >/dev/null 2>&1 || FATAL "No Ruby 'gem' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or rbenv from within Jenkins?"
 	gem install cf-uaac
 
 	CHANGES=1
@@ -108,7 +108,7 @@ fi
 for i in BOSH CF; do
 	eval file="\$$i"
 	eval version="\$${i}_CLI_VERSION"
-	
+
 	file_name="`basename \"$file\"`"
 
 	# Should never fail

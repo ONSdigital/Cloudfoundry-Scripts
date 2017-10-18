@@ -274,7 +274,7 @@ if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"true" -a -n "$POST_DEPLOY_ERRANDS" ]; the
 		"$BOSH_CLI" run-errand "$_e"
 	done
 elif [ x"$SKIP_POST_DEPLOY_ERRANDS" = x"true" ]; then
-	INFO 'Skipping run of post deploy errands' 
+	INFO 'Skipping run of post deploy errands'
 
 elif [ -z "$POST_DEPLOY_ERRANDS" ]; then
 	INFO 'No post deploy errands to run'

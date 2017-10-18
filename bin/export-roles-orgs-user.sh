@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export CF_COLOR=false 
+export CF_COLOR=false
 
 for i in 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh; do
 	[ -f "$i" ] && rm -f "$i"

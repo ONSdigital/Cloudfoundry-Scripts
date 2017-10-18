@@ -13,7 +13,7 @@ if [ -z "$FOOT_PROTECTION_DISABLED_AND_I_KNOW_WHY" ] && git branch | grep -Eq '^
 
 	exit 1
 fi
-	
+
 
 for i in ${@:-`ls vendor/`}; do
 	$ECHO -n "Git update: $i? (y/N)"
@@ -62,4 +62,4 @@ for i in ${@:-`ls vendor/`}; do
 done
 
 $ECHO "Git status"
-git status 
+git status

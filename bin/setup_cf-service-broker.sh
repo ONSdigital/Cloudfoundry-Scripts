@@ -42,7 +42,7 @@ if [ -z "$NO_LOGIN" ]; then
 	"$CF_CLI" api "$api_dns" "$CF_EXTRA_OPTS"
 
 	INFO "Logging in as $CF_ADMIN_USERNAME"
-	"$CF_CLI" login -u "$CF_ADMIN_USERNAME" -p "$CF_ADMIN_PASSWORD" -s "$SERVICES_SPACE" "$CF_EXTRA_OPTS" 
+	"$CF_CLI" login -u "$CF_ADMIN_USERNAME" -p "$CF_ADMIN_PASSWORD" -s "$SERVICES_SPACE" "$CF_EXTRA_OPTS"
 else
 	"$CF_CLI" target -s "$SERVICES_SPACE"
 fi

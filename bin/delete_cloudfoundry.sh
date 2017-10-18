@@ -7,7 +7,7 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common-bosh.sh"
 . "$BASE_DIR/common-bosh-login.sh"
-	
+
 # Sanity check
 [ -f "$PASSWORD_CONFIG_FILE" ] || FATAL "Password configuration file does not exist: '$PASSWORD_CONFIG_FILE'"
 

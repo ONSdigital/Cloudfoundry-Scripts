@@ -30,7 +30,7 @@ GOLANG_VERSION='1.6.3'
 
 if "$CF_CLI" service-brokers | grep -Eq "^$BROKER_NAME\s*http"; then
 	[ -n "$IGNORE_EXISTING" ] && LOG_LEVEL='WARN' || LOG_LEVEL='FATAL'
-	
+
 	$LOG_LEVEL "Service broker '$BROKER_NAME' exists"
 
 	exit 0

@@ -47,7 +47,7 @@ RDS_BROKER_ENC_KEY="${RDS_BROKER_ENC_KEY:-`generate_password 32`}"
 
 if "$CF_CLI" service-brokers | grep -Eq "^$SERVICE_NAME\s*http"; then
 	[ -n "$IGNORE_EXISTING" ] && LOG_LEVEL='WARN' || LOG_LEVEL='FATAL'
-	
+
 	$LOG_LEVEL "Service broker '$SERVICE_NAME' exists"
 
 	exit 0

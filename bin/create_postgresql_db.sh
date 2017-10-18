@@ -127,7 +127,7 @@ EOF_PSQL
 $PRE_COMMAND_END
 EOF_PRE
 fi
-	
+
 if [ -n "$EXTENSIONS" ]; then
 	OLDIFS="$IFS"
 	IFS=','

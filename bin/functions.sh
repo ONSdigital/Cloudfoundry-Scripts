@@ -180,7 +180,7 @@ update_parameters_file(){
 		if [ -z "$_value" -o x"$_value" = x'$' ]; then
 			DEBUG "No value provided for key $_key"
 			# No value provided, so cannot update, so see if we have an existing entry we can retain
-			grep -E "\"ParameterKey\": \"$_key\"" "$parameters_file" && DEBUG "Retaining existing value for $_key" || : 
+			grep -E "\"ParameterKey\": \"$_key\"" "$parameters_file" && DEBUG "Retaining existing value for $_key" || :
 
 		elif grep -Eq "\"ParameterKey\": \"$_key\"" "$parameters_file"; then
 			# ... update an existing entry

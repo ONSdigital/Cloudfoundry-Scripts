@@ -2,7 +2,7 @@
 #
 # Very simplified CF delete - there is a more full fat CF suite within the CF repo
 # This is here so we can bootstrap/test enough of CF to make sure things work
-# 
+#
 
 set -e
 
@@ -25,6 +25,6 @@ if "$CF_CLI" app "$CF_APP" >/dev/null 2>&1; then
 	INFO "Deleting application: $CF_APP"
 	"$CF_CLI" delete -r -f $CF_APP
 else
-	INFO "Application does not exist: $CF_APP"	
+	INFO "Application does not exist: $CF_APP"
 fi
 
