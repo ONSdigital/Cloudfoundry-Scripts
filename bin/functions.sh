@@ -299,7 +299,7 @@ bosh_env(){
 	[ -n "$PRIVATE_BOSH_LITE_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_LITE_OPS_FILE'"
 
 	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
-		sh -c "'$BOSH' interpolate '$BOSH_LITE_MANIFEST_FILE' \
+		sh -c "'$BOSH_CLI' interpolate '$BOSH_LITE_MANIFEST_FILE' \
 			$BOSH_INTERACTIVE_OPT \
 			$BOSH_TTY_OPT \
 			$opts_option \
@@ -310,7 +310,7 @@ bosh_env(){
 			--vars-store='$BOSH_LITE_VARS_FILE'"
 	fi
 
-	sh -c "'$BOSH' '$action_option' '$BOSH_LITE_MANIFEST_FILE' \
+	sh -c "'$BOSH_CLI' '$action_option' '$BOSH_LITE_MANIFEST_FILE' \
 		$BOSH_INTERACTIVE_OPT \
 		$BOSH_TTY_OPT \
 		--state='$BOSH_LITE_STATE_FILE' \
@@ -337,7 +337,7 @@ bosh_deploy(){
 	[ x"$extra_opt" = x'NO_OPS_FILES' ] && unset extra_opt
 
 	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
-		sh -c "'$BOSH' interpolate '$bosh_manifest' \
+		sh -c "'$BOSH_CLI' interpolate '$bosh_manifest' \
 			$BOSH_INTERACTIVE_OPT \
 			$BOSH_TTY_OPT \
 			$opts_option \
@@ -348,7 +348,7 @@ bosh_deploy(){
 			--vars-store='$bosh_vars'"
 	fi
 
-	sh -c "'$BOSH' deploy '$bosh_manifest' \
+	sh -c "'$BOSH_CLI' deploy '$bosh_manifest' \
 		$extra_opt \
 		$BOSH_INTERACTIVE_OPT \
 		$BOSH_TTY_OPT \
