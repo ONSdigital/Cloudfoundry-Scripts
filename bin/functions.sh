@@ -69,10 +69,10 @@ stack_file_name(){
 
 find_aws(){
 	if which aws >/dev/null 2>&1; then
-		AWS="`which aws`"
+		AWS_CLI="`which aws`"
 
 	elif [ -f "$BIN_DIR/aws" ]; then
-		AWS="$BIN_DIR/aws"
+		AWS_CLI="$BIN_DIR/aws"
 
 	else
 		FATAL "AWS cli is not installed - did you run '$BASE_DIR/install_deps.sh'?"
@@ -103,7 +103,7 @@ parse_aws_cloudformation_outputs(){
 	# Debian's Awk (mawk) doesn't have gensub(), so we can't do this easily/cleanly
 	#
 	# Basically we convert camelcase variable names to underscore seperated names (eg FooBar -> foo_bar)
-	"$AWS" --output text --query 'Stacks[*].[Parameters[*].[ParameterKey,ParameterValue],Outputs[*].[OutputKey,OutputValue]]' \
+	"$AWS_CLI" --output text --query 'Stacks[*].[Parameters[*].[ParameterKey,ParameterValue],Outputs[*].[OutputKey,OutputValue]]' \
 		cloudformation describe-stacks --stack-name "$stack" | perl -a -F'\t' -ne 'defined($F[1]) || next;
 		chomp($F[1]);
 		$F[0] =~ s/([a-z0-9])([A-Z])/\1_\2/g;
@@ -209,7 +209,7 @@ stack_exists(){
 
 	[ -z "$stack_name" ] && FATAL 'No stack name provided'
 
-	"$AWS" --output text --query "StackSummaries[?StackName == '$stack_name' && StackStatus != 'DELETE_COMPLETE'].StackName" \
+	"$AWS_CLI" --output text --query "StackSummaries[?StackName == '$stack_name' && StackStatus != 'DELETE_COMPLETE'].StackName" \
 		cloudformation list-stacks | grep -Eq "^$stack_name"
 }
 
@@ -221,13 +221,13 @@ check_cloudformation_stack(){
 
 	INFO "Checking for existing Cloudformation stack: $stack_name"
 	# Is there a better way to query?
-	if "$AWS" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" \
+	if "$AWS_CLI" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" \
 		cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE | grep -Eq "^$stack_name$"; then
 
  		INFO "Stack found: $stack_name"
 
 		local rc=0
-	elif "$AWS" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" cloudformation list-stacks --stack-status-filter DELETE_FAILED \
+	elif "$AWS_CLI" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" cloudformation list-stacks --stack-status-filter DELETE_FAILED \
 		| grep -Eq "^$stack_name$"; then
 
 		FATAL 'Stack is in DELETE_FAILED state. Please manually fix the issues and finish deleting the stack'
@@ -289,7 +289,7 @@ bosh_int(){
 
 	# Stupidly, Bosh prints out its logs to stdout.  When the debug level is 'debug' this causes the output of the
 	# interpolation to be interspersed with debug lines
-	BOSH_LOG_LEVEL=info "$BOSH" interpolate --vars-env="$ENV_PREFIX_NAME" "$manifest"
+	BOSH_LOG_LEVEL=info "$BOSH_CLI" interpolate --vars-env="$ENV_PREFIX_NAME" "$manifest"
 }
 
 bosh_env(){
@@ -367,7 +367,7 @@ cf_app_url(){
 
 	# We blindly assume we are logged in and pointing at the right place
 	# Sometimes we seem to get urls, sometimes routes?
-	"$CF" app "$application" | awk -F" *: *" '/^(urls|routes):/{print $2}'
+	"$CF_CLI" app "$application" | awk -F" *: *" '/^(urls|routes):/{print $2}'
 }
 
 

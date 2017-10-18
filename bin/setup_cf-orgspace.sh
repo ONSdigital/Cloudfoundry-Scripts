@@ -25,22 +25,22 @@ export BOSH_CA_CERT
 [ -z "$SPACE_NAME" ] && FATAL 'No space name provided'
 [ -z "$ORG_NAME" ] && FATAL 'No organisation name provided'
 
-if ! "$CF" org "$ORG_NAME" >/dev/null 2>&1; then
+if ! "$CF_CLI" org "$ORG_NAME" >/dev/null 2>&1; then
 	# Add some intelligence to check existance of org & space
 	INFO "Creating organisation $ORG_NAME"
-	"$CF" create-org "$ORG_NAME"
+	"$CF_CLI" create-org "$ORG_NAME"
 else
 	INFO "Organisation already created: $ORG_NAME"
 fi
 
-if ! "$CF" space "$SPACE_NAME" >/dev/null 2>&1; then
+if ! "$CF_CLI" space "$SPACE_NAME" >/dev/null 2>&1; then
 	# This seems to create the org
 	INFO "Creating space $SPACE_NAME under $ORG_NAME"
-	"$CF" create-space "$SPACE_NAME" -o "$ORG_NAME"
+	"$CF_CLI" create-space "$SPACE_NAME" -o "$ORG_NAME"
 else
 	INFO "Space already created: $SPACE_NAME"
 fi
 
-"$CF" target -o "$ORG_NAME" -s "$SPACE_NAME"
+"$CF_CLI" target -o "$ORG_NAME" -s "$SPACE_NAME"
 
 

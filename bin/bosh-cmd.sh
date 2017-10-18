@@ -16,4 +16,4 @@ shift
 
 [ -z "${GATEWAY_HOST:-$BOSH_ENVIRONMENT}" ] && FATAL 'No gateway host available'
 
-"$BOSH" $@
+"$BOSH_CLI" $@

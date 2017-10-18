@@ -159,10 +159,10 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 fi
 
 INFO 'Pointing Bosh client at newly deployed Bosh Director'
-"$BOSH" alias-env $BOSH_TTY_OPT -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT" >&2
+"$BOSH_CLI" alias-env $BOSH_TTY_OPT -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT" >&2
 
 INFO 'Attempting to login'
-"$BOSH" log-in $BOSH_TTY_OPT >&2
+"$BOSH_CLI" log-in $BOSH_TTY_OPT >&2
 
 if [ ! -f "$FULL_STATIC_IPS_YML" -o "$REINTERPOLATE_FULL_STATIC_IPS" = x"true" ]; then
 	# Create the initial YML header
@@ -173,7 +173,7 @@ EOF
 fi
 
 INFO 'Setting CloudConfig'
-"$BOSH" update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE" \
+"$BOSH_CLI" update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE" \
 	$BOSH_INTERACTIVE_OPT \
 	$BOSH_TTY_OPT \
 	--var bosh_deployment="$BOSH_DEPLOYMENT" \
@@ -184,11 +184,11 @@ INFO 'Setting CloudConfig'
 
 # Set release and stemcell versions
 # Should we be supporting an OPS file?
-for version in `"$BOSH" interpolate "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^- name:/{gsub("\(|\)",""); print $NF}'`; do
+for version in `"$BOSH_CLI" interpolate "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^- name:/{gsub("\(|\)",""); print $NF}'`; do
 	# ADMIN_UI_VERSION
 	upper="`echo $version | tr '[[:lower:]]' '[[:upper:]]'`"
 
-	eval upper_value="\$$upper"
+	eval upper_value="\$'$upper'"
 
 	# If we haven't been given a version, we assume the latest
 	[ -n "$upper_value" ] || upper_value='latest'
@@ -224,7 +224,7 @@ if [ x"$RUN_BOSH_PREAMBLE" = x"true" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; th
 
 	# For some reason Bosh lists the errands in the preamble manifest and an additional one that has the same name
 	# as the release we install on the errand VMs (2017/09/07)
-	for _e in `"$BOSH" errands`; do
+	for _e in `"$BOSH_CLI" errands`; do
 		# TEMPORARY until the output of 'bosh errands' is fixed and only prints a list of errands
 		if ! awk -v errand="$_e" 'BEGIN{ rc=1 }/^- name:/{if($NF == errand) rc=0 }END{ exit rc }' "$BOSH_PREAMBLE_MANIFEST_FILE"; then
 			WARN "Ignoring non-existant errand: $_e"
@@ -236,7 +236,7 @@ if [ x"$RUN_BOSH_PREAMBLE" = x"true" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; th
 		# TEMPORARY
 
 		INFO "Running errand: $_e"
-		"$BOSH" run-errand "$_e"
+		"$BOSH_CLI" run-errand "$_e"
 	done
 
 	# TEMPORARY report when workaround is no longer required
@@ -244,7 +244,7 @@ if [ x"$RUN_BOSH_PREAMBLE" = x"true" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; th
 	# TEMPORARY
 
 	INFO 'Deleting Bosh premable deployment'
-	"$BOSH" delete-deployment --force $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
+	"$BOSH_CLI" delete-deployment --force $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
 fi
 
 INFO 'Checking Bosh deployment dry-run'
@@ -257,7 +257,7 @@ if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"true" -a -n "$POST_DEPLOY_ERRANDS" ]; the
 	INFO 'Running post deployment smoke tests'
 	for _e in $POST_DEPLOY_ERRANDS; do
 		INFO "Running errand: $_e"
-		"$BOSH" run-errand "$_e"
+		"$BOSH_CLI" run-errand "$_e"
 	done
 elif [ x"$SKIP_POST_DEPLOY_ERRANDS" = x"true" ]; then
 	INFO 'Skipping run of post deploy errands' 
@@ -270,7 +270,7 @@ fi
 for i in stemcells release; do
 	[ x"$i" = x"release" ] && OUTPUT_FILE="$RELEASE_CONFIG_FILE" || OUTPUT_FILE="$STEMCELL_CONFIG_FILE"
 
-	"$BOSH" $i | awk -v type="$i" 'BEGIN{
+	"$BOSH_CLI" $i | awk -v type="$i" 'BEGIN{
 		printf("# Cloudfoundry %s\n",type)
 	}{
 		if($1 ~ /^[a-z]/)
@@ -281,5 +281,5 @@ done
 post_deploy_scripts CF
 
 INFO 'Bosh VMs'
-"$BOSH" vms
+"$BOSH_CLI" vms
 

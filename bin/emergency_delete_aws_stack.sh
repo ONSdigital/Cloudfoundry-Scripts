@@ -4,16 +4,16 @@
 
 STACK_PREFIX="$1"
 
-if [ -n "$AWS" ]; then
+if [ -n "$AWS_CLI" ]; then
 	echo "Using $AWS cli"
 
 elif which aws >/dev/null 2>1; then
-	AWS='aws'
+	AWS_CLI='aws'
 
 elif [ -x ~/.local/bin/aws ]; then
-	AWS=~/.local/bin/aws
+	AWS_CLI=~/.local/bin/aws
 
-elif [ -z "$AWS" -o ! -x "$AWS" ]; then
+elif [ -z "$AWS_CLI" -o ! -x "$AWS_CLI" ]; then
 	echo Unable to find AWS CLI
 	echo 'Set AWS to full filename, including path, of the AWS CLI, eg AWS=/opt/bin/aws'
 
@@ -27,7 +27,7 @@ if [ -z "$STACK_PREFIX" ]; then
 fi
 
 for i in `$AWS --output text --query "StackSummaries[?starts_with(StackName,'$STACK_PREFIX') && StackStatus != 'DELETE_COMPLETE'].StackName" cloudformation list-stacks | sed -re 's/\t/\n/g' | sed -re '/n-[A-Z0-9]{12,13}$/d'`; do
-	$AWS cloudformation delete-stack --stack-name $i
+	"$AWS_CLI" cloudformation delete-stack --stack-name $i
 
-	$AWS cloudformation wait stack-delete-complete --stack-name $i
+	"$AWS_CLI" cloudformation wait stack-delete-complete --stack-name $i
 done

@@ -43,4 +43,4 @@ if echo "$bosh_ssh_key_file" | grep -q " "; then
 	bosh_ssh_key_file="$bosh_ssh_key_file_org"
 fi
 
-"$BOSH" ssh --gw-private-key="$bosh_ssh_key_file" --gw-user="$GATEWAY_USER" --gw-host "$GATEWAY" "$SSH_HOST"
+"$BOSH_CLI" ssh --gw-private-key="$bosh_ssh_key_file" --gw-user="$GATEWAY_USER" --gw-host "$GATEWAY" "$SSH_HOST"

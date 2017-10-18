@@ -28,7 +28,7 @@ find_aws
 [ x"$AWS_DEBUG" = x"true" ] && AWS_DEBUG_OPTION='--debug'
 
 if [ -z "$AWS_DEFAULT_REGION" ]; then
-	[ -f ~/.aws/config ] && CONFIGURED_AWS_REGION="`"$AWS" configure get region`"
+	[ -f ~/.aws/config ] && CONFIGURED_AWS_REGION="`"$AWS_CLI" configure get region`"
 
 	# Provide a default - these should come from a configuration/defaults file
 	DEFAULT_AWS_REGION="${DEFAULT_AWS_REGION:-${CONFIGURED_AWS_REGION:-eu-central-1}}"
@@ -38,8 +38,8 @@ fi
 if [ -z "$AWS_ACCESS_KEY_ID" -o -z "$AWS_SECRET_ACCESS_KEY" ]; then
 	[ -f ~/.aws/credentials ] || FATAL 'No AWS_ACCESS_KEY_ID and/or AWS_SECRET_ACCESS_KEY provided and no AWS credentials (~/.aws/credentials),'
 
-	[ -z "$AWS_ACCESS_KEY_ID" ] && AWS_ACCESS_KEY_ID="`"$AWS" configure get aws_access_key_id`"
-	[ -z "$AWS_SECRET_ACCESS_KEY" ] && AWS_SECRET_ACCESS_KEY="`"$AWS" configure get aws_secret_access_key`"
+	[ -z "$AWS_ACCESS_KEY_ID" ] && AWS_ACCESS_KEY_ID="`"$AWS_CLI" configure get aws_access_key_id`"
+	[ -z "$AWS_SECRET_ACCESS_KEY" ] && AWS_SECRET_ACCESS_KEY="`"$AWS_CLI" configure get aws_secret_access_key`"
 
 	[ -z "$AWS_ACCESS_KEY_ID" ] && FATAL 'No AWS_ACCESS_KEY_ID'
 	[ -z "$AWS_SECRET_ACCESS_KEY" ] && FATAL 'No AWS_SECRET_ACCESS_KEY'

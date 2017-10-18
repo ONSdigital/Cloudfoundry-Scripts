@@ -30,10 +30,10 @@ if [ -n "$3" ]; then
 	for _s in $@; do
 		filename="`basename "$_s"`"
 
-		"$BOSH" add-blob "$_s" "$RELEASE_BLOB_DESTINATION/$filename"
+		"$BOSH_CLI" add-blob "$_s" "$RELEASE_BLOB_DESTINATION/$filename"
 	done
 fi
 
-"$BOSH" create-release --force
+"$BOSH_CLI" create-release --force
 
-"$BOSH" upload-release --rebase 
+"$BOSH_CLI" upload-release --rebase 

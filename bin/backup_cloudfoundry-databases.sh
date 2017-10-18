@@ -12,6 +12,6 @@ DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/common-bosh-login.sh"
 
-for _e in `"$BOSH" errands | grep -E '^backup-'`; do
-	"$BOSH" run-errand "$_e"
+for _e in `"$BOSH_CLI" errands | grep -E '^backup-'`; do
+	"$BOSH_CLI" run-errand "$_e"
 done

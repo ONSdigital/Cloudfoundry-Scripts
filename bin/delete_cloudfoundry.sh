@@ -27,7 +27,7 @@ eval bosh_ssh_key_file="\$${ENV_PREFIX}bosh_ssh_key_file"
 findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 
 INFO 'Deleting Bosh Deployment'
-"$BOSH" delete-deployment --force $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
+"$BOSH_CLI" delete-deployment --force $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
 
 INFO 'Deleting Bosh bootstrap environment'
 bosh_env delete-env || FATAL 'Bosh environment deletion failed'

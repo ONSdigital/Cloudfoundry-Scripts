@@ -45,7 +45,7 @@ RDS_BROKER_PASSWORD="${RDS_BROKER_PASSWORD:-`generate_password`}"
 # Should be a multiple of something, probably 32, 16 or 8
 RDS_BROKER_ENC_KEY="${RDS_BROKER_ENC_KEY:-`generate_password 32`}"
 
-if "$CF" service-brokers | grep -Eq "^$SERVICE_NAME\s*http"; then
+if "$CF_CLI" service-brokers | grep -Eq "^$SERVICE_NAME\s*http"; then
 	[ -n "$IGNORE_EXISTING" ] && LOG_LEVEL='WARN' || LOG_LEVEL='FATAL'
 	
 	$LOG_LEVEL "Service broker '$SERVICE_NAME' exists"

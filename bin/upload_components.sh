@@ -82,9 +82,9 @@ for i in $BOSH_UPLOADS; do
 
 	INFO "Starting upload of $i"
 	# --fix doesn't actually 'fix' it merely replaces any existing file
-	"$BOSH" upload-$UPLOAD_TYPE --fix "$url"
+	"$BOSH_CLI" upload-$UPLOAD_TYPE --fix "$url"
 
-	[ x"$USE_EXISTING_VERSIONS" = x"true" ] || "$BOSH" $TYPES | record_version "$COMPONENT" "$i" >>"$OUTPUT_FILE"
+	[ x"$USE_EXISTING_VERSIONS" = x"true" ] || "$BOSH_CLI" $TYPES | record_version "$COMPONENT" "$i" >>"$OUTPUT_FILE"
 
 	unset base_url version
 done
@@ -93,7 +93,7 @@ done
 echo
 
 INFO 'Bosh Releases'
-"$BOSH" releases
+"$BOSH_CLI" releases
 
 INFO 'Bosh Stemcells'
-"$BOSH" stemcells
+"$BOSH_CLI" stemcells

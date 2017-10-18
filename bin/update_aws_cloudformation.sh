@@ -35,7 +35,7 @@ aws_change_set(){
 
 	if [ x"$update_validate" = x"validate" ]; then
 		INFO "Validating Cloudformation template: $stack_url"
-		"$AWS" cloudformation validate-template $template_option "$stack_url"
+		"$AWS_CLI" cloudformation validate-template $template_option "$stack_url"
 
 		return $?
 	fi
@@ -64,36 +64,36 @@ aws_change_set(){
 
 	# Changesets only have three states: CREATE_IN_PROGRESS, CREATE_COMPLETE & FAILED. 
 	INFO "Waiting for Cloudformation changeset to be created: $change_set_name"
-	"$AWS" cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name" >/dev/null 2>&1 || :
+	"$AWS_CLI" cloudformation wait change-set-create-complete --stack-name "$stack_arn" --change-set-name "$change_set_name" >/dev/null 2>&1 || :
 
 	INFO 'Checking changeset status'
-	if "$AWS" --output text --query \
+	if "$AWS_CLI" --output text --query \
 		"Status == 'CREATE_COMPLETE' && ExecutionStatus == 'AVAILABLE'" \
 		cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name" | grep -Eq '^True$'; then
 
 		INFO 'Stack change set details:'
-		"$AWS" cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS_CLI" cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
 		INFO "Starting Cloudformation changeset: $change_set_name"
-		"$AWS" cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS_CLI" cloudformation execute-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
 		INFO 'Waiting for Cloudformation stack to finish creation'
-		"$AWS" cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
+		"$AWS_CLI" cloudformation wait stack-update-complete --stack-name "$stack_arn" || FATAL 'Cloudformation stack changeset failed to complete'
 
 		local stack_changes=1
-	elif "$AWS" --output text --query "StatusReason == 'The submitted information didn"\\\'"t contain changes. Submit different information to create a change set.'" \
+	elif "$AWS_CLI" --output text --query "StatusReason == 'The submitted information didn"\\\'"t contain changes. Submit different information to create a change set.'" \
 		cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name" | grep -Eq '^True$'; then
 
 		WARN "Changeset did not contain any changes: $change_set_name"
 
 		WARN "Deleting empty changeset: $change_set_name"
-		"$AWS" cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS_CLI" cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 	else
 		WARN "Changeset failed to create"
-		"$AWS" cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS_CLI" cloudformation describe-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 
 		WARN "Deleting failed changeset: $change_set_name"
-		"$AWS" cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
+		"$AWS_CLI" cloudformation delete-change-set --stack-name "$stack_arn" --change-set-name "$change_set_name"
 	fi
 
 
@@ -144,7 +144,7 @@ INFO 'Parsing preamble outputs'
 . "$STACK_PREAMBLE_OUTPUTS"
 
 INFO 'Copying templates to S3'
-"$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
+"$AWS_CLI" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
 
 # Now we can set the main stack URL
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"

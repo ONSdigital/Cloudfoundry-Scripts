@@ -18,12 +18,12 @@ NO_SKIP_SSL_VALIDATION="$3"
 
 [ -z "$CF_APP" ] && FATAL 'No application name provided'
 
-"$CF" target -o "$CF_ORG" -s "$CF_SPACE"
+"$CF_CLI" target -o "$CF_ORG" -s "$CF_SPACE"
 
 INFO 'Checking if application exists'
-if "$CF" app "$CF_APP" >/dev/null 2>&1; then
+if "$CF_CLI" app "$CF_APP" >/dev/null 2>&1; then
 	INFO "Deleting application: $CF_APP"
-	"$CF" delete -r -f $CF_APP
+	"$CF_CLI" delete -r -f $CF_APP
 else
 	INFO "Application does not exist: $CF_APP"	
 fi
