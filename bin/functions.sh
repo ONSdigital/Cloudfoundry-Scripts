@@ -282,7 +282,11 @@ show_duplicate_output_names(){
 }
 
 bosh_int_simple(){
-	bosh_int SIMPLE $@
+	local manifest="$1"
+
+	[ -n "$2" ] && shift
+
+	bosh_int SIMPLE "$1" $@
 }
 
 bosh_int(){
