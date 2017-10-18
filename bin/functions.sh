@@ -281,17 +281,26 @@ show_duplicate_output_names(){
 	awk -F= '!/^#/{ a[$1]++ }END{ for(i in a){ if(a[i] > 1) printf("%s=%d\n",i,a[i])}}' "$outputs_dir"/outputs-*.sh
 }
 
-bosh_int(){
-	local manifest="$1"
+bosh_int_simple(){
+	bosh_int SIMPLE $@
+}
 
-	# So we can pass in options using $@
-	[ -n "$1" ] && shift
+bosh_int(){
+	local type="$1"
+	local manifest="$2"
 
 	[ -z "$manifest" ] && FATAL 'No manifest to interpolate for'
 	[ -f "$manifest" ] || FATAL "Manifest file does not exist: $manifest"
 
-	[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_FULL_OPS_FILE'"
-	[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_FULL_OPS_FILE'"
+	if [ x"$type" = x"FULL" ]; then
+		[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_FULL_OPS_FILE'"
+		[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_FULL_OPS_FILE'"
+	elif [ x"$type" = x"LITE" ]; then
+		[ -n "$PUBLIC_BOSH_LITE_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_LITE_OPS_FILE'"
+		[ -n "$PRIVATE_BOSH_LITE_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_LITE_OPS_FILE'"
+	fi
+
+	shift 2
 
 	# Stupidly, Bosh prints out its logs to stdout.  When the debug level is 'debug' this causes the output of the
 	# interpolation to be interspersed with debug lines
@@ -306,7 +315,6 @@ bosh_env(){
 
 	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
 		sh -c "'$BOSH_CLI' interpolate '$BOSH_LITE_MANIFEST_FILE' \
-			$BOSH_INTERACTIVE_OPT \
 			$BOSH_TTY_OPT \
 			$opts_option \
 			--var-errs \
@@ -317,7 +325,6 @@ bosh_env(){
 	fi
 
 	sh -c "'$BOSH_CLI' '$action_option' '$BOSH_LITE_MANIFEST_FILE' \
-		$BOSH_INTERACTIVE_OPT \
 		$BOSH_TTY_OPT \
 		--state='$BOSH_LITE_STATE_FILE' \
 		$opts_option \
@@ -344,7 +351,6 @@ bosh_deploy(){
 
 	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
 		sh -c "'$BOSH_CLI' interpolate '$bosh_manifest' \
-			$BOSH_INTERACTIVE_OPT \
 			$BOSH_TTY_OPT \
 			$opts_option \
 			--var-errs \
@@ -356,7 +362,6 @@ bosh_deploy(){
 
 	sh -c "'$BOSH_CLI' deploy '$bosh_manifest' \
 		$extra_opt \
-		$BOSH_INTERACTIVE_OPT \
 		$BOSH_TTY_OPT \
 		$opts_option \
 		--vars-env='$ENV_PREFIX_NAME' \

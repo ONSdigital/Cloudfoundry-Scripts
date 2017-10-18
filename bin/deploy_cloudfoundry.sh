@@ -133,7 +133,7 @@ if [ ! -f "$LITE_STATIC_IPS_YML" -o "$REINTERPOLATE_LITE_STATIC_IPS" = x"true" ]
 	cat >"$BOSH_LITE_STATIC_IPS_YML" <<EOF
 ---
 EOF
-	bosh_int "$BOSH_LITE_STATIC_IPS_FILE" >>"$BOSH_LITE_STATIC_IPS_YML"
+	bosh_int_simple "$BOSH_LITE_STATIC_IPS_FILE" >>"$BOSH_LITE_STATIC_IPS_YML"
 fi
 
 
@@ -173,12 +173,11 @@ if [ ! -f "$FULL_STATIC_IPS_YML" -o "$REINTERPOLATE_FULL_STATIC_IPS" = x"true" ]
 	cat >"$BOSH_FULL_STATIC_IPS_YML" <<EOF
 ---
 EOF
-	bosh_int "$BOSH_FULL_STATIC_IPS_FILE" >>"$BOSH_FULL_STATIC_IPS_YML"
+	bosh_int_simple "$BOSH_FULL_STATIC_IPS_FILE" >>"$BOSH_FULL_STATIC_IPS_YML"
 fi
 
 INFO 'Setting CloudConfig'
 "$BOSH_CLI" update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE" \
-	$BOSH_INTERACTIVE_OPT \
 	$BOSH_TTY_OPT \
 	--var bosh_deployment="$BOSH_DEPLOYMENT" \
 	--vars-file="$SSL_YML" \
@@ -186,10 +185,10 @@ INFO 'Setting CloudConfig'
 	--vars-env="$ENV_PREFIX_NAME" \
 	--vars-store="$BOSH_FULL_VARS_FILE"
 
-# Set release and stemcell versions
-# Should we be supporting an OPS file?
-for component_version in `"$BOSH_CLI" interpolate "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version:/{gsub("(\\\(|\\\))",""); print $NF}'`; do
-	# ADMIN_UI_VERSION
+# Set release versions
+set -x
+for component_version in `bosh_int FULL "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version:/{gsub("(\\\(|\\\))",""); print $NF}'`; do
+set +x
 	upper="`echo "$component_version" | tr '[[:lower:]]' '[[:upper:]]'`"
 
 	# eg CF_RELEASE=277
@@ -214,7 +213,7 @@ for component_version in `"$BOSH_CLI" interpolate "$BOSH_FULL_MANIFEST_FILE" --p
 	# Set the version for consumption by Bosh
 	export "$ENV_PREFIX$component_version"="$version"
 done
-
+set +x
 # Allow running of a custom script that can do other things (eg upload a local release)
 if [ x"$RUN_PREDEPLOY" = x"true" -a x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
 	[ -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] || chmod +x "$TOP_LEVEL_DIR/pre_deploy.sh"
@@ -252,7 +251,7 @@ if [ x"$RUN_BOSH_PREAMBLE" = x"true" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; th
 	# TEMPORARY
 
 	INFO 'Deleting Bosh premable deployment'
-	"$BOSH_CLI" delete-deployment --force $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
+	"$BOSH_CLI" delete-deployment --force $BOSH_TTY_OPT
 fi
 
 # This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'

@@ -90,7 +90,7 @@ BOSH_FULL_STATIC_IPS_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_FULL_STATIC_
 [ -f "$BOSH_FULL_STATIC_IPS_FILE" ] || FATAL "Bosh static IPs file '$BOSH_FULL_STATIC_IPS_FILE' does not exist"
 
 # Run non-interactively?
-[ x"$INTERACTIVE" = x'true' ] || BOSH_INTERACTIVE_OPT="--non-interactive"
+[ x"$INTERACTIVE" = x'true' ] || export BOSH_NON_INTERACTIVE='true'
 
 # Without a TTY (eg within Jenkins) Bosh doesn't seem to output anything when deploying
 [ -n "$NO_FORCE_TTY" ] || BOSH_TTY_OPT="--tty"
