@@ -284,12 +284,18 @@ show_duplicate_output_names(){
 bosh_int(){
 	local manifest="$1"
 
+	# So we can pass in options using $@
+	[ -n "$1" ] && shift
+
 	[ -z "$manifest" ] && FATAL 'No manifest to interpolate for'
 	[ -f "$manifest" ] || FATAL "Manifest file does not exist: $manifest"
 
+	[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_FULL_OPS_FILE'"
+	[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_FULL_OPS_FILE'"
+
 	# Stupidly, Bosh prints out its logs to stdout.  When the debug level is 'debug' this causes the output of the
 	# interpolation to be interspersed with debug lines
-	BOSH_LOG_LEVEL=info "$BOSH_CLI" interpolate --vars-env="$ENV_PREFIX_NAME" "$manifest"
+	BOSH_LOG_LEVEL=info "$BOSH_CLI" interpolate $opts_option --vars-env="$ENV_PREFIX_NAME" "$manifest" $@
 }
 
 bosh_env(){
