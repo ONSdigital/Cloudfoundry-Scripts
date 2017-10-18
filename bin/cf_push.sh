@@ -34,18 +34,18 @@ if [ -z "$APP_NAME" ]; then
 	[ -z "$APP_NAME" ] && FATAL 'Unable to determine application name from manifest.yml'
 fi
 
-"$CF" target -o "$CF_ORGANISATION" -s "$CF_SPACE"
+"$CF_CLI" target -o "$CF_ORGANISATION" -s "$CF_SPACE"
 
-if "$CF" app "$APP_NAME" >/dev/null 2>&1; then
+if "$CF_CLI" app "$APP_NAME" >/dev/null 2>&1; then
 	WARN "Deleting existing app: $APP_NAME"
 
-	"$CF" delete -f "$APP_NAME"
+	"$CF_CLI" delete -f "$APP_NAME"
 fi
 
-"$CF" push "$APP_NAME" || FAILED=1
+"$CF_CLI" push "$APP_NAME" || FAILED=1
 
 if [ -n "$FAILED" ]; then
-	"$CF" logs "$APP_NAME" --recent
+	"$CF_CLI" logs "$APP_NAME" --recent
 
 	FATAL 'Application failed to deploy'
 fi

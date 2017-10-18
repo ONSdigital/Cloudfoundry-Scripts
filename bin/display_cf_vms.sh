@@ -43,4 +43,4 @@ case "$OPTION" in
 		;;
 esac
 
-watch -tn "$INTERVAL" "'$BOSH' instances $BOSH_OPTS --$OUTPUT_TYPE"
+watch -tn "$INTERVAL" "'$BOSH_CLI' instances $BOSH_OPTS --$OUTPUT_TYPE"

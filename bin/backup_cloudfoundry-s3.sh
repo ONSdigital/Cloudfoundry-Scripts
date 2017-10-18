@@ -92,7 +92,7 @@ for _bucket in $s3_bucket_resource_names; do
 		FATAL "Unknown action: $ACTION"
 	fi
 
-	"$AWS" s3 sync --acl bucket-owner-full-control --delete "$src" "$dst"
+	"$AWS_CLI" s3 sync --acl bucket-owner-full-control --delete "$src" "$dst"
 done
 IFS="$OLDIFS"
 

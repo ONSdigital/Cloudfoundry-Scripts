@@ -28,7 +28,7 @@ GOLANG_VERSION='1.6.3'
 [ -d "$TMP_DIR" ] || mkdir -p "$TMP_DIR"
 [ -d "$BROKER_DIR" ] && rm -rf "$BROKER_DIR"
 
-if "$CF" service-brokers | grep -Eq "^$BROKER_NAME\s*http"; then
+if "$CF_CLI" service-brokers | grep -Eq "^$BROKER_NAME\s*http"; then
 	[ -n "$IGNORE_EXISTING" ] && LOG_LEVEL='WARN' || LOG_LEVEL='FATAL'
 	
 	$LOG_LEVEL "Service broker '$BROKER_NAME' exists"

@@ -10,10 +10,10 @@ BASE_DIR="`dirname \"$0\"`"
 
 for i in `seq 0 9`; do
 	# Check we have a valid entry
-	"$BOSH" interprolate "$BOSH_FULL_MANIFEST_FILE" --path /properties/databases/roles | sed -re 's/: /=/g' || break
+	"$BOSH_CLI" interprolate "$BOSH_FULL_MANIFEST_FILE" --path /properties/databases/roles | sed -re 's/: /=/g' || break
 
 	# Pull in the values
-	eval `"$BOSH" interprolate "$BOSH_FULL_MANIFEST_FILE" --path /properties/databases/roles | sed -re 's/: /=/g'`
+	eval `"$BOSH_CLI" interprolate "$BOSH_FULL_MANIFEST_FILE" --path /properties/databases/roles | sed -re 's/: /=/g'`
 
 	[ -n "$name" ] || FATAL 'Unable to find database role name'
 
@@ -24,9 +24,9 @@ for i in `seq 0 9`; do
 
 	[ -n "$real_password" -o x"$real_password" != x'$' ] && password_opt="--new-database-password '$real_password'"
 
-	"$BOSH" interprolate "$BOSH_FULL_MANIFEST_FILE" --path "/properties/databases/databases/name=$name" || FATAL "Unable to find database section for $name"
+	"$BOSH_CLI" interprolate "$BOSH_FULL_MANIFEST_FILE" --path "/properties/databases/databases/name=$name" || FATAL "Unable to find database section for $name"
 
-	eval `"$BOSH" interprolate "$BOSH_FULL_MANIFEST_FILE" --path "/properties/databases/databases/name=$name"`
+	eval `"$BOSH_CLI" interprolate "$BOSH_FULL_MANIFEST_FILE" --path "/properties/databases/databases/name=$name"`
 
 	[ x"$citext" = x"true" ] && extensions_opt="--extensions citext"
 

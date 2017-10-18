@@ -29,7 +29,7 @@ eval export `prefix_vars "$CF_CREDENTIALS"`
 
 [ -n "$DONT_SKIP_SSL_VALIDATION" ] || CF_EXTRA_OPTS='--skip-ssl-validation'
 
-if "$CF" service-brokers | grep -Eq "^$SERVICE_URL$"; then
+if "$CF_CLI" service-brokers | grep -Eq "^$SERVICE_URL$"; then
 	[ -n "$IGNORE_EXISTING" ] && LOG_LEVEL='WARN' || LOG_LEVEL='FATAL'
 
 	$LOG_LEVEL "Service broker '$SERVICE_NAME' exists"
@@ -39,16 +39,16 @@ fi
 
 if [ -z "$NO_LOGIN" ]; then
 	INFO "Setting API target as $api_dns"
-	"$CF" api "$api_dns" "$CF_EXTRA_OPTS"
+	"$CF_CLI" api "$api_dns" "$CF_EXTRA_OPTS"
 
 	INFO "Logging in as $CF_ADMIN_USERNAME"
-	"$CF" login -u "$CF_ADMIN_USERNAME" -p "$CF_ADMIN_PASSWORD" -s "$SERVICES_SPACE" "$CF_EXTRA_OPTS" 
+	"$CF_CLI" login -u "$CF_ADMIN_USERNAME" -p "$CF_ADMIN_PASSWORD" -s "$SERVICES_SPACE" "$CF_EXTRA_OPTS" 
 else
-	"$CF" target -s "$SERVICES_SPACE"
+	"$CF_CLI" target -s "$SERVICES_SPACE"
 fi
 
 INFO "Creating service broker: $SERVICE_NAME"
-"$CF" create-service-broker "$SERVICE_NAME" "$SERVICE_USERNAME" "$SERVICE_PASSWORD" "$SERVICE_URL"
+"$CF_CLI" create-service-broker "$SERVICE_NAME" "$SERVICE_USERNAME" "$SERVICE_PASSWORD" "$SERVICE_URL"
 
 INFO "Enabling service broker: $SERVICE_NAME"
-"$CF" enable-service-access "$SERVICE_NAME"
+"$CF_CLI" enable-service-access "$SERVICE_NAME"

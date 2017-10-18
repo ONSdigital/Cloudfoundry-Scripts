@@ -40,17 +40,17 @@ installed_bin cf
 eval export `prefix_vars "$CF_CREDENTIALS"`
 
 INFO "Setting API target as $api_dns"
-"$CF" api "$api_dns" "$CF_EXTRA_OPTS"
+"$CF_CLI" api "$api_dns" "$CF_EXTRA_OPTS"
 
 INFO "Logging in as $CF_ADMIN_USERNAME"
-"$CF" login -u "$CF_ADMIN_USERNAME" -p "$CF_ADMIN_PASSWORD" "$CF_EXTRA_OPTS" </dev/null
+"$CF_CLI" login -u "$CF_ADMIN_USERNAME" -p "$CF_ADMIN_PASSWORD" "$CF_EXTRA_OPTS" </dev/null
 
 "$BASE_DIR/setup_cf-orgspace.sh" "$DEPLOYMENT_NAME" "$ORG_NAME" "$TEST_SPACE"
 
 INFO 'Available buildpacks:'
 # Sometimes we get a weird error, but upon next deployment the error doesn't occur...
 # Server error, status code: 400, error code: 100001, message: The app is invalid: buildpack staticfile_buildpack is not valid public url or a known buildpack name
-"$CF" buildpacks
+"$CF_CLI" buildpacks
 
 if [ -z "$SKIP_TESTS" ]; then
 	INFO 'Testing application deployment'
@@ -58,7 +58,7 @@ if [ -z "$SKIP_TESTS" ]; then
 		buildpack="`awk '/^ *buildpack:/{print $2}' "$TEST_APPS/$i/manifest.yml"`"
 
 		if [ -n "$buildpack" ]; then
-			"$CF" buildpacks | grep -q "^$buildpack" || FATAL "Buildpack '$buildpack' not available - please retry"
+			"$CF_CLI" buildpacks | grep -q "^$buildpack" || FATAL "Buildpack '$buildpack' not available - please retry"
 		fi
 
 		cd "$TEST_APPS/$i"
@@ -94,6 +94,6 @@ if [ -d "config/security_groups" ]; then
 		group_name="`echo $security_group | sed $SED_EXTENDED -e 's/\.json$//g'`"
 		INFO "... $group_name"
 
-		"$CF" create-security-group "$group_name" "config/security_groups/$_s"
+		"$CF_CLI" create-security-group "$group_name" "config/security_groups/$_s"
 	done
 fi

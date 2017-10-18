@@ -44,16 +44,16 @@ fi
 
 if [ -z "$SKIP_EXISTING" -o x"$SKIP_EXISTING" != x"true" ] || ! stack_exists "$PREAMBLE_STACK"; then
 	INFO 'Checking for existing Cloudformation stack'
-	"$AWS" --output text --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') && StackStatus != 'DELETE_COMPLETE'].StackName" \
+	"$AWS_CLI" --output text --query "StackSummaries[?starts_with(StackName,'$DEPLOYMENT_NAME-') && StackStatus != 'DELETE_COMPLETE'].StackName" \
 		cloudformation list-stacks | grep -q "^$DEPLOYMENT_NAME" && FATAL 'Stack(s) exists'
 
 	INFO 'Validating Cloudformation Preamble Template'
-	"$AWS" cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
+	"$AWS_CLI" cloudformation validate-template --template-body "$STACK_PREAMBLE_URL"
 
 	# The preamble must be kept smaller than 51200 as we use it to host templates
 	INFO 'Creating Cloudformation stack preamble'
 	INFO 'Stack details:'
-	"$AWS" \
+	"$AWS_CLI" \
 		cloudformation create-stack \
 		--capabilities CAPABILITY_IAM \
 		--capabilities CAPABILITY_NAMED_IAM \
@@ -63,7 +63,7 @@ if [ -z "$SKIP_EXISTING" -o x"$SKIP_EXISTING" != x"true" ] || ! stack_exists "$P
 		--template-body "$STACK_PREAMBLE_URL"
 
 	INFO 'Waiting for Cloudformation stack to finish creation'
-	"$AWS" cloudformation wait stack-create-complete --stack-name "$DEPLOYMENT_NAME-preamble" || FATAL 'Failed to create Cloudformation preamble stack'
+	"$AWS_CLI" cloudformation wait stack-create-complete --stack-name "$DEPLOYMENT_NAME-preamble" || FATAL 'Failed to create Cloudformation preamble stack'
 fi
 
 # Always generate outputs
@@ -75,24 +75,24 @@ INFO "Loading: $STACK_PREAMBLE_OUTPUTS"
 . "$STACK_PREAMBLE_OUTPUTS"
 
 INFO 'Copying templates to S3'
-"$AWS" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
+"$AWS_CLI" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
 
 for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
 	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
 	STACK_URL="$templates_bucket_http_url/$stack_file"
 
 	INFO "Validating Cloudformation template: '$stack_file'"
-	"$AWS" cloudformation validate-template --template-url "$STACK_URL" || FAILED=$?
+	"$AWS_CLI" cloudformation validate-template --template-url "$STACK_URL" || FAILED=$?
 
 	if [ 0$FAILED -ne 0 ] && [ -z "$SKIP_EXISTING" -o x"$SKIP_EXISTING" != x"true" ]; then
 		INFO 'Cleaning preamble S3 bucket'
-		"$AWS" s3 rm --recursive "s3://$templates_bucket_name"
+		"$AWS_CLI" s3 rm --recursive "s3://$templates_bucket_name"
 
 		INFO "Deleting stack: '$PREAMBLE_STACK'"
-		"$AWS" cloudformation delete-stack --stack-name "$PREAMBLE_STACK"
+		"$AWS_CLI" cloudformation delete-stack --stack-name "$PREAMBLE_STACK"
 
 		INFO "Waiting for Cloudformation stack deletion to finish creation: '$PREAMBLE_STACK'"
-		"$AWS" cloudformation wait stack-delete-complete --stack-name "$PREAMBLE_STACK" || FATAL 'Failed to delete Cloudformation stack'
+		"$AWS_CLI" cloudformation wait stack-delete-complete --stack-name "$PREAMBLE_STACK" || FATAL 'Failed to delete Cloudformation stack'
 
 		[ -d "$STACK_OUTPUTS_DIR" ] && rm -rf "$STACK_OUTPUTS_DIR"
 
@@ -144,7 +144,7 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 	if [ -z "$STACK_EXISTS" ]; then
 		INFO "Creating Cloudformation stack: '$STACK_NAME'"
 		INFO 'Stack details:'
-		"$AWS" cloudformation create-stack \
+		"$AWS_CLI" cloudformation create-stack \
 			--stack-name "$STACK_NAME" \
 			--template-url "$STACK_URL" \
 			--capabilities CAPABILITY_IAM \
@@ -153,7 +153,7 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 			--parameters "file://$STACK_PARAMETERS"
 
 		INFO "Waiting for Cloudformation stack to finish creation: '$STACK_NAME'"
-		"$AWS" cloudformation wait stack-create-complete --stack-name "$STACK_NAME" || FATAL 'Failed to create Cloudformation stack'
+		"$AWS_CLI" cloudformation wait stack-create-complete --stack-name "$STACK_NAME" || FATAL 'Failed to create Cloudformation stack'
 	fi
 
 	# Generate outputs
@@ -173,7 +173,7 @@ if [ -n "$NEW_OUTPUTS" ]; then
 fi
 
 # Check if we have an existing AWS SSH key that has the correct name
-"$AWS" ec2 describe-key-pairs --key-names "$BOSH_SSH_KEY_NAME" >/dev/null 2>&1 && AWS_KEY_EXISTS='true'
+"$AWS_CLI" ec2 describe-key-pairs --key-names "$BOSH_SSH_KEY_NAME" >/dev/null 2>&1 && AWS_KEY_EXISTS='true'
 
 if [ x"$REGENERATE_SSH_KEY" = x"true" -a -f "$BOSH_SSH_KEY_FILENAME" ]; then
 	INFO 'Deleting local SSH key'
@@ -193,7 +193,7 @@ if [ x"$AWS_KEY_EXISTS" = x"true" -a x"$DELETE_AWS_SSH_KEY" != x"true" ]; then
 	LOCAL_SSH_FINGERPRINT="`openssl pkey -in "$BOSH_SSH_KEY_FILENAME" -pubout -outform DER | openssl md5 -c | awk '{print $NF}'`"
 
 	INFO 'Obtaining AWS SSH key fingerprint'
-	AWS_SSH_FINGERPRINT="`"$AWS" --output text --query "KeyPairs[?KeyName == '$BOSH_SSH_KEY_NAME'].KeyFingerprint" ec2 describe-key-pairs --key-names "$BOSH_SSH_KEY_NAME"`"
+	AWS_SSH_FINGERPRINT="`"$AWS_CLI" --output text --query "KeyPairs[?KeyName == '$BOSH_SSH_KEY_NAME'].KeyFingerprint" ec2 describe-key-pairs --key-names "$BOSH_SSH_KEY_NAME"`"
 
 	INFO 'Checking if we need to reupload AWS SSH key'
 	[ x"$AWS_SSH_FINGERPRINT" != x"$LOCAL_SSH_FINGERPRINT" ] && DELETE_AWS_SSH_KEY='true'
@@ -201,7 +201,7 @@ fi
 
 if [ x"$AWS_KEY_EXISTS" = x"true" -a x"$DELETE_AWS_SSH_KEY" = x"true" ]; then
 	INFO 'Deleting AWS SSH key'
-	"$AWS" ec2 delete-key-pair --key-name "$BOSH_SSH_KEY_NAME"
+	"$AWS_CLI" ec2 delete-key-pair --key-name "$BOSH_SSH_KEY_NAME"
 
 	AWS_KEY_EXISTS='false'
 fi
@@ -212,7 +212,7 @@ fi
 if [ x"$AWS_KEY_EXISTS" != x"true" ]; then
 	INFO "Uploading $BOSH_SSH_KEY_NAME to AWS"
 	KEY_DATA="`cat "$BOSH_SSH_KEY_FILENAME.pub"`"
-	"$AWS" ec2 import-key-pair --key-name "$BOSH_SSH_KEY_NAME" --public-key-material "$KEY_DATA"
+	"$AWS_CLI" ec2 import-key-pair --key-name "$BOSH_SSH_KEY_NAME" --public-key-material "$KEY_DATA"
 fi
 
 if [ ! -f "$BOSH_SSH_CONFIG" ]; then

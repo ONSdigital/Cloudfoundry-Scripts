@@ -14,8 +14,8 @@ export BOSH_CA_CERT
 installed_bin bosh
 
 INFO "Pointing Bosh at deployed Bosh: $BOSH_ENVIRONMENT"
-"$BOSH" alias-env $BOSH_TTY_OPT -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT" >&2
+"$BOSH_CLI" alias-env $BOSH_TTY_OPT -e "$BOSH_ENVIRONMENT" "$BOSH_ENVIRONMENT" >&2
 
 INFO 'Attempting to login'
-"$BOSH" log-in $BOSH_TTY_OPT >&2
+"$BOSH_CLI" log-in $BOSH_TTY_OPT >&2
 

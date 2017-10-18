@@ -64,7 +64,7 @@ for i in Lite Full; do
 		if [ -n "$file_name" ]; then
 			[ ! -f "$file" ] && FATAL "$file does not exist"
 
-			eval "${j}_BOSH_${upper}_OPS_FILE"="$file"
+			eval "${j}_BOSH_${upper}_OPS_FILE"="'$file'"
 		fi
 	done
 done
