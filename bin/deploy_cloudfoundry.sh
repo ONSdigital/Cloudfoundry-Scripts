@@ -105,6 +105,14 @@ eval export `prefix_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"`
 INFO 'Loading Bosh network configuration'
 eval export `prefix_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"`
 
+if [ x"$USE_EXISTING_VERSIONS" = x"true" ]; then
+	INFO 'Loading Bosh release versions'
+	. "$RELEASE_CONFIG_FILE"
+
+	INFO 'Loading Bosh stemell versions'
+	. "$STEMCELL_CONFIG_FILE"
+fi
+
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"
 export BOSH_CA_CERT
@@ -174,15 +182,30 @@ INFO 'Setting CloudConfig'
 	--vars-env="$ENV_PREFIX_NAME" \
 	--vars-store="$BOSH_FULL_VARS_FILE"
 
-# Upload Stemcells & releases
-if [ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
-	# At the moment (2017/09/11) and for a good few months, there has been a problem with some of the uploads:
-	# Task 17 | 10:12:31 | Compiling packages: golang-1.8/63a243be32451af083a062ba2c929c3f2b34f132 (00:03:28)
-	#	L Error: Action Failed get_task: Task b8160a99-e155-4b42-6eb2-cba0ae7488b7 result: Compiling package golang-1.8: Fetching package golang-1.8: Fetching package blob 33dacc88-3647-4469-9183-acfcefe24611: Getting blob from inner blobstore: Checking downloaded blob '33dacc88-3647-4469-9183-acfcefe24611': Expected stream to have digest 'dac8587b4ce06a0f647f0061984d308349af9d08' but was 'c25e7406a45fb901a085edc8a7b1769f6fb543dd'
-	# https://github.com/cloudfoundry/cf-release/issues/1239
-	"$BASE_DIR/upload_components.sh" "$DEPLOYMENT_NAME"
+# Set release and stemcell versions
+# Should we be supporting an OPS file?
+for version in `"$BOSH" interpolate "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^- name:/{gsub("\(|\)",""); print $NF}'`; do
+	# ADMIN_UI_VERSION
+	upper="`echo $version | tr '[[:lower:]]' '[[:upper:]]'`"
 
-fi
+	eval upper_value="\$$upper"
+
+	# If we haven't been given a version, we assume the latest
+	[ -n "$upper_value" ] || upper_value='latest'
+
+	# Set the version for consumption by Bosh
+	eval "$ENV_PREFIX$version"="$upper_value"
+done
+
+# Upload Stemcells & releases
+#if [ x"$REUPLOAD_COMPONENTS" = x"true" -o x"$NEW_BOSH_ENV" = x"true" ]; then
+#	# At the moment (2017/09/11) and for a good few months, there has been a problem with some of the uploads:
+#	# Task 17 | 10:12:31 | Compiling packages: golang-1.8/63a243be32451af083a062ba2c929c3f2b34f132 (00:03:28)
+#	#	L Error: Action Failed get_task: Task b8160a99-e155-4b42-6eb2-cba0ae7488b7 result: Compiling package golang-1.8: Fetching package golang-1.8: Fetching package blob 33dacc88-3647-4469-9183-acfcefe24611: Getting blob from inner blobstore: Checking downloaded blob '33dacc88-3647-4469-9183-acfcefe24611': Expected stream to have digest 'dac8587b4ce06a0f647f0061984d308349af9d08' but was 'c25e7406a45fb901a085edc8a7b1769f6fb543dd'
+#	# https://github.com/cloudfoundry/cf-release/issues/1239
+#	"$BASE_DIR/upload_components.sh" "$DEPLOYMENT_NAME"
+#
+#fi
 
 # Allow running of a custom script that can do other things (eg upload a local release)
 if [ x"$RUN_PREDEPLOY" = x"true" -a x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
@@ -242,6 +265,18 @@ elif [ x"$SKIP_POST_DEPLOY_ERRANDS" = x"true" ]; then
 elif [ -z "$POST_DEPLOY_ERRANDS" ]; then
 	INFO 'No post deploy errands to run'
 fi
+
+# Save stemcell and release versions
+for i in stemcells release; do
+	[ x"$i" = x"release" ] && OUTPUT_FILE="$RELEASE_CONFIG_FILE" || OUTPUT_FILE="$STEMCELL_CONFIG_FILE"
+
+	"$BOSH" $i | awk -v type="$i" 'BEGIN{
+		printf("# Cloudfoundry %s\n",type)
+	}{
+		if($1 ~ /^[a-z]/)
+			printf("%s='\''%s'\''\n",$1,$2)
+	}' >"$OUTPUT_FILE"
+done
 
 post_deploy_scripts CF
 
