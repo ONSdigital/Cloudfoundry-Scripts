@@ -284,9 +284,9 @@ show_duplicate_output_names(){
 bosh_int_simple(){
 	local manifest="$1"
 
-	[ -n "$2" ] && shift
+	[ -n "$1" ] && shift
 
-	bosh_int SIMPLE "$1" $@
+	bosh_int SIMPLE "$manifest" $@
 }
 
 bosh_int(){
@@ -308,7 +308,7 @@ bosh_int(){
 
 	# Stupidly, Bosh prints out its logs to stdout.  When the debug level is 'debug' this causes the output of the
 	# interpolation to be interspersed with debug lines
-	BOSH_LOG_LEVEL=info "$BOSH_CLI" interpolate $opts_option --vars-env="$ENV_PREFIX_NAME" "$manifest" $@
+	sh -c "BOSH_LOG_LEVEL=info '$BOSH_CLI' --no-color interpolate $opts_option --vars-env='$ENV_PREFIX_NAME' '$manifest'" $@
 }
 
 bosh_env(){

@@ -186,9 +186,7 @@ INFO 'Setting CloudConfig'
 	--vars-store="$BOSH_FULL_VARS_FILE"
 
 # Set release versions
-set -x
-for component_version in `bosh_int FULL "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version:/{gsub("(\\\(|\\\))",""); print $NF}'`; do
-set +x
+for component_version in `bosh_int FULL "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
 	upper="`echo "$component_version" | tr '[[:lower:]]' '[[:upper:]]'`"
 
 	# eg CF_RELEASE=277
@@ -213,7 +211,7 @@ set +x
 	# Set the version for consumption by Bosh
 	export "$ENV_PREFIX$component_version"="$version"
 done
-set +x
+
 # Allow running of a custom script that can do other things (eg upload a local release)
 if [ x"$RUN_PREDEPLOY" = x"true" -a x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
 	[ -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] || chmod +x "$TOP_LEVEL_DIR/pre_deploy.sh"
