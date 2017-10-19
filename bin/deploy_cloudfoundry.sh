@@ -176,6 +176,9 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 
 	# We may need to run the pre-deploy script
 	RUN_PREDEPLOY='true'
+
+	# (Re)upload the stemcell
+	REUPLOAD_STEMCELL='true'
 fi
 
 INFO 'Pointing Bosh client at newly deployed Bosh Director'
@@ -222,7 +225,7 @@ for component_version in `bosh_deploy "$BOSH_FULL_MANIFEST_FILE" interpolate_onl
 done
 
 # Unfortunately, there is no way currently (2017/10/19) for Bosh/Director to automatically upload a stemcell in the same way it does for releases
-if [ -n "$STEMCELL_URL" ]; then
+if [ x"$REUPLOAD_STEMCELL" = x"true" -a -n "$STEMCELL_URL" ]; then
 	[ -n "$BOSH_STEMCELL_VERSION" ] && URL_EXTENSION="?v=$BOSH_STEMCELL_VERSION"
 
 	UPLOAD_URL="$STEMCELL_URL$BOSH_STEMCELL_VERSION"
