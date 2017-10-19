@@ -298,8 +298,10 @@ bosh_lite(){
 }
 
 bosh_full(){
-	local bosh_manifest="$1"
+	local action_option="$1"
+	local bosh_manifest="$2"
 
+	[ -z "$action_option" ] && FATAL 'No action provided'
 	[ -z "$bosh_manifest" ] && FATAL 'No Bosh manifest provided'
 	[ -f "$bosh_manifest" ] || FATAL "Unable to find: $bosh_manifest"
 
@@ -308,7 +310,7 @@ bosh_full(){
 	[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PUBLIC_BOSH_FULL_OPS_FILE"
 	[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PRIVATE_BOSH_FULL_OPS_FILE"
 
-	_bosh deploy "$bosh_manifest" "$@"
+	_bosh deploy "$action_option" "$bosh_manifest" "$@"
 }
 
 _bosh(){
