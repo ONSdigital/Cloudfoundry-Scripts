@@ -83,7 +83,7 @@ if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && ! which aws >/dev/null 2>&1
 	CHANGES=1
 fi
 
-if [ ! -e "$BOSH-$BOSH_CLI_VERSION" ]; then
+if [ ! -e "$BOSH_CLI-$BOSH_CLI_VERSION" ]; then
 	INFO "Downloading Bosh $BOSH_CLI_VERSION"
 	curl -SLo "$BOSH_CLI-$BOSH_CLI_VERSION" "$BOSH_CLI_URL"
 
