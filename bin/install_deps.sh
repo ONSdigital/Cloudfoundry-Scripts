@@ -105,9 +105,9 @@ if [ ! -f "$CF_CLI-$CF_CLI_VERSION" ]; then
 	mv "$TMP_DIR/cf" "$CF_CLI-$CF_CLI_VERSION"
 fi
 
-for i in BOSH CF; do
+for i in BOSH_CLI CF_CLI; do
 	eval file="\$$i"
-	eval version="\$${i}_CLI_VERSION"
+	eval version="\$${i}_VERSION"
 
 	file_name="`basename \"$file\"`"
 
