@@ -323,7 +323,11 @@ _bosh(){
 	shift 2
 
 	# --vars-errs is ignored for 'bosh create-env'
-	[ x"$action" = x'create-env' -o x"$action" = x'delete-env' ] || local vars_errs_option='--vars-errs'
+	if [ x"$action" = x'create-env' -o x"$action" = x'delete-env' ]; then
+		local state_option="--state=$BOSH_LITE_STATE_FILE"
+	else
+		local vars_errs_option='--vars-errs'
+	fi
 
 	# We don't always want to process the ops file(s)
 	[ 0"$NO_OPS_FILE" -eq 1 ] && unset ops_file_option
@@ -346,6 +350,7 @@ _bosh(){
 		$BOSH_TTY_OPT \
 		$ops_file_option \
 		$vars_errs_option \
+		$state_option
 		$@ \
 		--vars-env=$ENV_PREFIX_NAME
 }
