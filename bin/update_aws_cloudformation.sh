@@ -177,6 +177,6 @@ if [ -n "$NEW_OUTPUTS" ]; then
 	calculate_dns "$vpc_cidr" >"$STACK_OUTPUTS_DIR/outputs-dns.$STACK_OUTPUTS_SUFFIX"
 fi
 
-post_deploy_scripts AWS
+post_deploy_scripts aws
 
 INFO 'AWS Deployment Update Complete'
