@@ -350,7 +350,7 @@ _bosh(){
 		$BOSH_TTY_OPT \
 		$ops_file_option \
 		$vars_errs_option \
-		$state_option
+		$state_option \
 		$@ \
 		--vars-env=$ENV_PREFIX_NAME
 }
