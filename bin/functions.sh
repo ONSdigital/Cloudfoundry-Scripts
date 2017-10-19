@@ -331,15 +331,12 @@ _bosh(){
 	# 
 	if [ x"$action" = x'interpolate' -o x"$action" = x'int' ] || [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
 		echo '---'
-		# https://github.com/cloudfoundry/bosh-cli/issues/338	
-		# Stupidly bosh-cli prints 'Succeeded' to stdout rather than stderr (2017/10/19)
 		"$BOSH_CLI" interpolate "$bosh_manifest" \
-			$BOSH_TTY_OPT \
 			$ops_file_option \
 			--no-color \
 			$@ \
 			--var-errs \
-			--vars-env=$ENV_PREFIX_NAME | grep -vi '^Succeeded'
+			--vars-env=$ENV_PREFIX_NAME
 
 		[ x"$action" = x'interpolate' -o x"$action" = x'int' ] && return
 	fi
