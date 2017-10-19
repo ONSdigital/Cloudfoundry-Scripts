@@ -221,6 +221,19 @@ for component_version in `bosh_deploy "$BOSH_FULL_MANIFEST_FILE" interpolate_onl
 	export "$ENV_PREFIX$component_version"="$version"
 done
 
+# Unfortunately, there is no way currently (2017/10/19) for Bosh/Director to automatically upload a stemcell in the same way it does for releases
+if [ -n "$STEMCELL_URL" ]; then
+	[ -n "$BOSH_STEMCELL_VERSION" ] && URL_EXTENSION="?v=$BOSH_STEMCELL_VERSION"
+
+	UPLOAD_URL="$STEMCELL_URL$BOSH_STEMCELL_VERSION"
+
+	INFO "Uploaded $UPLOAD_URL to Bosh"
+	"$BOSH_CLI" upload-stemcell "$UPLOAD_URL"
+else
+	WARN 'No STEMCELL_URL provided, unable to upload a stemcell'
+
+fi
+
 # Allow running of a custom script that can do other things (eg upload a local release)
 if [ x"$RUN_PREDEPLOY" = x"true" -a x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
 	[ -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] || chmod +x "$TOP_LEVEL_DIR/pre_deploy.sh"
