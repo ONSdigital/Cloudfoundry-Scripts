@@ -305,7 +305,7 @@ bosh_full(){
 	[ -z "$bosh_manifest" ] && FATAL 'No Bosh manifest provided'
 	[ -f "$bosh_manifest" ] || FATAL "Unable to find: $bosh_manifest"
 
-	shift
+	shift 2
 
 	[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PUBLIC_BOSH_FULL_OPS_FILE"
 	[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PRIVATE_BOSH_FULL_OPS_FILE"
