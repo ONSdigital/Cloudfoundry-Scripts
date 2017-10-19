@@ -12,6 +12,7 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common-bosh.sh"
 
+# Check if we have any existing Bosh state
 if [ -f "$BOSH_LITE_STATE_FILE" ]; then
 	if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 		# If we have been asked to delete the Bosh env, we need to retain the state file, otherwise we cannot
@@ -19,12 +20,15 @@ if [ -f "$BOSH_LITE_STATE_FILE" ]; then
 		WARN "Not deleting Bootstrap Bosh state file as we need this to delete the Bootstrap Bosh environment"
 		WARN "The state file will be deleted after we successfully, delete Bosh"
 	elif [ x"$DELETE_BOSH_STATE" = x"true" ]; then
+		# If we have manually deleted the Bosh VM, we should delete the state file
+		INFO 'Removing Bosh state file'
 		rm -f "$BOSH_LITE_STATE_FILE"
 	else
 		WARN "Existing Bootstrap Bosh state file exists: $BOSH_LITE_STATE_FILE"
 	fi
 fi
 
+# Do we need to generate new passwords?
 if [ ! -f "$PASSWORD_CONFIG_FILE" -o x"$REGENERATE_PASSWORDS" = x"true" ]; then
 	# Environmental variables are insecure
 	INFO 'Generating password config'
@@ -39,6 +43,7 @@ EOF
 	done >>"$PASSWORD_CONFIG_FILE"
 fi
 
+# Do we need to generate the network configuration?
 if [ ! -f "$NETWORK_CONFIG_FILE" -o x"$REGENERATE_NETWORKS_CONFIG" = x"true" ]; then
 	INFO 'Generating network configuration'
 	echo '# Cloudfoundry network configuration' >"$NETWORK_CONFIG_FILE"
@@ -48,7 +53,7 @@ if [ ! -f "$NETWORK_CONFIG_FILE" -o x"$REGENERATE_NETWORKS_CONFIG" = x"true" ]; 
 	done >>"$NETWORK_CONFIG_FILE"
 fi
 
-# Sanity check
+# Sanity check - make sure things exist
 [ -f "$PASSWORD_CONFIG_FILE" ] || FATAL "Password configuration file does not exist: '$PASSWORD_CONFIG_FILE'"
 [ -f "$AWS_PASSWORD_CONFIG_FILE" ] || FATAL "AWS Password configuration file does not exist: '$AWS_PASSWORD_CONFIG_FILE'"
 
@@ -60,6 +65,7 @@ eval DIRECTOR_PASSWORD="\$${ENV_PREFIX}director_password"
 INFO 'Setting Bosh deployment name'
 export ${ENV_PREFIX}bosh_deployment="$DEPLOYMENT_NAME"
 
+# Do we need to clear the existing SSL key pairs/fingerprints?
 if [ x"$REGENERATE_SSL" = x"true" -o x"$DELETE_SSL_CA" = x"true" ] && [ -d "$SSL_DIR" ]; then
 	INFO 'Regenerating SSL CAs and keypairs'
 	rm -rf "$SSL_DIR"
@@ -74,16 +80,18 @@ fi
 
 cd "$SSL_DIR"
 
+# Generate any new/missing SSL keypairs/fingerprints
 # $SSL_YML may contain spaces
 OUTPUT_YML="$SSL_YML" "$BASE_DIR/generate-ssl.sh" "$domain_name" "$INTERNAL_DOMAIN"
 
 cd -
 
-# Just in case
+# More sanity checking
 if [ ! -f "$EXTERNAL_SSL_DIR/client/director.$domain_name.key" -o ! -f "$EXTERNAL_SSL_DIR/client/director.$domain_name.crt" ]; then
 	FATAL 'No director SSL keypair available'
 fi
 
+# Generate some configuration to ease connecting to Bosh in the future
 if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ] || ! grep -Eq "^BOSH_CLIENT_SECRET='$DIRECTOR_PASSWORD'" "$BOSH_DIRECTOR_CONFIG"; then
 	INFO 'Generating Bosh configurations'
 	cat <<EOF >"$BOSH_DIRECTOR_CONFIG"
@@ -96,6 +104,7 @@ BOSH_CA_CERT='$EXTERNAL_SSL_DIR_RELATIVE/ca/$domain_name.crt'
 EOF
 fi
 
+# ... more sanity checking
 [ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh configuration file does not exist: '$BOSH_DIRECTOR_CONFIG'"
 
 INFO 'Loading Bosh config'
@@ -105,6 +114,7 @@ eval export `prefix_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"`
 INFO 'Loading Bosh network configuration'
 eval export `prefix_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"`
 
+# Do we want to use the existing versions of stemcells/releases?  Individual items can still be overridden if required
 if [ x"$USE_EXISTING_VERSIONS" = x"true" ]; then
 	if [ -f "$RELEASE_CONFIG_FILE" ]; then
 		INFO 'Loading Bosh release versions'
@@ -129,24 +139,30 @@ findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 # Bosh doesn't seem to be able to handle templating (eg ((variable))) and variables files at the same time, so we need to expand the variables and then use
 # the output when we do a bosh create-env/deploy
 if [ ! -f "$LITE_STATIC_IPS_YML" -o "$REINTERPOLATE_LITE_STATIC_IPS" = x"true" ]; then
-	# Create the initial YML header
-	cat >"$BOSH_LITE_STATIC_IPS_YML" <<EOF
----
-EOF
-	bosh_int_simple "$BOSH_LITE_STATIC_IPS_FILE" >>"$BOSH_LITE_STATIC_IPS_YML"
+	INFO 'Generating Bosh Lite static IPs'
+	NO_OPS_FILE=1 bosh_lite interpolate "$BOSH_LITE_STATIC_IPS_FILE" >"$BOSH_LITE_STATIC_IPS_YML"
 fi
 
-
+# Remove Bosh?
 if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 	INFO 'Removing existing Bosh bootstrap environment'
-	bosh_env delete-env
+	if [ -f "$BOSH_LITE_MANIFEST_INT_YML" ]; then
+		bosh_lite delete-env "$BOSH_LITE_MANIFEST_INT_YML"
+	else
+		bosh_lite delete-env "$BOSH_LITE_MANIFEST_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_LITE_STATIC_IPS_YML"
+	fi
 
+	# ... and cleanup any state
 	rm -f "$BOSH_LITE_STATE_FILE"
 fi
 
+# Do we need to (re)generate a new Bosh bootstrap environment?
 if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
+	INFO 'Saving interpolated lite Bosh manifest'
+	bosh_lite interpolate "$BOSH_LITE_MANIFEST_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_LITE_STATIC_IPS_YML" >"$BOSH_LITE_MANIFEST_INT_YML"
+
 	INFO 'Creating Bosh bootstrap environment'
-	bosh_env create-env
+	bosh_lite create-env "$BOSH_LITE_MANIFEST_FILE" --vars-file="$BOSH_LITE_STATIC_IPS_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_LITE_STATIC_IPS_YML"
 
 	# Do not keep any state file if things fail
 	if [ 0$? -ne 0 ]; then
@@ -158,8 +174,8 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 	# We may not have created a new Bosh environment
 	NEW_BOSH_ENV='true'
 
-	# These can be disabled later if required
-	RUN_PREDEPLOY='true' RUN_BOSH_PREAMBLE='true'
+	# We may need to run the pre-deploy script
+	RUN_PREDEPLOY='true'
 fi
 
 INFO 'Pointing Bosh client at newly deployed Bosh Director'
@@ -169,24 +185,15 @@ INFO 'Attempting to login'
 "$BOSH_CLI" log-in $BOSH_TTY_OPT >&2
 
 if [ ! -f "$FULL_STATIC_IPS_YML" -o "$REINTERPOLATE_FULL_STATIC_IPS" = x"true" ]; then
-	# Create the initial YML header
-	cat >"$BOSH_FULL_STATIC_IPS_YML" <<EOF
----
-EOF
-	bosh_int_simple "$BOSH_FULL_STATIC_IPS_FILE" >>"$BOSH_FULL_STATIC_IPS_YML"
+	INFO 'Generating Bosh static IPs'
+	NO_OPS_FILE=1 bosh_full interpolate "$BOSH_FULL_STATIC_IPS_FILE" >"$BOSH_FULL_STATIC_IPS_YML"
 fi
 
 INFO 'Setting CloudConfig'
-"$BOSH_CLI" update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE" \
-	$BOSH_TTY_OPT \
-	--var bosh_deployment="$BOSH_DEPLOYMENT" \
-	--vars-file="$SSL_YML" \
-	--vars-file="$BOSH_FULL_STATIC_IPS_YML" \
-	--vars-env="$ENV_PREFIX_NAME" \
-	--vars-store="$BOSH_FULL_VARS_FILE"
+NO_OPS_FILE=1 bosh_full update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE"
 
 # Set release versions
-for component_version in `bosh_int FULL "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
+for component_version in `bosh_deploy "$BOSH_FULL_MANIFEST_FILE" interpolate_only --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
 	upper="`echo "$component_version" | tr '[[:lower:]]' '[[:upper:]]'`"
 
 	# eg CF_RELEASE=277
@@ -195,12 +202,14 @@ for component_version in `bosh_int FULL "$BOSH_FULL_MANIFEST_FILE" --path /relea
 	# eg cf_release=277
 	eval lower_value="\$$component_version"
 
+	# Upper case values take priority as these are likely to be set by the person/thing running this script
 	if [ -n "$upper_value" ]; then
 		INFO "Using $upper_value for $component_version"
+		INFO "Overriding ${lower_value:-latest} version and using $upper_value for $component_version"
 		version="$upper_value"
 
 	elif [ -n "$lower_value" ]; then
-		INFO "Using $lower_value for $component_version"
+		INFO "Using previous version of $lower_value for $component_version"
 		version="$lower_value"
 
 	else
@@ -219,13 +228,17 @@ if [ x"$RUN_PREDEPLOY" = x"true" -a x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_L
 	"$TOP_LEVEL_DIR/pre_deploy.sh"
 fi
 
-# Not sure if it'd make more sense to reverse this logic and have an explicit run preamble
-if [ x"$RUN_BOSH_PREAMBLE" = x"true" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then
-	INFO 'Checking Bosh preamble dry-run'
-	bosh_deploy "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE" --dry-run NO_OPS_FILES
+if [ x"$RUN_BOSH_PREAMBLE" = x"true" ] || [ ! -f "$BOSH_PREAMBLE_MANIFEST_INT_YML" -a ! -f "$BOSH_FULL_MANIFEST_INT_YML" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then
+	if [ x"$RUN_DRY_RUN" = x"true" ]; then
+		INFO 'Checking Bosh preamble dry-run'
+		NO_OPS_FILE=1 bosh_full "$BOSH_PREAMBLE_MANIFEST_FILE" --vars-file="$BOSH_PREAMBLE_VARS_FILE" --dry-run
+	fi
+
+	INFO 'Saving interpolated preamble Bosh manifest'
+	NO_OPS_FILE=1 bosh_full interpolate "$BOSH_PREAMBLE_MANIFEST_FILE" --vars-file="$BOSH_PREAMBLE_VARS_FILE" >"$BOSH_PREAMBLE_MANIFEST_INT_YML"
 
 	INFO 'Deploying Bosh preamble'
-	bosh_deploy "$BOSH_PREAMBLE_MANIFEST_FILE" "$BOSH_PREAMBLE_VARS_FILE" NO_OPS_FILES
+	NO_OPS_FILE=1 bosh_full deploy "$BOSH_PREAMBLE_MANIFEST_FILE" --vars-file="$BOSH_PREAMBLE_VARS_FILE"
 
 	# For some reason Bosh lists the errands in the preamble manifest and an additional one that has the same name
 	# as the release we install on the errand VMs (2017/09/07)
@@ -255,12 +268,17 @@ fi
 # This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'
 if [ x"$RUN_DRY_RUN" = x'true' ]; then
 	INFO 'Checking Bosh deployment dry-run'
-	bosh_deploy "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE" --dry-run
+	bosh_full deploy "$BOSH_FULL_MANIFEST_FILE" --vars-file="$BOSH_FULL_VARS_FILE" --vars-file="$SSL_YML_RELATIVE" --dry-run
 fi
 
-INFO 'Deploying Bosh'
-bosh_deploy "$BOSH_FULL_MANIFEST_FILE" "$BOSH_FULL_VARS_FILE"
+INFO 'Saving interpolated full Bosh manifest'
+bosh_full interpolate "$BOSH_FULL_MANIFEST_FILE" --vars-file="$BOSH_FULL_VARS_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_FULL_STATIC_IPS_YML" >"$BOSH_FULL_MANIFEST_INT_YML"
 
+# ... finally we get around to running the Bosh/CF deployment
+INFO 'Deploying Bosh'
+bosh_full deploy "$BOSH_FULL_MANIFEST_FILE" --vars-file="$BOSH_FULL_VARS_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_FULL_STATIC_IPS_YML"
+
+# Do we need to run any errands (eg smoke tests, registrations)
 if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"true" -a -n "$POST_DEPLOY_ERRANDS" ]; then
 	INFO 'Running post deployment smoke tests'
 	for _e in $POST_DEPLOY_ERRANDS; do
@@ -287,7 +305,8 @@ for i in stemcell release do
 	}' >"$OUTPUT_FILE"
 done
 
-post_deploy_scripts CF
+# Any post deploy script to run? These are under $POST_DEPLOY_SCRIPTS_DIR/cf
+post_deploy_scripts cf
 
 INFO 'Bosh VMs'
 "$BOSH_CLI" vms

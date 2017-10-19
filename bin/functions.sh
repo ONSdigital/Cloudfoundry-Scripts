@@ -148,12 +148,12 @@ EOF
 }
 
 capitalise_aws(){
-	 perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'
+	perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'
 }
 
 # decapitalise/uncapitalise doesn't sound 100% correct as it sounds as if they would revert back to original case
 lowercase_aws(){
-	 perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print lc($_)'
+	perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print lc($_)'
 }
 
 update_parameters_file(){
@@ -224,7 +224,7 @@ check_cloudformation_stack(){
 	if "$AWS_CLI" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" \
 		cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE | grep -Eq "^$stack_name$"; then
 
- 		INFO "Stack found: $stack_name"
+		INFO "Stack found: $stack_name"
 
 		local rc=0
 	elif "$AWS_CLI" --output text --query "StackSummaries[?StackName == '$stack_name'].[StackName]" cloudformation list-stacks --stack-status-filter DELETE_FAILED \
@@ -281,99 +281,74 @@ show_duplicate_output_names(){
 	awk -F= '!/^#/{ a[$1]++ }END{ for(i in a){ if(a[i] > 1) printf("%s=%d\n",i,a[i])}}' "$outputs_dir"/outputs-*.sh
 }
 
-bosh_int_simple(){
-	local manifest="$1"
+bosh_lite(){
+	local action_option="$1"
+	local bosh_manifest="$2"
 
-	[ -n "$1" ] && shift
-
-	bosh_int SIMPLE "$manifest" $@
-}
-
-bosh_int(){
-	local type="$1"
-	local manifest="$2"
-
-	[ -z "$manifest" ] && FATAL 'No manifest to interpolate for'
-	[ -f "$manifest" ] || FATAL "Manifest file does not exist: $manifest"
-
-	if [ x"$type" = x"FULL" ]; then
-		[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_FULL_OPS_FILE'"
-		[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_FULL_OPS_FILE'"
-	elif [ x"$type" = x"LITE" ]; then
-		[ -n "$PUBLIC_BOSH_LITE_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_LITE_OPS_FILE'"
-		[ -n "$PRIVATE_BOSH_LITE_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_LITE_OPS_FILE'"
-	fi
+	[ -z "$action_option" ] && FATAL 'No action provided'
+	[ -z "$bosh_manifest" ] && FATAL 'No Bosh manifest provided'
+	[ -f "$bosh_manifest" ] || FATAL "Unable to find: $bosh_manifest"
 
 	shift 2
 
-	# Stupidly, Bosh prints out its logs to stdout.  When the debug level is 'debug' this causes the output of the
-	# interpolation to be interspersed with debug lines
-	sh -c "BOSH_LOG_LEVEL=info '$BOSH_CLI' --no-color interpolate $opts_option --vars-env='$ENV_PREFIX_NAME' '$manifest'" $@
+	[ -n "$PUBLIC_BOSH_LITE_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PUBLIC_BOSH_LITE_OPS_FILE"
+	[ -n "$PRIVATE_BOSH_LITE_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PRIVATE_BOSH_LITE_OPS_FILE"
+
+	_bosh "$action_option" "$bosh_manifest" "$@"
 }
 
-bosh_env(){
-	local action_option=$1
-
-	[ -n "$PUBLIC_BOSH_LITE_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_LITE_OPS_FILE'"
-	[ -n "$PRIVATE_BOSH_LITE_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_LITE_OPS_FILE'"
-
-	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
-		WARN 'Showing interpolated manifest'
-		sh -c "'$BOSH_CLI' interpolate '$BOSH_LITE_MANIFEST_FILE' \
-			$BOSH_TTY_OPT \
-			$opts_option \
-			--var-errs \
-			--vars-env='$ENV_PREFIX_NAME' \
-			--vars-file='$SSL_YML' \
-			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-			--vars-store='$BOSH_LITE_VARS_FILE'"
-	fi
-
-	sh -c "'$BOSH_CLI' '$action_option' '$BOSH_LITE_MANIFEST_FILE' \
-		$BOSH_TTY_OPT \
-		--state='$BOSH_LITE_STATE_FILE' \
-		$opts_option \
-		--vars-env='$ENV_PREFIX_NAME' \
-		--vars-file='$SSL_YML' \
-		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-		--vars-store='$BOSH_LITE_VARS_FILE'"
-}
-
-bosh_deploy(){
+bosh_full(){
 	local bosh_manifest="$1"
-	local bosh_vars="$2"
-	local extra_opt="$3"
 
-	[ -z "$bosh_vars" ] && FATAL 'Not enough options'
+	[ -z "$bosh_manifest" ] && FATAL 'No Bosh manifest provided'
 	[ -f "$bosh_manifest" ] || FATAL "Unable to find: $bosh_manifest"
 
-	if [ x"$extra_opt" != x'NO_OPS_FILES' -a x"$4" != x"NO_OPS_FILES" ]; then
-		[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local opts_option="--ops-file='$PUBLIC_BOSH_FULL_OPS_FILE'"
-		[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local opts_option="$opts_option --ops-file='$PRIVATE_BOSH_FULL_OPS_FILE'"
-	fi
+	shift
 
-	[ x"$extra_opt" = x'NO_OPS_FILES' ] && unset extra_opt
+	[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PUBLIC_BOSH_FULL_OPS_FILE"
+	[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PRIVATE_BOSH_FULL_OPS_FILE"
 
-	if [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
-		WARN 'Showing interpolated manifest'
-		sh -c "'$BOSH_CLI' interpolate '$bosh_manifest' \
+	_bosh deploy "$bosh_manifest" "$@"
+}
+
+_bosh(){
+	local action="$1"
+	local bosh_manifest="$2"
+
+	[ -z "$action_option" ] && FATAL 'No action provided'
+	[ -z "$bosh_manifest" ] && FATAL 'No Bosh manifest provided'
+
+	shift 2
+
+	# --vars-errs is ignored for 'bosh create-env'
+	[ x"$action" = x'create-env' -o x"$action" = x'delete-env' ] || local vars_errs_option='--vars-errs'
+
+	# We don't always want to process the ops file(s)
+	[ 0"$NO_OPS_FILE" -eq 1 ] && unset ops_file_option
+
+	# 
+	if [ x"$action" = x'interpolate' -o x"$action" = x'int' ] || [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
+		echo '---'
+		# https://github.com/cloudfoundry/bosh-cli/issues/338	
+		# Stupidly bosh-cli prints 'Succeeded' to stdout rather than stderr (2017/10/19)
+		"$BOSH_CLI" interpolate "$bosh_manifest" \
 			$BOSH_TTY_OPT \
-			$opts_option \
+			$ops_file_option \
+			--no-color \
+			$@ \
 			--var-errs \
-			--vars-env='$ENV_PREFIX_NAME' \
-			--vars-file='$SSL_YML' \
-			--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
-			--vars-store='$bosh_vars'"
+			--vars-env=$ENV_PREFIX_NAME | grep -vi '^Succeeded'
+
+		[ x"$action" = x'interpolate' -o x"$action" = x'int' ] && return
 	fi
 
-	sh -c "'$BOSH_CLI' deploy '$bosh_manifest' \
-		$extra_opt \
+	INFO "Running 'bosh $action'"
+	"$BOSH_CLI" "$action" "$bosh_manifest" \
 		$BOSH_TTY_OPT \
-		$opts_option \
-		--vars-env='$ENV_PREFIX_NAME' \
-		--vars-file='$SSL_YML' \
-		--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
-		--vars-store='$bosh_vars'"
+		$ops_file_option \
+		$vars_errs_option \
+		$@ \
+		--vars-env=$ENV_PREFIX_NAME
 }
 
 cf_app_url(){
