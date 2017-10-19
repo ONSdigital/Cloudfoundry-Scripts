@@ -29,7 +29,7 @@ DEPLOYMENT_BASE_DIR="$TOP_LEVEL_DIR/deployment"
 DEPLOYMENT_BASE_DIR_RELATIVE='deployment'
 BROKER_CONFIG_DIR="$TOP_LEVEL_DIR/config/brokers"
 DEPLOYMENTS_CONFIG_DIR="$TOP_LEVEL_DIR/config/deployments"
-OPS_FILES_CONFIG_DIR="$TOP_LEVEL_DIR/config/ops-files"
+OPS_FILES_CONFIG_DIR="config/ops-files"
 POST_DEPLOY_SCRIPTS_DIR="$TOP_LEVEL_DIR/config/post-scripts"
 
 STACK_TEMPLATES_DIRNAME="Templates"
@@ -75,13 +75,13 @@ EOF
 	RELEASE_CONFIG_FILE="$DEPLOYMENT_DIR/release-config.sh"
 	STEMCELL_CONFIG_FILE="$DEPLOYMENT_DIR/stemcells-config.sh"
 
-	BOSH_LITE_STATIC_IPS_YML="$DEPLOYMENT_DIR/bosh-lite-static-ips.yml"
-	BOSH_FULL_STATIC_IPS_YML="$DEPLOYMENT_DIR/bosh-full-static-ips.yml"
+	BOSH_LITE_STATIC_IPS_YML="$DEPLOYMENT_DIR_RELATIVE/bosh-lite-static-ips.yml"
+	BOSH_FULL_STATIC_IPS_YML="$DEPLOYMENT_DIR_RELATIVE/bosh-full-static-ips.yml"
 
 	# Storing for future reference
-	BOSH_PREAMBLE_MANIFEST_INT_YML="$DEPLOYMENT_DIR/bosh-preamble-manifest-interpolated.yml"
-	BOSH_LITE_MANIFEST_INT_YML="$DEPLOYMENT_DIR/bosh-lite-manifest-interpolated.yml"
-	BOSH_FULL_MANIFEST_INT_YML="$DEPLOYMENT_DIR/bosh-full-manifest-interpolated.yml"
+	BOSH_PREAMBLE_MANIFEST_INT_YML="$DEPLOYMENT_DIR_RELATIVE/bosh-preamble-manifest-interpolated.yml"
+	BOSH_LITE_MANIFEST_INT_YML="$DEPLOYMENT_DIR_RELATIVE/bosh-lite-manifest-interpolated.yml"
+	BOSH_FULL_MANIFEST_INT_YML="$DEPLOYMENT_DIR_RELATIVE/bosh-full-manifest-interpolated.yml"
 
 	AWS_PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/aws-passwords.sh"
 
