@@ -78,6 +78,11 @@ EOF
 	BOSH_LITE_STATIC_IPS_YML="$DEPLOYMENT_DIR/bosh-lite-static-ips.yml"
 	BOSH_FULL_STATIC_IPS_YML="$DEPLOYMENT_DIR/bosh-full-static-ips.yml"
 
+	# Storing for future reference
+	BOSH_PREAMBLE_MANIFEST_INT_YML="$DEPLOYMENT_DIR/bosh-preamble-manifest-interpolated.yml"
+	BOSH_LITE_MANIFEST_INT_YML="$DEPLOYMENT_DIR/bosh-lite-manifest-interpolated.yml"
+	BOSH_FULL_MANIFEST_INT_YML="$DEPLOYMENT_DIR/bosh-full-manifest-interpolated.yml"
+
 	AWS_PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/aws-passwords.sh"
 
 	# Load the environment config if we have been given one
