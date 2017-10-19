@@ -85,13 +85,13 @@ fi
 
 if [ ! -e "$BOSH-$BOSH_CLI_VERSION" ]; then
 	INFO "Downloading Bosh $BOSH_CLI_VERSION"
-	curl -SLo "$BOSH-$BOSH_CLI_VERSION" "$BOSH_CLI_URL"
+	curl -SLo "$BOSH_CLI-$BOSH_CLI_VERSION" "$BOSH_CLI_URL"
 
-	chmod +x "$BOSH-$BOSH_CLI_VERSION"
+	chmod +x "$BOSH_CLI-$BOSH_CLI_VERSION"
 fi
 
 
-if [ ! -f "$CF-$CF_CLI_VERSION" ]; then
+if [ ! -f "$CF_CLI-$CF_CLI_VERSION" ]; then
 	if [ ! -f "$TMP_DIR/$CF_CLI_ARCHIVE" ]; then
 		INFO "Downloading CF $CF_CLI_VERSION"
 		curl -SLo "$TMP_DIR/$CF_CLI_ARCHIVE" "$CF_CLI_URL"
@@ -102,7 +102,7 @@ if [ ! -f "$CF-$CF_CLI_VERSION" ]; then
 	INFO 'Extracting CF CLI'
 	tar -zxf "$TMP_DIR/$CF_CLI_ARCHIVE" -C "$TMP_DIR" cf || FATAL "Unable to extract $TMP_DIR/$CF_CLI_ARCHIVE"
 
-	mv "$TMP_DIR/cf" "$CF-$CF_CLI_VERSION"
+	mv "$TMP_DIR/cf" "$CF_CLI-$CF_CLI_VERSION"
 fi
 
 for i in BOSH CF; do
