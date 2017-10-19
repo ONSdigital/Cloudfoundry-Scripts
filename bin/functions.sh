@@ -324,7 +324,7 @@ _bosh(){
 
 	# --vars-errs is ignored for 'bosh create-env'
 	if [ x"$action" = x'create-env' -o x"$action" = x'delete-env' ]; then
-		local state_option="--state=$BOSH_LITE_STATE_FILE"
+		local state_option="--state='$BOSH_LITE_STATE_FILE'"
 	else
 		local vars_errs_option='--vars-errs'
 	fi
