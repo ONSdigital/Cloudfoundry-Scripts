@@ -310,7 +310,7 @@ bosh_full(){
 	[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PUBLIC_BOSH_FULL_OPS_FILE"
 	[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PRIVATE_BOSH_FULL_OPS_FILE"
 
-	_bosh deploy "$action_option" "$bosh_manifest" "$@"
+	_bosh "$action_option" "$bosh_manifest" "$@"
 }
 
 _bosh(){
