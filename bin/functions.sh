@@ -322,25 +322,29 @@ _bosh(){
 
 	shift 2
 
-	# --vars-errs is ignored for 'bosh create-env'
 	if [ x"$action" = x'create-env' -o x"$action" = x'delete-env' ]; then
 		local state_option="--state=$BOSH_LITE_STATE_FILE"
-	elif [ x"$action" != x'update-cloud-config' -a x"$action" != x'deploy' -a 0$NO_VAR_ERRS -ne 1 ]; then
-		local vars_errs_option='--vars-errs'
+
+	elif [ x"$action" != x'update-cloud-config' -a x"$action" != x'deploy' ]; then
+		local action_vars_errs_option='--vars-errs'
+
 	fi
 
 	# We don't always want to process the ops file(s)
 	[ 0"$NO_OPS_FILE" -eq 1 ] && unset ops_file_option
 
+	# We don't always want to error out on missing vars
+	[ 0$NO_VAR_ERRS -ne 1 ] && local int_vars_errs_option='--var-errs'
+
 	# 
 	if [ x"$action" = x'interpolate' -o x"$action" = x'int' ] || [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
-		echo '---'
+		[ 0$NO_YML -ne 1 ] && echo '---'
 		"$BOSH_CLI" interpolate "$bosh_manifest" \
 			$ops_file_option \
 			--no-color \
-			$@ \
-			--var-errs \
-			--vars-env=$ENV_PREFIX_NAME
+			$int_vars_errs_option \
+			--vars-env=$ENV_PREFIX_NAME \
+			$@
 
 		[ x"$action" = x'interpolate' -o x"$action" = x'int' ] && return
 	fi
@@ -349,10 +353,10 @@ _bosh(){
 	"$BOSH_CLI" "$action" "$bosh_manifest" \
 		$BOSH_TTY_OPT \
 		$ops_file_option \
-		$vars_errs_option \
+		$action_vars_errs_option \
 		$state_option \
-		$@ \
-		--vars-env=$ENV_PREFIX_NAME
+		--vars-env=$ENV_PREFIX_NAME \
+		$@
 }
 
 cf_app_url(){

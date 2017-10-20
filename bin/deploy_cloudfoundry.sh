@@ -196,7 +196,7 @@ INFO 'Setting CloudConfig'
 NO_OPS_FILE=1 bosh_full update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE"
 
 # Set release versions
-for component_version in `NO_VAR_ERRS=1 bosh_full interpolate "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
+for component_version in `NO_YML=1 NO_VAR_ERRS=1 bosh_full interpolate "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
 	upper="`echo "$component_version" | tr '[[:lower:]]' '[[:upper:]]'`"
 
 	# eg CF_RELEASE=277
@@ -219,6 +219,13 @@ for component_version in `NO_VAR_ERRS=1 bosh_full interpolate "$BOSH_FULL_MANIFE
 		INFO "Using latest for $component_version"
 		version='latest'
 	fi
+
+	# If v='' then it downloads the latest.  If "$ENV_PREFIX${component_version}_url_suffix"='' then we get a complaint from Bosh:
+	# Invalid type '<nil>' for value '<nil>' and variable 'cf_version_url_suffix'. Supported types for interpolation within a string are integers and strings.
+	# Exit code 1
+	[ x"$version" = x'latest' ] && url_suffix='?version=' || url_suffix="?version=$version"
+
+	export "$ENV_PREFIX${component_version}_url_suffix"="$url_suffix"
 
 	# Set the version for consumption by Bosh
 	export "$ENV_PREFIX$component_version"="$version"
@@ -292,7 +299,7 @@ bosh_full interpolate "$BOSH_FULL_MANIFEST_FILE" --vars-file="$SSL_YML_RELATIVE"
 
 # ... finally we get around to running the Bosh/CF deployment
 INFO 'Deploying Bosh'
-bosh_full deploy "$BOSH_FULL_MANIFEST_FILE" --vars-file="$BOSH_FULL_VARS_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_FULL_STATIC_IPS_YML"
+bosh_full deploy "$BOSH_FULL_MANIFEST_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_FULL_STATIC_IPS_YML"
 
 # Do we need to run any errands (eg smoke tests, registrations)
 if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"true" -a -n "$POST_DEPLOY_ERRANDS" ]; then
