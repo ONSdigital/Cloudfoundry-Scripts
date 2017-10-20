@@ -223,7 +223,8 @@ for component_version in `NO_YML=1 NO_VAR_ERRS=1 bosh_full interpolate "$BOSH_FU
 	# If v='' then it downloads the latest.  If "$ENV_PREFIX${component_version}_url_suffix"='' then we get a complaint from Bosh:
 	# Invalid type '<nil>' for value '<nil>' and variable 'cf_version_url_suffix'. Supported types for interpolation within a string are integers and strings.
 	# Exit code 1
-	[ x"$version" = x'latest' ] && url_suffix='?version=' || url_suffix="?version=$version"
+	# ?v= or ?version= can both be used
+	[ x"$version" = x'latest' ] && url_suffix='?v=' || url_suffix="?v=$version"
 
 	export "$ENV_PREFIX${component_version}_url_suffix"="$url_suffix"
 
