@@ -323,9 +323,9 @@ _bosh(){
 	shift 2
 
 	# --vars-errs is ignored for 'bosh create-env'
-	if [ x"$action" = x'create-env' -o x"$action" = x'delete-env' -o x"$action" = x'update-cloud-config' ]; then
+	if [ x"$action" = x'create-env' -o x"$action" = x'delete-env' ]; then
 		local state_option="--state=$BOSH_LITE_STATE_FILE"
-	else
+	elif [ x"$action" != x'update-cloud-config' ]; then
 		local vars_errs_option='--vars-errs'
 	fi
 
