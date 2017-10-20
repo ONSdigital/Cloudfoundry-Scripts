@@ -325,7 +325,7 @@ _bosh(){
 	# --vars-errs is ignored for 'bosh create-env'
 	if [ x"$action" = x'create-env' -o x"$action" = x'delete-env' ]; then
 		local state_option="--state=$BOSH_LITE_STATE_FILE"
-	elif [ x"$action" != x'update-cloud-config' ]; then
+	elif [ x"$action" != x'update-cloud-config' -a x"$action" != x'deploy' -a 0$NO_VAR_ERRS -ne 1 ]; then
 		local vars_errs_option='--vars-errs'
 	fi
 

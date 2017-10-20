@@ -162,7 +162,7 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 	bosh_lite interpolate "$BOSH_LITE_MANIFEST_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_LITE_STATIC_IPS_YML" >"$BOSH_LITE_MANIFEST_INT_YML"
 
 	INFO 'Creating Bosh bootstrap environment'
-	bosh_lite create-env "$BOSH_LITE_MANIFEST_FILE" --vars-file="$BOSH_LITE_STATIC_IPS_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_LITE_STATIC_IPS_YML"
+	bosh_lite create-env "$BOSH_LITE_MANIFEST_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_LITE_STATIC_IPS_YML"
 
 	# Do not keep any state file if things fail
 	if [ 0$? -ne 0 ]; then
@@ -196,7 +196,7 @@ INFO 'Setting CloudConfig'
 NO_OPS_FILE=1 bosh_full update-cloud-config "$BOSH_FULL_CLOUD_CONFIG_FILE"
 
 # Set release versions
-for component_version in `bosh_deploy "$BOSH_FULL_MANIFEST_FILE" interpolate_only --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
+for component_version in `NO_VAR_ERRS=1 bosh_full interpolate "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
 	upper="`echo "$component_version" | tr '[[:lower:]]' '[[:upper:]]'`"
 
 	# eg CF_RELEASE=277
@@ -228,12 +228,12 @@ done
 if [ x"$REUPLOAD_STEMCELL" = x"true" -a -n "$STEMCELL_URL" ]; then
 	[ -n "$BOSH_STEMCELL_VERSION" ] && URL_EXTENSION="?v=$BOSH_STEMCELL_VERSION"
 
-	UPLOAD_URL="$STEMCELL_URL$BOSH_STEMCELL_VERSION"
+	UPLOAD_URL="$STEMCELL_URL$URL_EXTENSION"
 
 	INFO "Uploaded $UPLOAD_URL to Bosh"
 	"$BOSH_CLI" upload-stemcell "$UPLOAD_URL"
-else
-	WARN 'No STEMCELL_URL provided, unable to upload a stemcell'
+elif [ x"$REUPLOAD_STEMCELL" = x"true" -a -z "$STEMCELL_URL" ]; then
+	FATAL 'No STEMCELL_URL provided, unable to upload a stemcell'
 
 fi
 
@@ -247,14 +247,14 @@ fi
 if [ x"$RUN_BOSH_PREAMBLE" = x"true" ] || [ ! -f "$BOSH_PREAMBLE_MANIFEST_INT_YML" -a ! -f "$BOSH_FULL_MANIFEST_INT_YML" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then
 	if [ x"$RUN_DRY_RUN" = x"true" ]; then
 		INFO 'Checking Bosh preamble dry-run'
-		NO_OPS_FILE=1 bosh_full "$BOSH_PREAMBLE_MANIFEST_FILE" --vars-file="$BOSH_PREAMBLE_VARS_FILE" --dry-run
+		NO_OPS_FILE=1 bosh_full "$BOSH_PREAMBLE_MANIFEST_FILE" --dry-run
 	fi
 
 	INFO 'Saving interpolated preamble Bosh manifest'
-	NO_OPS_FILE=1 bosh_full interpolate "$BOSH_PREAMBLE_MANIFEST_FILE" --vars-file="$BOSH_PREAMBLE_VARS_FILE" >"$BOSH_PREAMBLE_MANIFEST_INT_YML"
+	NO_OPS_FILE=1 bosh_full interpolate "$BOSH_PREAMBLE_MANIFEST_FILE" >"$BOSH_PREAMBLE_MANIFEST_INT_YML"
 
 	INFO 'Deploying Bosh preamble'
-	NO_OPS_FILE=1 bosh_full deploy "$BOSH_PREAMBLE_MANIFEST_FILE" --vars-file="$BOSH_PREAMBLE_VARS_FILE"
+	NO_OPS_FILE=1 bosh_full deploy "$BOSH_PREAMBLE_MANIFEST_FILE"
 
 	# For some reason Bosh lists the errands in the preamble manifest and an additional one that has the same name
 	# as the release we install on the errand VMs (2017/09/07)
@@ -284,11 +284,11 @@ fi
 # This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'
 if [ x"$RUN_DRY_RUN" = x'true' ]; then
 	INFO 'Checking Bosh deployment dry-run'
-	bosh_full deploy "$BOSH_FULL_MANIFEST_FILE" --vars-file="$BOSH_FULL_VARS_FILE" --vars-file="$SSL_YML_RELATIVE" --dry-run
+	bosh_full deploy "$BOSH_FULL_MANIFEST_FILE" --vars-file="$SSL_YML_RELATIVE" --dry-run
 fi
 
 INFO 'Saving interpolated full Bosh manifest'
-bosh_full interpolate "$BOSH_FULL_MANIFEST_FILE" --vars-file="$BOSH_FULL_VARS_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_FULL_STATIC_IPS_YML" >"$BOSH_FULL_MANIFEST_INT_YML"
+bosh_full interpolate "$BOSH_FULL_MANIFEST_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_FULL_STATIC_IPS_YML" >"$BOSH_FULL_MANIFEST_INT_YML"
 
 # ... finally we get around to running the Bosh/CF deployment
 INFO 'Deploying Bosh'
