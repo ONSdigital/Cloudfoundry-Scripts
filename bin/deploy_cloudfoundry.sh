@@ -115,7 +115,8 @@ INFO 'Loading Bosh network configuration'
 eval export `prefix_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"`
 
 # Do we want to use the existing versions of stemcells/releases?  Individual items can still be overridden if required
-if [ x"$USE_EXISTING_VERSIONS" = x"true" ]; then
+# We default to using existing versions unless we have been told not to
+if [ x"$USE_EXISTING_VERSIONS" != x"false" ]; then
 	if [ -f "$RELEASE_CONFIG_FILE" ]; then
 		INFO 'Loading Bosh release versions'
 		. "$RELEASE_CONFIG_FILE"

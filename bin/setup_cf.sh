@@ -77,11 +77,6 @@ if [ x"$deploy_apps_rds_instance" != x"false" ]; then
 	IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-rds-broker.sh" "$DEPLOYMENT_NAME"
 fi
 
-if [ x"$create_rabbitmq_networks" != x"false" ]; then
-	INFO 'Setting up RabbitMQ broker'
-	IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-service-broker.sh" "$DEPLOYMENT_NAME" rabbitmq rabbitmq-broker "$rabbitmq_broker_password" "https://rabbitmq-broker.system.$domain_name"
-fi
-
 if [ x"$create_elasti_cache_infrastructure" != x"false" ]; then
 	INFO 'Setting up ElastiCache broker'
 	IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-elasticache-broker.sh" "$DEPLOYMENT_NAME" elasticache-broker
