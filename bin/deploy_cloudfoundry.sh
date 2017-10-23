@@ -317,7 +317,7 @@ elif [ -z "$POST_DEPLOY_ERRANDS" ]; then
 fi
 
 # Save stemcell and release versions
-for i in stemcell release do
+for i in stemcell release; do
 	INFO "Recording $i(s) versions"
 	[ x"$i" = x"release" ] && OUTPUT_FILE="$RELEASE_CONFIG_FILE" || OUTPUT_FILE="$STEMCELL_CONFIG_FILE"
 
