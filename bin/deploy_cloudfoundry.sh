@@ -324,10 +324,25 @@ for i in stemcell release; do
 	"$BOSH_CLI" ${i}s | awk -v type="$i" 'BEGIN{
 		printf("# Cloudfoundry %ss\n",type)
 	}{
-		if($1 ~ /^[a-z]/)
+		if($1 ~ /^[a-z]/ && ! a[$1]){
+			a[$1]++
+
+			gsub("-","_",$1)
+			gsub("*","",$2)
+
 			printf("%s='\''%s'\''\n",$1,$2)
+		}
 	}' >"$OUTPUT_FILE"
 done
+
+./Scripts/bin/bosh-cmd.sh bananas releases | awk -v type=release 'BEGIN{
+        printf("# Cloudfoundry %ss\n",type)
+}{
+        if($1 ~ /^[a-z]/ && !a[$1]){
+                printf("%s='%s'\n",$1,$2)
+                a[$1]++
+        }
+}'
 
 # Any post deploy script to run? These are under $POST_DEPLOY_SCRIPTS_DIR/cf
 post_deploy_scripts cf
