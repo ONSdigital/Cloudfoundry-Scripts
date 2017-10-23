@@ -30,7 +30,7 @@ INFO 'Deleting Bosh Deployment'
 "$BOSH_CLI" delete-deployment --force $BOSH_INTERACTIVE_OPT $BOSH_TTY_OPT
 
 INFO 'Deleting Bosh bootstrap environment'
-bosh_lite delete-env || FATAL 'Bosh environment deletion failed'
+bosh_lite delete-env "$BOSH_LITE_MANIFEST_FILE" --vars-file="$SSL_YML_RELATIVE" --vars-file="$BOSH_LITE_STATIC_IPS_YML" || FATAL 'Bosh environment deletion failed'
 
 # It 'should' exist
 if [ -f "$BOSH_LITE_STATE_FILE" ]; then
