@@ -13,6 +13,10 @@ DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 ACTION="${2:-backup}"
 S3_BUCKET_LOCATION="$3"
 
+for i in 1 2 3; do
+	[ -n "$1" ] && shift 1
+done
+
 . "$BASE_DIR/common-aws.sh"
 
 [ -z "$S3_BUCKET_LOCATION" ] && FATAL 'No source/destination provided'
