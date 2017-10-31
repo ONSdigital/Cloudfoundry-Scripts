@@ -39,7 +39,7 @@ fi
 
 [ -f "$DEPLOYMENT_DIR/cf-credentials-admin.sh" ] || FATAL "CF admin credentials file does not exist: $DEPLOYMENT_DIR/cf-credentials-admin.sh"
 
-load_outputs_vars "$STACK_OUTPUTS_DIR" domain_name
+load_output_vars "$STACK_OUTPUTS_DIR" domain_name
 
 . "$DEPLOYMENT_DIR/cf-credentials-admin.sh"
 
