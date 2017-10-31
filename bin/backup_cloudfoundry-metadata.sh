@@ -25,13 +25,14 @@ BACKUP_ACTIONS='export-config'
 
 if which cf-mgnt >/dev/null 2>&1; then
 	CF_MGNT='cf-mgnt'
+
 elif [ -f cf-mgnt ]; then
-	CF_MGNT="$PWD/cf-mgnt"
+	CF_MGNT="$BIN_DIR/cf-mgnt"
+
+	installed_bin cf-mgnt
 elif [ -z "$CF_MGNT" ]; then
 	FATAL Unable to find cf-mgnt tool
 fi
-
-[ -z "$S3_BUCKET" ] && FATAL 'No source/destination provided'
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
 [ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"
