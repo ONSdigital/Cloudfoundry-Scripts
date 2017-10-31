@@ -23,6 +23,10 @@ BACKUP_ACTIONS='export-config'
 
 . "$BASE_DIR/common-aws.sh"
 
+[ -f "$CF_CREDENTIALS" ] || FATAL "$CF_CREDENTIALS does not exist"
+
+. "$CF_CREDENTIALS"
+
 if which cf-mgnt >/dev/null 2>&1; then
 	CF_MGNT='cf-mgnt'
 
