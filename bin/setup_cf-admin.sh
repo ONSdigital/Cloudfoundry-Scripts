@@ -27,8 +27,6 @@ UAA_ADMIN_USERNAME="${UAA_ADMIN_USERNAME:-admin}"
 [ -z "$EMAIL" ] && FATAL 'No email address supplied'
 [ -z "$CF_CREDENTIALS" ] && FATAL 'Unknown CF credentials filename'
 
-[ ! -f "$CF_CREDENTIALS" ] && echo FOO
-
 # Generate config if it does not exist, or if any of the values have changed
 if [ ! -f "$CF_CREDENTIALS" ] ||
 	[ -n "$USERNAME" -a -n "$CF_ADMIN_USERNAME" -a x"$CF_ADMIN_USERNAME" != x"$USERNAME" ] ||
@@ -65,7 +63,7 @@ INFO "Obtaining initial $UAA_ADMIN_USERNAME user token"
 uaac token client get "$UAA_ADMIN_USERNAME" -s "$uaa_admin_client_secret"
 
 # Hmmm... there is a better way
-if uaac user get "$CF_ADMIN_USERNAME" >/dev/null -o uaac client get "$CF_ADMIN_USERNAME" >/dev/null ; then
+if uaac user get "$CF_ADMIN_USERNAME" >/dev/null || uaac client get "$CF_ADMIN_USERNAME" >/dev/null ; then
 	if [ -z "$NEW_CREDENTIALS" ]; then
 		WARN 'No changes to perform'
 
