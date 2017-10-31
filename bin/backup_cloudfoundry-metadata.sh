@@ -24,7 +24,7 @@ BACKUP_ACTIONS='export-config'
 . "$BASE_DIR/common-aws.sh"
 
 [ -f "$CF_CREDENTIALS" ] || FATAL "$CF_CREDENTIALS does not exist"
-
+t
 . "$CF_CREDENTIALS"
 
 if which cf-mgnt >/dev/null 2>&1; then
@@ -69,7 +69,7 @@ else
 fi
 
 for a in $ACTIONS; do
-	if ! "$CF_MGNT" "$a" --user-id "$CF_ADMIN_USERNAME" --client-secreet "$CF_ADMIN_CLIENT_SECRET" \
+	if ! "$CF_MGNT" "$a" --user-id "$CF_ADMIN_USERNAME" --client-secret "$CF_ADMIN_CLIENT_SECRET" \
 		--config-dir "$DEPLOYMENT_DIR/metadata" \
 		--system-domain "system.$domain_name"; then
 
