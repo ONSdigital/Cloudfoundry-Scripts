@@ -92,7 +92,12 @@ for _bucket in $s3_bucket_resource_names; do
 		FATAL "Unknown action: $ACTION"
 	fi
 
-	"$AWS_CLI" s3 sync --acl bucket-owner-full-control --delete "$src" "$dst"
+	if ! "$AWS_CLI" s3 sync --acl bucket-owner-full-control --delete "$src" "$dst"; then
+		WARN "$log_name of $_bucket failed"
+
+		LOG_LEVEL='FATAL'
+		STATE=FAILED
+	fi
 done
 IFS="$OLDIFS"
 

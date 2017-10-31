@@ -42,6 +42,6 @@ else
 fi
 
 
-"$AWS_CLI" s3 sync --acl bucket-owner-full-control --delete "$src" "$dst" || LOG_LEVEL='FATAL'
+"$AWS_CLI" s3 sync --acl bucket-owner-full-control --delete "$src" "$dst" || FATAL "$log_name failed"
 
-"${LOG_LEVEL:-INFO}" "$log_name ${STATE:-Successful}"
+INFO "$log_name successful"
