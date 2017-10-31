@@ -11,11 +11,11 @@ export NON_AWS_DEPLOY=true
 
 DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 ACTION="${2:-backup}"
-S3_BUCKET="$3"
+S3_BUCKET_LOCATION="$3"
 
 . "$BASE_DIR/common-aws.sh"
 
-[ -z "$S3_BUCKET" ] && FATAL 'No source/destination provided'
+[ -z "$S3_BUCKET_LOCATION" ] && FATAL 'No source/destination provided'
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
 [ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"
@@ -28,11 +28,11 @@ load_outputs "$STACK_OUTPUTS_DIR"
 if [ x"$ACTION" = x"backup" ]; then
 	log_name='Backup'
 	src='./'
-	dst="s3://$S3_BUCKET"
+	dst="$S3_BUCKET_LOCATION"
 
 elif [ x"$ACTION" = x"restore" ]; then
 	log_name='Restore'
-	src="s3://$S3_BUCKET"
+	src="$S3_BUCKET_LOCATION"
 	dst='./'
 
 	git checkout -b "$DEPLOYMENT_NAME"
