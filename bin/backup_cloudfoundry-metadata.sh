@@ -26,7 +26,7 @@ BACKUP_ACTIONS='export-config'
 if which cf-mgnt >/dev/null 2>&1; then
 	CF_MGNT='cf-mgnt'
 
-elif [ -f cf-mgnt ]; then
+elif [ -f "$BIN_DIR/cf-mgnt" ]; then
 	CF_MGNT="$BIN_DIR/cf-mgnt"
 
 	installed_bin cf-mgnt
