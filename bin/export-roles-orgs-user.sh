@@ -1,4 +1,9 @@
 #!/bin/sh
+#
+# Export:
+#	services			'cf service-brokers'
+#	service provided services
+#
 
 export CF_COLOR=false
 
@@ -43,6 +48,23 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 				printf("cf set-space-role \"%s\" \"%s\" \"%s\" \"%s\"\n",$1,org,space,role)
 			}
 		}' >>04_space-roles.sh
+
+		echo '.. inspect space services'
+		cf target -o "$org" -s "$space"
+
+		for service in `cf services | awk '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ print $1 }'`; do
+			cf service "$service" | awk -F': *' '{
+				if(/Service instance/){
+					instance=$2
+				}else if(/Service/){
+					service=$2
+				}else if(/Bound apps/){
+					apps=$2
+					printf("Service: %s, Instance: %s, Bound Apps: %s\n",service,instance,apps)
+				}
+			}'
+		done | sort -k4 >>999_service-apps.txt
+			
 	done
 
 	echo '. finding organisation roles'
@@ -72,6 +94,8 @@ awk '{
 }' users | sort -k 3 >03_create-users.sh
 
 rm -f users
+
+cf service-brokers | awk '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ print $1 }' | sort >998_service-brokers.txt
 
 ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh
 
