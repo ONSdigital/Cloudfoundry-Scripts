@@ -97,5 +97,5 @@ rm -f users
 
 cf service-brokers | awk '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ print $1 }' | sort >998_service-brokers.txt
 
-ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh
+ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh 998_service-brokers.txt 999_service-apps.txt
 
