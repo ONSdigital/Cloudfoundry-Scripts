@@ -7,7 +7,7 @@
 
 export CF_COLOR=false
 
-for i in 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh; do
+for i in 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh 998_service-brokers.txt 999_service-apps.txt; do
 	[ -f "$i" ] && rm -f "$i"
 done
 
