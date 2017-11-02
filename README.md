@@ -15,15 +15,27 @@ completes.
 
 ## Scripts
 
+- backup\_cloudfoundry-branch.sh
+  - Backs up the current deployment branch to an S3 bucket.
+    - Parameters: `DEPLOYMENT_NAME ACTION=backup|restore SRC_OR_DST=s3://destinaion|dir_destination`
+    - Environmental Variables: `DEPLOYMENT_NAME ACTION SRC_OR_DST`
+    - Defaults: `ACTION='backup' SRC_OR_DST='s3_backets'`
+
 - backup\_cloudfoundry-databases.sh
   - Run backup errands.
     - Parameters: `DEPLOYMENT_NAME`
     - Environmental Variables: `DEPLOYMENT_NAME`
 
+- backup\_cloudfoundry-metadata.sh
+  - Calls cf-mgnt to backup/restore Cloudfoundry org, space, user & role metadata.  The data is stored under the deployment
+    directory under another directory called `metadata`
+    - Parameters: `DEPLOYMENT_NAME ACTION=backup|restore`
+    - Environmental Variables: `DEPLOYMENT_NAME ACTION`
+    - Defaults: `ACTION='backup'`
+
 - backup\_cloudfoundry-s3.sh
   - Backup various internal Bosh/Cloudfoundry buckets to another S3 bucket.  This uses subdirectories that are named
-    after
-    the S3 source bucket
+    after the S3 source bucket
     - Parameters: `DEPLOYMENT_NAME ACTION=backup|restore SRC_OR_DST=s3://destinaion|dir_destination`
     - Environmental Variables: `DEPLOYMENT_NAME ACTION SRC_OR_DST`
     - Defaults: `ACTION='backup' SRC_OR_DST='s3_backets'`
@@ -156,7 +168,8 @@ completes.
     - Defaults: `AWS_PROFILE='default'`
 
 - export-roles-orgs-user.sh
-  - Simple script that exports users, organisations, spaces and roles from a given Cloudfoundry
+  - Simple script that generates various scripts to create users, organisations, spaces and roles when pointed at a given Cloudfoundry.
+    Additionally the script will generate a few text files that contain data about services & service brokers.
 
 - find\_external\_ip.sh
   - Simple script to find a hosts external IP
