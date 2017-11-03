@@ -79,7 +79,7 @@ for i in Lite Full; do
 done
 
 #
-BOSH_LITE_MANIFEST_FILE="$MANIFESTS_DIR/Bosh-Lite-Manifests/$BOSH_LITE_MANIFEST_NAME.yml"
+BOSH_LITE_MANIFEST_FILE="$MANIFESTS_DIR/Bosh-Lite-Manifests/$BOSH_LITE_MANIFEST_NAME-$CPI.yml"
 BOSH_LITE_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/$BOSH_LITE_STATIC_IPS_NAME.yml"
 if [ x"$BOSH_PREAMBLE_MANIFEST_NAME" = x"NONE" ]; then
 	# We may not always want to run the pre-amble manifest
