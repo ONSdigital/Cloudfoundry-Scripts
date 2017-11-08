@@ -54,7 +54,7 @@ aws_change_set(){
 
 	INFO "Creating Cloudformation stack change set: $stack_name"
 	INFO 'Changeset details:'
-	sh -c "'$AWS' cloudformation create-change-set \
+	sh -c "'$AWS_CLI' cloudformation create-change-set \
 		--stack-name '$stack_arn' \
 		--change-set-name '$change_set_name' \
 		--capabilities CAPABILITY_IAM \

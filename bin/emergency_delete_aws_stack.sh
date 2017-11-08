@@ -26,7 +26,7 @@ if [ -z "$STACK_PREFIX" ]; then
 	exit 1
 fi
 
-for i in `$AWS --output text --query "StackSummaries[?starts_with(StackName,'$STACK_PREFIX') && StackStatus != 'DELETE_COMPLETE'].StackName" cloudformation list-stacks | sed -re 's/\t/\n/g' | sed -re '/n-[A-Z0-9]{12,13}$/d'`; do
+for i in `"$AWS_CLI" --output text --query "StackSummaries[?starts_with(StackName,'$STACK_PREFIX') && StackStatus != 'DELETE_COMPLETE'].StackName" cloudformation list-stacks | sed -re 's/\t/\n/g' | sed -re '/n-[A-Z0-9]{12,13}$/d'`; do
 	"$AWS_CLI" cloudformation delete-stack --stack-name $i
 
 	"$AWS_CLI" cloudformation wait stack-delete-complete --stack-name $i
