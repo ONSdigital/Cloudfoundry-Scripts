@@ -331,7 +331,7 @@ for i in stemcell release; do
 			gsub("-","_",$1)
 			gsub("\*","",$2)
 
-			printf("%s='\''%s'\''\n",$1,$2)
+			printf("%s_version='\''%s'\''\n",$1,$2)
 		}
 	}' >"$OUTPUT_FILE"
 done
