@@ -293,7 +293,7 @@ fi
 # This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'
 if [ x"$RUN_DRY_RUN" = x'true' ]; then
 	INFO 'Checking Bosh deployment dry-run'
-	bosh_full deploy "$BOSH_FULL_MANIFEST_FILE" --vars-file="$SSL_YML_RELATIVE" --dry-run
+	bosh_full deploy "$BOSH_FULL_MANIFEST_FILE" --vars-file="$SSL_YML_RELATIVE" -vars-file="$BOSH_FULL_STATIC_IPS_YML" --dry-run
 fi
 
 INFO 'Saving interpolated full Bosh manifest'
