@@ -154,6 +154,7 @@ policy				= policy_default
 distinguished_name		= req_distinguished_name
 
 # Directories
+# $ENV::var will not work with LibreSSL
 dir				= $ENV::DIR
 serial				= $dir/serial.txt
 
@@ -166,8 +167,10 @@ keyUsage			= nonRepudiation,digitalSignature,keyEncipherment,dataEncipherment,ke
 
 [x509v3]
 subjectKeyIdentifier=hash
+# $ENV::var will not work with LibreSSL
 basicConstraints		= ${ENV::BASIC_CRITICAL}CA:FALSE
 authorityKeyIdentifier		= keyid,issuer
+# $ENV::var will not work with LibreSSL
 extendedKeyUsage		= ${ENV::EXTENDED_CRITICAL}codeSigning,serverAuth,clientAuth
 keyUsage			= nonRepudiation,digitalSignature,keyEncipherment,dataEncipherment
 
@@ -177,6 +180,7 @@ basicConstraints		= $x509v3::basicConstraints
 authorityKeyIdentifier		= $x509v3::authorityKeyIdentifier
 extendedKeyUsage		= $x509v3::extendedKeyUsage
 keyUsage			= $x509v3::keyUsage
+# $ENV::var will not work with LibreSSL
 subjectAltName			= $ENV::SAN
 
 [ca_default]

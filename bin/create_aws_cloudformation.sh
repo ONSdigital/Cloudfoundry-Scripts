@@ -137,7 +137,7 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 
 	# Always renegerate the parameters file
 	if [ -z "$STACK_EXISTS" -o ! -f "$STACK_PARAMETERS" ]; then
-		INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
+		INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 		generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
 	fi
 

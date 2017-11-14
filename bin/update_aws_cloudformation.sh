@@ -41,7 +41,7 @@ aws_change_set(){
 	fi
 
 	if check_cloudformation_stack "$stack_name"; then
-		local stack_arn="`\"$AWS\" --output text --query \"StackSummaries[?StackName == '$stack_name'].StackId\" cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE`"
+		local stack_arn="`\"$AWS_CLI\" --output text --query \"StackSummaries[?StackName == '$stack_name'].StackId\" cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE`"
 	fi
 
 	if [ -z "$stack_arn" ]; then
@@ -54,7 +54,7 @@ aws_change_set(){
 
 	INFO "Creating Cloudformation stack change set: $stack_name"
 	INFO 'Changeset details:'
-	sh -c "'$AWS' cloudformation create-change-set \
+	sh -c "'$AWS_CLI' cloudformation create-change-set \
 		--stack-name '$stack_arn' \
 		--change-set-name '$change_set_name' \
 		--capabilities CAPABILITY_IAM \
