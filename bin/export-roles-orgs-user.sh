@@ -7,7 +7,7 @@
 
 export CF_COLOR=false
 
-for i in 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh 998_service-brokers.txt 999_service-apps.txt; do
+for i in 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh 997_space_apps.txt 998_service-brokers.txt 999_service-apps.txt; do
 	[ -f "$i" ] && rm -f "$i"
 done
 
@@ -49,8 +49,12 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 			}
 		}' >>04_space-roles.sh
 
-		echo '.. inspect space services'
+		echo '.. inspecting space services'
 		cf target -o "$org" -s "$space"
+
+		echo '... inspecting space apps'
+		cf apps | awk -v org="$org" -v space="$space" '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ printf("Application: %s, Organisation: %s, Space: %s\n",$1,org,space }' \
+			>>997_space_apps.txt
 
 		for service in `cf services | awk '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ print $1 }'`; do
 			cf service "$service" | awk -F': *' '{
@@ -97,5 +101,5 @@ rm -f users
 
 cf service-brokers | awk '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ print $1 }' | sort >998_service-brokers.txt
 
-ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh 998_service-brokers.txt 999_service-apps.txt
+ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh 997_space_apps.txt 998_service-brokers.txt 999_service-apps.txt
 
