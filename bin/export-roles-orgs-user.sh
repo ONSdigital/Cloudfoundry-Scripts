@@ -53,7 +53,7 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 		cf target -o "$org" -s "$space"
 
 		echo '... inspecting space apps'
-		cf apps | awk -v org="$org" -v space="$space" '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ printf("Application: %s, Organisation: %s, Space: %s\n",$1,org,space }' \
+		cf apps | awk -v org="$org" -v space="$space" '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ printf("Application: %s, Organisation: %s, Space: %s\n",$1,org,space) }' \
 			>>997_space_apps.txt
 
 		for service in `cf services | awk '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ print $1 }'`; do
