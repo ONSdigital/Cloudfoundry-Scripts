@@ -1,3 +1,5 @@
+# The various JSON parsing elements assume the JSON is perfectly indented.  Failing to do so will break things.  We
+# could pipe the JSON via 'python -m json.tool'....
 
 FATAL(){
 	# RHEL echo allows -e (interpret escape sequences).
