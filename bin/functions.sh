@@ -283,6 +283,14 @@ show_duplicate_output_names(){
 	awk -F= '!/^#/{ a[$1]++ }END{ for(i in a){ if(a[i] > 1) printf("%s=%d\n",i,a[i])}}' "$outputs_dir"/outputs-*.sh
 }
 
+_expand_ops_files(){
+	local ops_files="$@"
+
+	awk '{ split($0,a,","); for(i in a) printf("--ops-file \"%s\" ",a[i])}' <<EOF
+$@
+EOF
+}
+
 bosh_lite(){
 	local action_option="$1"
 	local bosh_manifest="$2"
@@ -293,8 +301,9 @@ bosh_lite(){
 
 	shift 2
 
-	[ -n "$PUBLIC_BOSH_LITE_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PUBLIC_BOSH_LITE_OPS_FILE"
-	[ -n "$PRIVATE_BOSH_LITE_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PRIVATE_BOSH_LITE_OPS_FILE"
+	# Urgh.... we pass through these vars to _bosh()
+	[ -n "$PUBLIC_BOSH_LITE_OPS_FILES" ] && local public_ops_file_options="`_expand_ops_files $PUBLIC_BOSH_LITE_OPS_FILES`"
+	[ -n "$PRIVATE_BOSH_LITE_OPS_FILES" ] && local private_ops_file_options="`_expand_ops_files $PRIVATE_BOSH_LITE_OPS_FILES`"
 
 	_bosh "$action_option" "$bosh_manifest" "$@"
 }
@@ -309,8 +318,9 @@ bosh_full(){
 
 	shift 2
 
-	[ -n "$PUBLIC_BOSH_FULL_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PUBLIC_BOSH_FULL_OPS_FILE"
-	[ -n "$PRIVATE_BOSH_FULL_OPS_FILE" ] && local ops_file_option="$ops_file_option --ops-file=$PRIVATE_BOSH_FULL_OPS_FILE"
+	# Urgh.... we pass through these vars to _bosh()
+	[ -n "$PUBLIC_BOSH_FULL_OPS_FILES" ] && local public_ops_file_options="`_expand_ops_files $PUBLIC_BOSH_FULL_OPS_FILES`"
+	[ -n "$PRIVATE_BOSH_FULL_OPS_FILES" ] && local private_ops_file_options="`_expand_ops_files $PRIVATE_BOSH_FULL_OPS_FILES`"
 
 	_bosh "$action_option" "$bosh_manifest" "$@"
 }
@@ -333,7 +343,7 @@ _bosh(){
 	fi
 
 	# We don't always want to process the ops file(s)
-	[ 0"$NO_OPS_FILE" -eq 1 ] && unset ops_file_option
+	[ 0"$NO_OPS_FILE" -eq 1 ] && unset private_ops_file_options public_ops_file_options
 
 	# We don't always want to error out on missing vars
 	[ 0$NO_VAR_ERRS -ne 1 ] && local int_vars_errs_option='--var-errs'
@@ -342,7 +352,8 @@ _bosh(){
 	if [ x"$action" = x'interpolate' -o x"$action" = x'int' ] || [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
 		[ 0$NO_YML -ne 1 ] && echo '---'
 		"$BOSH_CLI" interpolate "$bosh_manifest" \
-			$ops_file_option \
+			$private_ops_file_options \
+			$public_ops_file_options \
 			--no-color \
 			$int_vars_errs_option \
 			--vars-env=$ENV_PREFIX_NAME \
@@ -354,7 +365,8 @@ _bosh(){
 	INFO "Running 'bosh $action'"
 	"$BOSH_CLI" "$action" "$bosh_manifest" \
 		$BOSH_TTY_OPT \
-		$ops_file_option \
+		$private_ops_file_options \
+		$public_ops_file_options \
 		$action_vars_errs_option \
 		$state_option \
 		--vars-env=$ENV_PREFIX_NAME \

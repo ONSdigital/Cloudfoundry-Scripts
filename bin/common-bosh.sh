@@ -67,15 +67,28 @@ for i in Lite Full; do
 	for j in PUBLIC PRIVATE; do
 		upper="`echo $i | tr '[[:lower:]]' '[[:upper:]]'`"
 
-		eval file_name="\$${j}_BOSH_${upper}_OPS_FILENAME"
+		eval file_names="\$${j}_BOSH_${upper}_OPS_FILENAMES"
 
-		[ x"$j" = x"PUBLIC" ] && file="$MANIFESTS_DIR/Bosh-$i-Manifests/$file_name" || file="$OPS_FILES_CONFIG_DIR/$file_name"
+		OLDIFS="$IFS"
+		IFS=','
 
-		if [ -n "$file_name" ]; then
-			[ ! -f "$file" ] && FATAL "$file does not exist"
+		for k in $file_names; do
+			[ x"$j" = x"PUBLIC" ] && file="$MANIFESTS_DIR/Bosh-$i-Manifests/$k" || file="$OPS_FILES_CONFIG_DIR/$k"
 
-			eval "${j}_BOSH_${upper}_OPS_FILE"="'$file'"
-		fi
+			if [ -n "$file_name" ]; then
+				[ ! -f "$file" ] && FATAL "$file does not exist"
+
+				eval existing="\$${j}_BOSH_${upper}_OPS_FILE"
+
+				if [ -n "$existing" ]; then
+					eval "${j}_BOSH_${upper}_OPS_FILES"="$existing,'$file'"
+				else
+					eval "${j}_BOSH_${upper}_OPS_FILES"="'$file'"
+				fi
+			fi
+		done
+
+		IFS="$OLDIFS"
 	done
 done
 
