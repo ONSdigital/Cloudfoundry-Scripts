@@ -193,7 +193,7 @@ for i in $INTERNAL_SERVICE_SSL_NAMES; do
 done
 
 for i in $NATS_CLIENT_NAMES; do
-	[ x"$ONLY_MISSING" = x"true" -a -f "$NATS_CLIENTS_CA_NAME/client/$i.crt" ] && continue
+	[ x"$ONLY_MISSING" = x"true" -a -f "$NATS_CLIENTS_CA_NAME/client/nats_clients_$i.crt" ] && continue
 
 	"$CA_TOOL" --ca-name "$NATS_CLIENTS_CA_NAME" --name "nats_clients_$i"
 
@@ -201,7 +201,7 @@ for i in $NATS_CLIENT_NAMES; do
 done
 
 for i in $NATS_NAMES; do
-	[ x"$ONLY_MISSING" = x"true" -a -f "$NATS_CA_NAME/client/$i.crt" ] && continue
+	[ x"$ONLY_MISSING" = x"true" -a -f "$NATS_CA_NAME/client/nats_$i.crt" ] && continue
 
 	"$CA_TOOL" --ca-name "$NATS_CA_NAME" --name "nats_$i"
 
