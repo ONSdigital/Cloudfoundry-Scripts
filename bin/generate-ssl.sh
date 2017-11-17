@@ -100,7 +100,7 @@ EOF
 }
 
 # Generate CAs
-for _i in $EXTERNAL_CA_NAME $INTERNAL_CA_NAME; do
+for _i in $EXTERNAL_CA_NAME $INTERNAL_CA_NAME $NATS_CA $NATS_CLIENT_CA; do
 	[ x"$ONLY_MISSING" = x"true" -a -f "$_i/ca/$_i.crt" ] && continue
 
 	"$CA_TOOL" --new-ca --ca-name "$_i" --not-trusted
