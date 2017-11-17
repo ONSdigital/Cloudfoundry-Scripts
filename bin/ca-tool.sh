@@ -162,7 +162,7 @@ serial				= $dir/serial.txt
 subjectKeyIdentifier=hash
 basicConstraints		= critical,CA:true
 authorityKeyIdentifier		= keyid,issuer
-extendedKeyUsage		= critical,codeSigning,serverAuth,clientAuth
+extendedKeyUsage		= critical,codeSigning
 keyUsage			= nonRepudiation,digitalSignature,keyEncipherment,dataEncipherment,keyCertSign,cRLSign
 
 [x509v3]

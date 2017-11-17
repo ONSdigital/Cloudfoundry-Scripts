@@ -5,24 +5,26 @@
 #	service provided services
 #
 
+set -e
+
 export CF_COLOR=false
 
-for i in 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh 997_space_apps.txt 998_service-brokers.txt 999_service-apps.txt; do
+for i in 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh 06_quotas.sh 07_org_quotas.sh 08_space_quotas.sh \
+	09_security_groups.sh \
+	997_space_apps.txt 998_service-brokers.txt 999_service-apps.txt; do
 	[ -f "$i" ] && rm -f "$i"
 done
 
 for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`; do
 	echo "Inspecting Organisation: $org"
 
-	echo "cf create-org \"$org\"" >>01_create-org.sh
+	org_quota="`cf org $org | awk '!/^quota:.*default$/ && /^quota:/{printf("-q %s",$2)}'`"
+
+	echo '. inspecting organisation quota'
+	echo "cf create-org $org_quota \"$org\"" >>01_create-org.sh
 
 	cf target -o "$org" 2>&1 >/dev/null
 
-	echo '. finding spaces'
-	cf spaces | awk -v org="$org" '!/^(name|Getting .*|No .*|FAILED)?$/{
-		gsub(" *","")
-		printf("cf create-space \"%s\" -o \"%s\"\n",$1,org)
-	}' >>02_create-space.sh
 
 	echo '. finding users'
 	# This seems to generate repeating passwords: first 4-ish will be the same, second 5-ish will be the same,
@@ -32,8 +34,13 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 		print $1
 	}' >>users
 
+	echo '. finding spaces'
 	for space in `cf spaces 2>&1 | awk '!/^(name|Getting .*|No .*|FAILED)?$/'`; do
 		echo ". inspecting space: $space"
+		echo '.. inspecting space quota'
+
+		space_quota="`cf space $space | awk -F": +" '!/^(space quota:.*default|space quota:|name|Getting .*|No .*|FAILED)?$/ && /^space quota:/{printf("-q %s",$2)}'`"
+		echo "cf create-space -o $org $space_quota \"$space\"" >>02_create-space.sh
 
 		echo '.. inspecting space roles'
 		cf space-users "$org" "$space" | awk -v org="$org" -v space="$space" '!/^(name|Getting .*|No .*|\s*(cf_)?admin)?$/{
@@ -99,7 +106,30 @@ awk '{
 
 rm -f users
 
-cf service-brokers | awk '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ print $1 }' | sort >998_service-brokers.txt
+echo '. finding quotas'
+cf quotas | awk '!/^(name.*|Getting .*|OK|No .*)/{
+	total_memory = ($2 == "unlimited") ? -1 : $2
+	instance_memory = ($3 == "unlimited") ? -1 : $3
+	total_services = ($5 == "unlimited") ? -1 : $5
+	allow_paid_plans = ($6 == "allowed") ? "--allow-paid-service-plans" : ""
+	total_instances = ($7 == "unlimited") ? -1 : $7
+	route_ports = $8
 
-ls 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.sh 05_org-roles.sh 997_space_apps.txt 998_service-brokers.txt 999_service-apps.txt
+	printf(
+		"cf create-quota %s -m %s -i %s -s %d %s -a %s --reserved-route-ports %s\n",
+		$1,total_memory,instance_memory,$4,total_services,allow_paid_plans,total_instances,$8
+	)' >06_quotas.sh
+
+cf service-brokers | awk '!/^(name.*|Getting .*|OK|No .*|\s*)?$/{ print $1 }' | sort >998_service-brokers.txt
+
+[ -d asg ] || mkdir -p asg
+echo '. finding security groups'
+for i in `cf security_groups | awk '!/^(name.*|Rules|Getting .*|OK|No .*|\s*)?$/{ print $2 }'`; do
+	echo ".. inspecting security group $i"
+	cf security-group $i | sed -re 's/^\t//g' >"asg/$i.yml"
+
+	echo "cf create-security-group $i asg/$i.yml" >
+done
+
+ls *
 

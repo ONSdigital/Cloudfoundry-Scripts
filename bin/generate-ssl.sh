@@ -12,12 +12,15 @@ BASE_DIR="`dirname \"$0\"`"
 EXTERNAL_CA_NAME="${1:-$EXTERNAL_CA_NAME}"
 INTERNAL_CA_NAME="${2:-$INTERNAL_CA_NAME}"
 OUTPUT_YML="${3:-$OUTPUT_YML}"
-ORGANISATION="${4:-$ORGANISATION}"
+NATS_CA_NAME="${4:-nats}"
+NATS_CLIENT_CA_NAME="${5:-nats_client}"
 
-APPS_DOMAIN="${5:-apps.$EXTERNAL_CA_NAME}"
-SYSTEM_DOMAIN="${6:-system.$EXTERNAL_CA_NAME}"
-SERVICE_DOMAIN="${7:-service.$INTERNAL_CA_NAME}"
-EXTERNAL_DOMAIN="${8:-$EXTERNAL_CA_NAME}"
+ORGANISATION="${6:-$ORGANISATION}"
+
+APPS_DOMAIN="${7:-apps.$EXTERNAL_CA_NAME}"
+SYSTEM_DOMAIN="${8:-system.$EXTERNAL_CA_NAME}"
+SERVICE_DOMAIN="${9:-service.$INTERNAL_CA_NAME}"
+EXTERNAL_DOMAIN="${10:-$EXTERNAL_CA_NAME}"
 
 ONLY_MISSING="${ONLY_MISSING:-true}"
 
@@ -103,8 +106,15 @@ for _i in $EXTERNAL_CA_NAME $INTERNAL_CA_NAME; do
 	"$CA_TOOL" --new-ca --ca-name "$_i" --not-trusted
 done
 
-grep -Eq '^internal_ca_crt:' "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/ca/$INTERNAL_CA_NAME.crt" internal_ca
-grep -Eq '^external_ca_crt:' "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$EXTERNAL_CA_NAME/ca/$EXTERNAL_CA_NAME.crt" external_ca
+for i in internal external nats nats_client; do
+	upper_name="`echo $i | tr '[[:lower:]]' '[[:upper:]]'`"
+
+	eval ca_name="\$${upper_name}_CA_NAME"
+
+	grep -Eq "^${i}_ca_crt:" "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$ca_name/ca/$ca_name.crt" ${i}_ca
+done
+
+grep -Eq "^${NATS_CLIENTS_CA}_(crt|key):" "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$NATS_CLIENTS_CA/ca/$NATS_CLIENTS_CA"
 
 if [ x"$ONLY_MISSING" = x"false" -o ! -f "$EXTERNAL_CA_NAME/client/ha-proxy.$SYSTEM_DOMAIN.crt" ]; then
 	# Public facing SSL
@@ -124,6 +134,7 @@ if [ x"$ONLY_MISSING" = x"false" -o ! -f "$INTERNAL_CA_NAME/client/cf-etcd.$SERV
 	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/cf-etcd.$SERVICE_DOMAIN.key" NONE NONE _server_key
 	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/cf-etcd-client"
 fi
+
 
 for i in $EXTERNAL_SSL_NAMES; do
 	[ x"$ONLY_MISSING" = x"true" -a -f "$EXTERNAL_CA_NAME/client/$i.$EXTERNAL_CA_NAME.crt" ] && continue
@@ -173,4 +184,12 @@ for i in $INTERNAL_SERVICE_SSL_NAMES; do
 	"$CA_TOOL" --ca-name "$INTERNAL_CA_NAME" --name "$i.$SERVICE_DOMAIN"
 
 	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/$i.$SERVICE_DOMAIN"
+done
+
+for i in $NATS_CLIENTS; do
+	[ x"$ONLY_MISSING" = x"true" -a -f "$NATS_CLIENTS_CA/client/$i.crt" ] && continue
+
+	"$CA_TOOL" --ca-name "$NATS_CLIENTS_CA" --name "$i"
+
+	generate_vars_yml "$OUTPUT_YML" "$NATS_CLIENTS_CA/client/$i"
 done
