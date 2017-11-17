@@ -117,10 +117,10 @@ for i in internal external nats nats_clients; do
 
 	eval ca_name="\$${upper_name}_CA_NAME"
 
-	grep -Eq "^${i}_ca_crt:" "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$ca_name/ca/$ca_name.crt" ${i}_ca
+	grep -Eq "^${i}_ca_crt:" "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$ca_name/ca/$ca_name.crt" "${i}_ca"
 done
 
-grep -Eq "^${NATS_CLIENTS_CA}_(crt|key):" "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$NATS_CLIENTS_CA_NAME/ca/$NATS_CLIENTS_CA_NAME"
+grep -Eq "^${NATS_CLIENTS_CA_NAME}_key:" "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$NATS_CLIENTS_CA_NAME/ca/$NATS_CLIENTS_CA_NAME.key" "${NATS_CLIENTS_CA_NAME}_ca"
 
 if [ x"$ONLY_MISSING" = x"false" -o ! -f "$EXTERNAL_CA_NAME/client/ha-proxy.$SYSTEM_DOMAIN.crt" ]; then
 	# Public facing SSL
@@ -203,7 +203,7 @@ done
 for i in $NATS_NAMES; do
 	[ x"$ONLY_MISSING" = x"true" -a -f "$NATS_CA_NAME/client/$i.crt" ] && continue
 
-	"$CA_TOOL" --ca-name "$NATS_CA_NAME" --name "nats_server_$i"
+	"$CA_TOOL" --ca-name "$NATS_CA_NAME" --name "nats_$i"
 
-	generate_vars_yml "$OUTPUT_YML" "$NATS_CA_NAME/client/nats_server_$i"
+	generate_vars_yml "$OUTPUT_YML" "$NATS_CA_NAME/client/nats_$i"
 done
