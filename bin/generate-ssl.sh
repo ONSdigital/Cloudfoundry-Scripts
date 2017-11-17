@@ -39,6 +39,12 @@ INTERNAL_CONSUL_SSL_NAMES='server.dc1 agent.dc1'
 # Unqualified names
 INTERNAL_SIMPLE_SSL_NAMES='doppler cc_trafficcontroller trafficcontroller metron syslogdrainbinder statsdinjector tps_watcher cc_uploader_cc cc_uploader_mutual router concourse'
 
+# NATS CA CLIENTS
+NATS_CLIENT_NAMES='director healthmonitor'
+
+# NATS CA
+NATS_NAMES='server'
+
 # Passed through to $CA_TOOL
 export EXTENDED_CRITICAL=
 export ORGANISATION
@@ -186,10 +192,18 @@ for i in $INTERNAL_SERVICE_SSL_NAMES; do
 	generate_vars_yml "$OUTPUT_YML" "$INTERNAL_CA_NAME/client/$i.$SERVICE_DOMAIN"
 done
 
-for i in $NATS_CLIENTS; do
-	[ x"$ONLY_MISSING" = x"true" -a -f "$NATS_CLIENTS_CA/client/$i.crt" ] && continue
+for i in $NATS_CLIENT_NAMES; do
+	[ x"$ONLY_MISSING" = x"true" -a -f "$NATS_CLIENTS_CA_NAME/client/$i.crt" ] && continue
 
-	"$CA_TOOL" --ca-name "$NATS_CLIENTS_CA" --name "$i"
+	"$CA_TOOL" --ca-name "$NATS_CLIENTS_CA_NAME" --name "nats_clients_$i"
 
-	generate_vars_yml "$OUTPUT_YML" "$NATS_CLIENTS_CA/client/$i"
+	generate_vars_yml "$OUTPUT_YML" "$NATS_CLIENTS_CA_NAME/client/nats_clients_$i"
+done
+
+for i in $NATS_NAMES; do
+	[ x"$ONLY_MISSING" = x"true" -a -f "$NATS_CA_NAME/client/$i.crt" ] && continue
+
+	"$CA_TOOL" --ca-name "$NATS_CA_NAME" --name "nats_server_$i"
+
+	generate_vars_yml "$OUTPUT_YML" "$NATS_CA_NAME/client/nats_server_$i"
 done
