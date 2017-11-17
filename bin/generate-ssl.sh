@@ -13,7 +13,7 @@ EXTERNAL_CA_NAME="${1:-$EXTERNAL_CA_NAME}"
 INTERNAL_CA_NAME="${2:-$INTERNAL_CA_NAME}"
 OUTPUT_YML="${3:-$OUTPUT_YML}"
 NATS_CA_NAME="${4:-nats}"
-NATS_CLIENT_CA_NAME="${5:-nats_client}"
+NATS_CLIENTS_CA_NAME="${5:-nats_clients}"
 
 ORGANISATION="${6:-$ORGANISATION}"
 
@@ -100,13 +100,13 @@ EOF
 }
 
 # Generate CAs
-for _i in $EXTERNAL_CA_NAME $INTERNAL_CA_NAME $NATS_CA $NATS_CLIENT_CA; do
+for _i in $EXTERNAL_CA_NAME $INTERNAL_CA_NAME $NATS_CA_NAME $NATS_CLIENTS_CA_NAME; do
 	[ x"$ONLY_MISSING" = x"true" -a -f "$_i/ca/$_i.crt" ] && continue
 
 	"$CA_TOOL" --new-ca --ca-name "$_i" --not-trusted
 done
 
-for i in internal external nats nats_client; do
+for i in internal external nats nats_clients; do
 	upper_name="`echo $i | tr '[[:lower:]]' '[[:upper:]]'`"
 
 	eval ca_name="\$${upper_name}_CA_NAME"
@@ -114,7 +114,7 @@ for i in internal external nats nats_client; do
 	grep -Eq "^${i}_ca_crt:" "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$ca_name/ca/$ca_name.crt" ${i}_ca
 done
 
-grep -Eq "^${NATS_CLIENTS_CA}_(crt|key):" "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$NATS_CLIENTS_CA/ca/$NATS_CLIENTS_CA"
+grep -Eq "^${NATS_CLIENTS_CA}_(crt|key):" "$OUTPUT_YML" || generate_vars_yml "$OUTPUT_YML" "$NATS_CLIENTS_CA_NAME/ca/$NATS_CLIENTS_CA_NAME"
 
 if [ x"$ONLY_MISSING" = x"false" -o ! -f "$EXTERNAL_CA_NAME/client/ha-proxy.$SYSTEM_DOMAIN.crt" ]; then
 	# Public facing SSL
