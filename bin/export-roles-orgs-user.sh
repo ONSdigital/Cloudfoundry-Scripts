@@ -15,10 +15,10 @@ for i in 01_create-org.sh 02_create-space.sh 03_create-users.sh 04_space-roles.s
 	[ -f "$i" ] && rm -f "$i"
 done
 
-for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`; do
+for org in `cf orgs 2>/dev/null | awk '!/^\s*(name|Getting .*|No .*FAILED|OK)?$/'`; do
 	echo "Inspecting Organisation: $org"
 
-	org_quota="`cf org $org | awk '!/^quota:.*default$/ && !/^quota: *$/ && /^quota/{printf("-q %s",$2)}'`"
+	org_quota="`cf org $org | awk '!/^\s*quota:.*default$/ && !/^\s*quota: *$/ && /^\s*quota/{gsub("\s*\(.*$",""); printf("-q %s",$2)}'`"
 
 	echo '. inspecting organisation quota'
 	echo "cf create-org $org_quota \"$org\"" | sed -re 's/  / /g' >>01_create-org.sh
@@ -29,7 +29,7 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 	echo '. finding users'
 	# This seems to generate repeating passwords: first 4-ish will be the same, second 5-ish will be the same,
 	# third 8-ish will be the same & last 32 (+?) will be the same
-	cf org-users -a "$org" | awk '!/^(USERS|Getting .*|FAILED|No .*|\s*(cf_)?admin)?$/{
+	cf org-users -a "$org" | awk '!/^\s*(USERS|Getting .*|FAILED|No .*|\s*(cf_)?admin)?$/{
 		gsub(" *","")
 		print $1
 	}' >>users
@@ -39,12 +39,12 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 		echo ". inspecting space: $space"
 		echo '.. inspecting space quota'
 
-		space_quota="`cf space $space | awk -F": +" '!/^(space quota:.*default|space quota: *|name|Getting .*|No .*|FAILED)?$/ && /^space quota:/{printf("-q %s",$2)}'`"
-		space_asg="`cf space $space | awk -F": +" '!/^(name|Getting .*|No .*|FAILED|security group: *)?$/ && /^security groups:/{printf("--security-group-rules %s",$2)}'`"
+		space_quota="`cf space $space | awk -F": +" '!/^\s*(space quota:.*default|space quota: *|name|Getting .*|No .*|FAILED)?$/ && /^\s*space quota:/{printf("-q %s",$2)}'`"
+		space_asg="`cf space $space | awk -F": +" '!/^\s*(name|Getting .*|No .*|FAILED|security group: *)?$/ && /^\s*security groups:/{gsub("\s*\(.*$",""); printf("--security-group-rules %s",$2)}'`"
 		echo "cf create-space -o $org $space_quota $space_asg \"$space\"" | sed -re 's/  / /g' -e 's/, /,/g' >>02_create-space.sh
 
 		echo '.. inspecting space roles'
-		cf space-users "$org" "$space" | awk -v org="$org" -v space="$space" '!/^(name|Getting .*|No .*|\s*(cf_)?admin)?$/{
+		cf space-users "$org" "$space" | awk -v org="$org" -v space="$space" '!/^\s*(name|Getting .*|No .*|(cf_)?admin)?$/{
 			gsub("^ *","")
 			if($0 ~ /SPACE MANAGER/){
 				role="SpaceManager"
@@ -61,10 +61,10 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 		cf target -o "$org" -s "$space"
 
 		echo '... inspecting space apps'
-		cf apps | awk -v org="$org" -v space="$space" '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ printf("Application: %s, Organisation: %s, Space: %s\n",$1,org,space) }' \
+		cf apps | awk -v org="$org" -v space="$space" '!/^\s*(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ printf("Application: %s, Organisation: %s, Space: %s\n",$1,org,space) }' \
 			>>997_space_apps.txt
 
-		for service in `cf services | awk '!/^(name.*|Getting .*|OK|No .*|\s*(cf_)?admin)?$/{ print $1 }'`; do
+		for service in `cf services | awk '!/^\s*(name.*|Getting .*|OK|No .*|(cf_)?admin)?$/{ print $1 }'`; do
 			cf service "$service" | awk -F': *' '{
 				if(/Service instance/){
 					instance=$2
@@ -80,7 +80,7 @@ for org in `cf orgs 2>/dev/null | awk '!/^(name|Getting .*|No .*FAILED|OK)?$/'`;
 	done
 
 	echo '. finding organisation roles'
-	cf org-users "$org" 2>&1 | awk -v org="$org" '!/^(USERS|Getting .*|No .*|FAILED|\s*(cf_)?admin)?$/{
+	cf org-users "$org" 2>&1 | awk -v org="$org" '!/^\s*(USERS|Getting .*|No .*|FAILED|(cf_)?admin)?$/{
 		gsub("^ *","")
 		if($0 ~ /ORG MANAGER/){
 			role="OrgManager"
@@ -108,7 +108,7 @@ awk '{
 rm -f users
 
 echo '. finding quotas'
-cf quotas | awk '!/^(default|name.*|Getting .*|OK|No .*|\s*$)/{
+cf quotas | awk '!/^\s*(default|name.*|Getting .*|OK|No .*|\s*$)/{
 	total_memory = ($2 == "unlimited") ? -1 : $2
 	instance_memory = ($3 == "unlimited") ? -1 : $3
 	total_services = ($5 == "unlimited") ? -1 : $5
@@ -122,9 +122,9 @@ cf service-brokers | awk '!/^(name.*|Getting .*|OK|No .*|\s*)?$/{ print $1 }' | 
 
 [ -d asg ] || mkdir -p asg
 echo '. finding security groups'
-for i in `cf security-groups | awk '!/^( *Name *.*|Getting .*|OK|No .*)?$/{ print $2 }'`; do
+for i in `cf security-groups | awk '!/^\s*(Name *.*|Getting .*|OK|No .*)?$/{ print $2 }'`; do
 	echo ".. inspecting security group $i"
-	cf security-group $i | awk '!/^(Name *.*|Getting .*|OK|No .*)?$/{
+	cf security-group $i | awk '!/^\s*(Name *.*|Getting .*|OK|No .*)?$/{
 		gsub("^\t","")
 		print $0
 	}' >"asg/$i.yml"
