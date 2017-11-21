@@ -23,6 +23,10 @@ BOSH_STATIC_IPS_PREFIX="${7:-${BOSH_STATIC_IPS_PREFIX:-Bosh-static-ips}}"
 MANIFESTS_DIR_RELATIVE="${8:-${MANIFESTS_DIR_RELATIVE:-Bosh-Manifests}}"
 INTERNAL_DOMAIN="${9:-${INTERNAL_DOMAIN:-cf.internal}}"
 
+
+#VARIABLES_BOSH_FULL_OPS_FILENAMES="${VARIABLES_BOSH_FULL_OPS_FILENAMES:-full-variables.yml}"
+VARIABLES_BOSH_LITE_OPS_FILENAMES="${VARIABLES_BOSH_LITE_OPS_FILENAMES:-lite-variables.yml}"
+
 . "$BASE_DIR/common.sh"
 
 [ -n "$DEPLOYMENT_NAME" ] || FATAL 'No Bosh deployment name provided'
@@ -61,29 +65,30 @@ BOSH_LITE_STATE_FILE="$DEPLOYMENT_DIR_RELATIVE/$BOSH_LITE_MANIFEST_NAME-Lite-sta
 # Expand manifests dir to full path
 findpath MANIFESTS_DIR "$MANIFESTS_DIR_RELATIVE"
 
+
 # Private, per deployment, ops files, eq for installation specific operartions
 # Publically available ops files, eg adjustments for VMware
 for i in Lite Full; do
 	for j in PUBLIC PRIVATE; do
 		upper="`echo $i | tr '[[:lower:]]' '[[:upper:]]'`"
 
-		eval file_names="\$${j}_BOSH_${upper}_OPS_FILENAMES"
+		eval files="\$${j}_BOSH_${upper}_OPS_FILENAMES"
 
 		OLDIFS="$IFS"
 		IFS=','
 
-		for k in $file_names; do
-			[ x"$j" = x"PUBLIC" ] && file="$MANIFESTS_DIR/Bosh-$i-Manifests/$k" || file="$OPS_FILES_CONFIG_DIR/$k"
+		for file in $files; do
+			[ x"$j" != x"PRIVATE" ] && filename="$MANIFESTS_DIR_RELATIVE/Bosh-$i-Manifests/$file" || filename="$OPS_FILES_CONFIG_DIR/$file"
 
-			if [ -n "$file_name" ]; then
-				[ ! -f "$file" ] && FATAL "$file does not exist"
+			if [ -n "$filename" ]; then
+				[ ! -f "$filename" ] && FATAL "$filename does not exist"
 
-				eval existing="\$${j}_BOSH_${upper}_OPS_FILE"
+				eval existing="\$${j}_BOSH_${upper}_OPS_FILE_OPTIONS"
 
 				if [ -n "$existing" ]; then
-					eval "${j}_BOSH_${upper}_OPS_FILES"="$existing,'$file'"
+					eval "${j}_BOSH_${upper}_OPS_FILE_OPTIONS"="$existing --ops-file='$filename'"
 				else
-					eval "${j}_BOSH_${upper}_OPS_FILES"="'$file'"
+					eval "${j}_BOSH_${upper}_OPS_FILE_OPTIONS"="--ops-file='$filename'"
 				fi
 			fi
 		done

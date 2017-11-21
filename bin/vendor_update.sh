@@ -30,7 +30,7 @@ for i in ${@:-`ls vendor/`}; do
 		read view_diff
 
 		if [ x"$view_diff" = x"Y" -o x"$view_diff" = x"y" ]; then
-			if diff -Ncrdx .git "vendor/$i" "$i"; then
+			if diff -Ncrdx .git -x \*.swp "vendor/$i" "$i"; then
 				echo "No differences"
 
 				continue
@@ -43,7 +43,7 @@ for i in ${@:-`ls vendor/`}; do
 		if [ x"$edit_diff" = x"Y" -o x"$edit_diff" = x"y" ]; then
 			patch="`mktemp "$i.patch.XXXX"`"
 
-			diff -Ncrdx .git "$i" "vendor/$i" >"$patch" || :
+			diff -Ncrdx .git \*.swp "$i" "vendor/$i" >"$patch" || :
 
 			vim "$patch"
 		fi
@@ -55,7 +55,7 @@ for i in ${@:-`ls vendor/`}; do
 			if [ -n "$patch" -a -f "$patch" ]; then
 				patch -p1 -d "$i" -i "$patch" && rm -f "$patch"
 			else
-				diff -Ncrdx .git "$i" "vendor/$i" | patch -p1 -d "$i"
+				diff -Ncrdx .git -x \*.swp "$i" "vendor/$i" | patch -p1 -d "$i"
 			fi
 		fi
 	fi
