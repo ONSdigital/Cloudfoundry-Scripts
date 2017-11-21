@@ -77,7 +77,7 @@ fi
 # Remove Bosh?
 if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 	INFO 'Removing existing Bosh bootstrap environment'
-	sh -c "'$BOSH_CLI' delete -env \
+	sh -c "'$BOSH_CLI' delete-env \
 			--tty \
 			 --non-interactive \
 			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
@@ -133,7 +133,7 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
 			--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
 			--path='/metadata/director_ca' \
-			$BOSH_LITE_MANIFEST_FILE >'$DEPLOYMENT_DIR_RELATIVE/director.crt'"
+			$BOSH_LITE_MANIFEST_FILE" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
 
 
 	INFO 'Storing Bosh Director password'
@@ -152,9 +152,6 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 
 		FATAL 'Bosh lite deployment failed'
 	fi
-
-	# We may not have created a new Bosh environment
-	NEW_BOSH_ENV='true'
 
 	# We may need to run the pre-deploy script
 	RUN_PREDEPLOY='true'
