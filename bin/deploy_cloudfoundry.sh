@@ -79,6 +79,7 @@ if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 	INFO 'Removing existing Bosh bootstrap environment'
 	sh -c "'$BOSH_CLI' delete -env \
 			--tty \
+			 --non-interactive \
 			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
 			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
 			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
@@ -96,7 +97,7 @@ fi
 if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 	if [ -n "$DEBUG" ]; then
 		INFO 'Interpolated Bosh lite manifest'
-		sh -c "'$BOSH_CLI' int \
+		sh -c "'$BOSH_CLI' interpolate \
 				--tty \
 				--var-errs \
 				$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
@@ -111,6 +112,7 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 	INFO 'Creating Bosh environment'
 	sh -c "'$BOSH_CLI' create-env \
 			--tty \
+			 --non-interactive \
 			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
 			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
 			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
@@ -264,6 +266,7 @@ if [ x"$RUN_BOSH_PREAMBLE" = x"true" ] || [ ! -f "$BOSH_PREAMBLE_MANIFEST_INT_YM
 	if [ x"$RUN_DRY_RUN" = x"true" -o -n "$DEBUG" ]; then
 		INFO 'Checking Bosh preamble dry-run'
 		"$BOSH_CLI" deploy \
+			--non-interactive \
 			--dry-run \
 			--tty \
 			--vars-env="$ENV_PREFIX_NAME" \
@@ -272,6 +275,7 @@ if [ x"$RUN_BOSH_PREAMBLE" = x"true" ] || [ ! -f "$BOSH_PREAMBLE_MANIFEST_INT_YM
 
 	INFO 'Deploying Bosh preamble'
 	"$BOSH_CLI" deploy \
+		--non-interactive \
 		--tty \
 		--vars-env="$ENV_PREFIX_NAME" \
 		"$BOSH_PREAMBLE_MANIFEST_FILE"
@@ -298,7 +302,7 @@ if [ x"$RUN_BOSH_PREAMBLE" = x"true" ] || [ ! -f "$BOSH_PREAMBLE_MANIFEST_INT_YM
 	# TEMPORARY
 
 	INFO 'Deleting Bosh premable deployment'
-	"$BOSH_CLI" delete-deployment --force --tty
+	"$BOSH_CLI" delete-deployment --force --tty --non-interactive
 fi
 
 # This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'
@@ -307,6 +311,7 @@ if [ x"$RUN_DRY_RUN" = x'true' -o -n "$DEBUG" ]; then
 	sh -c "'$BOSH_CLI' deploy \
 			--tty \
 			--dry-run \
+			--non-interactive \
 			$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 			$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
 			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/full-variables.yml' \
@@ -320,6 +325,7 @@ fi
 INFO 'Deploying Bosh'
 sh -c "'$BOSH_CLI' deploy \
 		--tty \
+		--non-interactive \
 		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
 		--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/full-variables.yml' \
