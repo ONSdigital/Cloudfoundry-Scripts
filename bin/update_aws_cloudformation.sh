@@ -123,8 +123,8 @@ validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES $STACK_TEMPLATES_FIL
 cd - >/dev/null
 
 # We need to suck in the region from the existing outputs.sh
-INFO 'Obtaining current stack region'
-load_output_vars "$STACK_OUTPUTS_DIR" NONE aws_region
+INFO 'Loading AWS outputs'
+load_outputs "$STACK_OUTPUTS_DIR"
 if [ -n "$aws_region" ]; then
 	INFO "Checking if we need to update AWS region to $aws_region"
 	export AWS_DEFAULT_REGION="$aws_region"

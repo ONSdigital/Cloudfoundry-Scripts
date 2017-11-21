@@ -43,7 +43,8 @@ fi
 
 [ -f "$DEPLOYMENT_DIR/cf-credentials-admin.sh" ] || FATAL "CF admin credentials file does not exist: $DEPLOYMENT_DIR/cf-credentials-admin.sh"
 
-load_output_vars "$STACK_OUTPUTS_DIR" NONE domain_name
+INFO 'Loading AWS outputs'
+load_outputs "$STACK_OUTPUTS_DIR"
 
 . "$DEPLOYMENT_DIR/cf-credentials-admin.sh"
 

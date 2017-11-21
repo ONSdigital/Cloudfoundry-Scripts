@@ -13,10 +13,10 @@ SPACE_NAME="${3:-Test}"
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
-eval export `prefix_vars "$PASSWORD_CONFIG_FILE"`
-eval export `prefix_vars "$CF_CREDENTIALS"`
-
+INFO 'Loading Bosh director config'
+export_file_vars "$BOSH_DIRECTOR_CONFIG"
+#export `grep -Evi '^#' "$PASSWORD_CONFIG_FILE"`
+#export `grep -Evi '^#' "$CF_CREDENTIALS"`
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"

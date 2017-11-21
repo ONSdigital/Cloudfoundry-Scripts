@@ -1,6 +1,10 @@
 # The various JSON parsing elements assume the JSON is perfectly indented.  Failing to do so will break things.  We
 # could pipe the JSON via 'python -m json.tool'....
 
+_date(){
+	date +"%F %T %Z"
+}
+
 FATAL(){
 	# RHEL echo allows -e (interpret escape sequences).
 	# Debian/Ubuntu/et al doesn't as it uses 'dash' as its default shell
@@ -17,10 +21,6 @@ INFO(){
 	"$ECHO" -e "`_date` ${INFO_COLOUR}INFO $@$NORMAL_COLOUR" >&2
 }
 
-_date(){
-	date +"%F %T %Z"
-}
-
 DEBUG(){
 	[ -z "$DEBUG" -o x"$DEBUG" = x"false" ] && return 0
 
@@ -34,6 +34,19 @@ post_deploy_scripts(){
 
 	INFO "Running $subdir post deployment scripts"
 	find "$POST_DEPLOY_SCRIPTS_DIR/$subdir" -maxdepth 1 -mindepth 1 -exec /bin/sh "{}" \;
+}
+
+export_file_vars(){
+	local file="$1"
+	# env_prefix may be empty
+	local env_prefix="$2"
+
+	[ -n "$file" ] || FATAL 'No file provided'
+	[ -f "$file" ] || FATAL "$file does not exist"
+
+	for _var in `awk -F= '!/^#/{print $1}' "$file"`; do
+		eval `awk -v var="$_var" -v prefix="$env_prefix" 'BEGIN{ regex=sprintf("^%s=",var) }{ if($0 ~ regex) printf("export %s%s",prefix,$0) }' "$file"`
+	done
 }
 
 calculate_dns(){
@@ -283,106 +296,10 @@ show_duplicate_output_names(){
 	awk -F= '!/^#/{ a[$1]++ }END{ for(i in a){ if(a[i] > 1) printf("%s=%d\n",i,a[i])}}' "$outputs_dir"/outputs-*.sh
 }
 
-#_expand_ops_files(){
-#	local ops_files="$1"
-#
-#	awk '{ split($0,a,","); for(i in a) printf("--ops-file \"%s\" ",a[i])}' <<EOF
-#$@
-#EOF
-#}
-
-#bosh_lite(){
-#	local action_option="$1"
-#	local bosh_manifest="$2"
-#
-#	[ -z "$action_option" ] && FATAL 'No action provided'
-#	[ -z "$bosh_manifest" ] && FATAL 'No Bosh manifest provided'
-#	[ -f "$bosh_manifest" ] || FATAL "Unable to find: $bosh_manifest"
-#
-#	shift 2
-#
-#	# Urgh.... we pass through these vars to _bosh()
-#	[ -n "$PUBLIC_BOSH_LITE_OPS_FILES" ] && local public_ops_file_options="`_expand_ops_files $PUBLIC_BOSH_LITE_OPS_FILES`"
-#	[ -n "$PRIVATE_BOSH_LITE_OPS_FILES" ] && local private_ops_file_options="`_expand_ops_files $PRIVATE_BOSH_LITE_OPS_FILES`"
-#	[ -n "$VARIABLES_BOSH_LITE_OPS_FILES" ] && local variables_ops_file_options="`_expand_ops_files $VARIABLES_BOSH_LITE_OPS_FILES`"
-#
-#	_bosh "$action_option" "$bosh_manifest" "$@"
-#}
-
-#bosh_full(){
-#	local action_option="$1"
-#	local bosh_manifest="$2"
-#
-#	[ -z "$action_option" ] && FATAL 'No action provided'
-#	[ -z "$bosh_manifest" ] && FATAL 'No Bosh manifest provided'
-#	[ -f "$bosh_manifest" ] || FATAL "Unable to find: $bosh_manifest"
-#
-#	shift 2
-#
-#	# Urgh.... we pass through these vars to _bosh()
-#	[ -n "$PUBLIC_BOSH_FULL_OPS_FILES" ] && local public_ops_file_options="`_expand_ops_files $PUBLIC_BOSH_FULL_OPS_FILES`"
-#	[ -n "$PRIVATE_BOSH_FULL_OPS_FILES" ] && local private_ops_file_options="`_expand_ops_files $PRIVATE_BOSH_FULL_OPS_FILES`"
-#	[ -n "$VARIABLES_BOSH_FULL_OPS_FILES" ] && local variables_ops_file_options="`_expand_ops_files $VARIABLES_BOSH_FULL_OPS_FILES`"
-#
-#	_bosh "$action_option" "$bosh_manifest" "$@"
-#}
-
-#_bosh(){
-#	local action="$1"
-#	local bosh_manifest="$2"
-#	local vars_store="$3"
-#
-#	[ -z "$action_option" ] && FATAL 'No action provided'
-#	[ -z "$bosh_manifest" ] && FATAL 'No Bosh manifest provided'
-#	[ -n "$vars_store" ] && shift 3 || shift 2
-#
-#	if [ x"$action" = x'create-env' -o x"$action" = x'delete-env' ]; then
-#		local state_option="--state=$BOSH_LITE_STATE_FILE"
-#
-#	elif [ x"$action" != x'update-cloud-config' -a x"$action" != x'deploy' ]; then
-#		local action_vars_errs_option='--vars-errs'
-#
-#	fi
-#
-#	# We don't always want to process the ops file(s)
-#	[ 0"$NO_OPS_FILE" -eq 1 ] && unset private_ops_file_options public_ops_file_options variables_ops_file_options
-#
-#	# We don't always want to error out on missing vars
-#	[ 0$NO_VAR_ERRS -ne 1 ] && local int_vars_errs_option='--var-errs'
-#
-#	# 
-#	if [ x"$action" = x'interpolate' -o x"$action" = x'int' ] || [ -n "$DEBUG" -a x"$DEBUG" != x"false" ]; then
-#		[ 0$NO_YML -ne 1 ] && echo '---'
-#		"$BOSH_CLI" interpolate "$bosh_manifest" \
-#			$private_ops_file_options \
-#			$public_ops_file_options \
-#			$variables_ops_file_options \
-#			--no-color \
-#			$int_vars_errs_option \
-#			--vars-env=$ENV_PREFIX_NAME \
-#			--vars-store="$vars_store" \
-#			$@
-#
-#		[ x"$action" = x'interpolate' -o x"$action" = x'int' ] && return
-#	fi
-#
-#	INFO "Running 'bosh $action'"
-#	"$BOSH_CLI" "$action" "$bosh_manifest" \
-#		$BOSH_TTY_OPT \
-#		$private_ops_file_options \
-#		$public_ops_file_options \
-#		$action_vars_errs_option \
-#		$state_option \
-#		--vars-env=$ENV_PREFIX_NAME \
-#		--vars-store="$vars_store" \
-#		$@
-#}
-
 cf_app_url(){
 	local application="$1"
 
 	[ -z "$application" ] && FATAL 'No application provided'
-
 
 	# We blindly assume we are logged in and pointing at the right place
 	# Sometimes we seem to get urls, sometimes routes?
@@ -437,15 +354,6 @@ findpath(){
 	[ x"$return_var" != x"NONE" ] && eval $return_var="\"$real_dir\"" || echo "$real_dir"
 }
 
-prefix_vars(){
-	local parse_file="$1"
-	local env_prefix="$2"
-
-	[ -n "$parse_file" -a x"$parse_file" != x"-" -a ! -f "$parse_file" ] && FATAL "Unable to parse missing file: $parse_file"
-
-	# This should cope with both env_prefix and parse_file being empty
-	awk -v env_prefix="$env_prefix" '!/^#/{printf("%s%s\n",env_prefix,$0)}' "$parse_file"
-}
 
 generate_password(){
 	local length="${1:-16}"
@@ -476,29 +384,7 @@ load_outputs(){
 			continue
 		fi
 
-		eval export `prefix_vars "$outputs_dir/$_o" "$env_prefix"`
-	done
-}
-
-load_output_vars(){
-	local stack_outputs_dir="$1"
-	local env_prefix="$2"
-
-	local outputs_dir
-
-	[ -z "$3" ] && FATAL 'Not enough parameters'
-	[ -z "$stack_outputs_dir" ] && FATAL 'No stack outputs directory provided'
-
-	# Find the absolute path
-	findpath outputs_dir "$stack_outputs_dir"
-
-	[ -d "$outputs_dir" ] || FATAL "Stack outputs directory does not exist: '$outputs_dir'"
-
-	[ x"$env_prefix" = x"NONE" ] && unset env_prefix
-	shift 2
-
-	for _i in $@; do
-		eval `grep -hE "^$_i=" "$outputs_dir"/* | prefix_vars - "$env_prefix"`
+		export_file_vars "$outputs_dir/$_o" "$env_prefix"
 	done
 }
 

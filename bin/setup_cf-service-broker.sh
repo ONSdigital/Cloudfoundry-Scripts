@@ -22,8 +22,11 @@ SERVICE_URL="${5:-$SERVICE_URL}"
 
 installed_bin cf
 
-eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
-eval export `prefix_vars "$CF_CREDENTIALS"`
+INFO 'Loading Bosh director config'
+export_file_vars "$BOSH_DIRECTOR_CONFIG"
+
+INFO 'Loading CF credentials'
+. "$CF_CREDENTIALS"
 
 [ -z "$SERVICE_URL" ] && FATAL 'Not enough parameters'
 

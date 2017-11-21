@@ -4,7 +4,8 @@
 [ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"
 [ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh config does not exist: $BOSH_DIRECTOR_CONFIG"
 
-eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
+INFO 'Loading Bosh director config'
+export_file_vars "$BOSH_DIRECTOR_CONFIG"
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"

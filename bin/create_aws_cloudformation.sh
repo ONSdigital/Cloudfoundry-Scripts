@@ -167,8 +167,10 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 done
 
 if [ -n "$NEW_OUTPUTS" ]; then
+	INFO 'Loading AWS outputs'
+	load_outputs "$STACK_OUTPUTS_DIR"
+
 	INFO 'Configuring DNS settings'
-	load_output_vars "$STACK_OUTPUTS_DIR" NONE vpc_cidr
 	calculate_dns "$vpc_cidr" >"$STACK_OUTPUTS_DIR/outputs-dns.$STACK_OUTPUTS_SUFFIX"
 fi
 

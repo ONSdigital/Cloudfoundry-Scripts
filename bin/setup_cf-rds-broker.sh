@@ -20,12 +20,13 @@ CF_ORG="${4:-$organisation}"
 
 installed_bin cf
 
-eval export `prefix_vars "$BOSH_DIRECTOR_CONFIG"`
-eval export `prefix_vars "$PASSWORD_CONFIG_FILE"`
-eval export `prefix_vars "$CF_CREDENTIALS"`
-. "$BOSH_SSH_CONFIG"
+INFO 'Loading Bosh director config'
+export_file_vars "$BOSH_DIRECTOR_CONFIG"
 
-[ -f "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh" ] && eval export `prefix_vars "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh"`
+INFO 'Loading CF credentials'
+. "$CF_CREDENTIALS"
+
+[ -f "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh" ] && eval export `grep -Evi '^#' "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh"`
 
 # Convert from relative to an absolute path
 findpath BOSH_CA_CERT "$BOSH_CA_CERT"

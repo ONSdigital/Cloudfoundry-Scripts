@@ -12,8 +12,8 @@ BROKER_NAME="${2:-elasticache}"
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-eval export `prefix_vars "$PASSWORD_CONFIG_FILE"`
-eval export `prefix_vars "$CF_CREDENTIALS"`
+INFO 'Loading CF credentials'
+. "$CF_CREDENTIALS"
 
 installed_bin cf
 

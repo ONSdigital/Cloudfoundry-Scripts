@@ -17,8 +17,6 @@ DONT_SKIP_SSL_VALIDATION="$5"
 
 [ -z "$ORG_NAME" ] && ORG_NAME="$organisation"
 
-eval export `prefix_vars "$PASSWORD_CONFIG_FILE"`
-
 # We don't want any sub-scripts to login
 export NO_LOGIN=1
 
@@ -37,7 +35,8 @@ installed_bin cf
 [ -f "$CF_CREDENTIALS" ] || FATAL "Cannot find CF admin credentials: $CF_CREDENTIALS. Has an admin user been created"
 
 # Pull in newly generated credentials
-eval export `prefix_vars "$CF_CREDENTIALS"`
+INFO 'Loading CF credentials'
+. "$CF_CREDENTIALS"
 
 INFO "Setting API target as $api_dns"
 "$CF_CLI" api "$api_dns" "$CF_EXTRA_OPTS"

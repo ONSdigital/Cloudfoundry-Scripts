@@ -41,9 +41,9 @@ fi
 INFO 'Setting Bosh deployment name'
 export ${ENV_PREFIX}bosh_deployment="$DEPLOYMENT_NAME"
 INFO 'Loading Bosh SSH config'
-eval export `prefix_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"`
+export_file_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"
 INFO 'Loading Bosh network configuration'
-eval export `prefix_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"`
+export_file_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"
 
 # Do we want to use the existing versions of stemcells/releases?  Individual items can still be overridden if required
 # We default to using existing versions unless we have been told not to
@@ -78,14 +78,15 @@ fi
 if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 	INFO 'Removing existing Bosh bootstrap environment'
 	sh -c "'$BOSH_CLI' delete -env \
-		--tty \
-		$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
-		$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-		--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
-		--vars-env='$ENV_PREFIX_NAME' \
-		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-		--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
-		'$BOSH_LITE_MANIFEST_FILE'"
+			--tty \
+			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
+			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
+			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
+			--state='$BOSH_LITE_STATE_FILE' \
+			--vars-env='$ENV_PREFIX_NAME' \
+			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
+			--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
+			'$BOSH_LITE_MANIFEST_FILE'"
 
 	# ... and cleanup any state
 	rm -f "$BOSH_LITE_STATE_FILE"
@@ -96,48 +97,51 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 	if [ -n "$DEBUG" ]; then
 		INFO 'Interpolated Bosh lite manifest'
 		sh -c "'$BOSH_CLI' int \
+				--tty \
+				--var-errs \
+				$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
+				$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
+				--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
+				--vars-env='$ENV_PREFIX_NAME' \
+				--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
+				--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
+				'$BOSH_LITE_MANIFEST_FILE'"
+	fi
+
+	INFO 'Creating Bosh environment'
+	sh -c "'$BOSH_CLI' create-env \
 			--tty \
-			--var-errs \
+			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
+			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
+			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
+			--state='$BOSH_LITE_STATE_FILE' \
+			--vars-env='$ENV_PREFIX_NAME' \
+			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
+			--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
+			'$BOSH_LITE_MANIFEST_FILE'"
+
+
+	INFO 'Storing Bosh Director certificate'
+	sh -c "'$BOSH_CLI' interpolate \
+			--no-color \
 			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
 			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
 			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
 			--vars-env='$ENV_PREFIX_NAME' \
 			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
 			--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
-			'$BOSH_LITE_MANIFEST_FILE'"
-	fi
-
-	INFO 'Creating Bosh environment'
-	sh -c "'$BOSH_CLI' create-env \
-		--tty \
-		$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
-		$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-		--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
-		--vars-env='$ENV_PREFIX_NAME' \
-		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-		--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
-		'$BOSH_LITE_MANIFEST_FILE'"
-
-
-	INFO 'Storing Bosh Director certificate'
-	"$BOSH_CLI" interpolate \
-		--no-color \
-		--ops-file="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml" \
-		--vars-env=$ENV_PREFIX_NAME \
-		--vars-file=$BOSH_LITE_STATIC_IPS_YML\
-		--vars-store="$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml" \
-		--path='/metadata/director_ca' \
-		$BOSH_LITE_MANIFEST_FILE >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
+			--path='/metadata/director_ca' \
+			$BOSH_LITE_MANIFEST_FILE >'$DEPLOYMENT_DIR_RELATIVE/director.crt'"
 
 
 	INFO 'Storing Bosh Director password'
-	DIRECTOR_PASSWORD="`"$BOSH_CLI" interpolate \
+	BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate \
 		--no-color \
 		--ops-file="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml" \
 		--vars-env=$ENV_PREFIX_NAME \
 		--vars-file=$BOSH_LITE_STATIC_IPS_YML \
 		--vars-store="$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml" \
-		--path '/metadata/director_password' \
+		--path '/metadata/director_secret' \
 		"$BOSH_LITE_MANIFEST_FILE"`"
 
 	# Do not keep any state file if things fail
@@ -157,13 +161,13 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 	REUPLOAD_STEMCELL='true'
 fi
 
-if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ] || ! grep -Eq "^BOSH_CLIENT_SECRET='$DIRECTOR_PASSWORD'" "$BOSH_DIRECTOR_CONFIG"; then
+if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ] || ! grep -Eq "^BOSH_CLIENT_SECRET='$BOSH_CLIENT_SECRET'" "$BOSH_DIRECTOR_CONFIG"; then
 	INFO 'Generating Bosh configuration'
 	cat <<EOF >"$BOSH_DIRECTOR_CONFIG"
 # Bosh deployment config
 BOSH_ENVIRONMENT='$director_dns'
 BOSH_DEPLOYMENT='$DEPLOYMENT_NAME'
-BOSH_CLIENT_SECRET='$DIRECTOR_PASSWORD'
+BOSH_CLIENT_SECRET='$BOSH_CLIENT_SECRET'
 BOSH_CLIENT='director'
 BOSH_CA_CERT='$DEPLOYMENT_DIR_RELATIVE/director.crt'
 EOF
@@ -172,11 +176,11 @@ fi
 # ... more sanity checking
 [ -f "$BOSH_DIRECTOR_CONFIG" ] || FATAL "Bosh configuration file does not exist: '$BOSH_DIRECTOR_CONFIG'"
 
-INFO 'Loading Bosh config'
-. "$BOSH_DIRECTOR_CONFIG"
+INFO 'Loading Bosh director config'
+export_file_vars "$BOSH_DIRECTOR_CONFIG"
 
 # Convert from relative to an absolute path
-findpath BOSH_CA_CERT "$BOSH_CA_CERT"
+findpath BOSH_CA_CERT $BOSH_CA_CERT
 export BOSH_CA_CERT
 
 INFO 'Pointing Bosh client at newly deployed Bosh Director'
@@ -195,7 +199,7 @@ if [ ! -f "$FULL_STATIC_IPS_YML" -o "$REINTERPOLATE_FULL_STATIC_IPS" = x"true" ]
 fi
 
 INFO 'Setting CloudConfig'
-"$BOSH_CLI" update-cloud-config --tty "$BOSH_FULL_CLOUD_CONFIG_FILE"
+"$BOSH_CLI" update-cloud-config --tty --vars-env="$ENV_PREFIX_NAME" "$BOSH_FULL_CLOUD_CONFIG_FILE"
 
 # Set release versions
 #for component_version in `NO_YML=1 NO_VAR_ERRS=1 bosh_full interpolate "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
@@ -241,7 +245,7 @@ if [ x"$REUPLOAD_STEMCELL" = x"true" -a -n "$STEMCELL_URL" ]; then
 
 	UPLOAD_URL="$STEMCELL_URL$URL_EXTENSION"
 
-	INFO "Uploaded $UPLOAD_URL to Bosh"
+	INFO "Uploading $UPLOAD_URL to Bosh"
 	"$BOSH_CLI" upload-stemcell --tty "$UPLOAD_URL"
 
 elif [ x"$REUPLOAD_STEMCELL" = x"true" -a -z "$STEMCELL_URL" ]; then
@@ -301,8 +305,21 @@ fi
 if [ x"$RUN_DRY_RUN" = x'true' -o -n "$DEBUG" ]; then
 	INFO 'Checking Bosh deployment dry-run'
 	sh -c "'$BOSH_CLI' deploy \
+			--tty \
+			--dry-run \
+			$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
+			$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
+			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/full-variables.yml' \
+			--vars-env='$ENV_PREFIX_NAME' \
+			--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
+			--vars-store='$DEPLOYMENT_DIR_RELATIVE/full-var-store.yml' \
+			'$BOSH_FULL_MANIFEST_FILE'"
+fi
+
+# ... finally we get around to running the Bosh/CF deployment
+INFO 'Deploying Bosh'
+sh -c "'$BOSH_CLI' deploy \
 		--tty \
-		--dry-run \
 		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
 		--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/full-variables.yml' \
@@ -310,19 +327,6 @@ if [ x"$RUN_DRY_RUN" = x'true' -o -n "$DEBUG" ]; then
 		--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
 		--vars-store='$DEPLOYMENT_DIR_RELATIVE/full-var-store.yml' \
 		'$BOSH_FULL_MANIFEST_FILE'"
-fi
-
-# ... finally we get around to running the Bosh/CF deployment
-INFO 'Deploying Bosh'
-sh -c "'$BOSH_CLI' deploy \
-	--tty \
-	$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
-	$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
-	--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/full-variables.yml' \
-	--vars-env='$ENV_PREFIX_NAME' \
-	--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
-	--vars-store='$DEPLOYMENT_DIR_RELATIVE/full-var-store.yml' \
-	'$BOSH_FULL_MANIFEST_FILE'"
 
 # Do we need to run any errands (eg smoke tests, registrations)
 if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"true" -a -n "$POST_DEPLOY_ERRANDS" ]; then

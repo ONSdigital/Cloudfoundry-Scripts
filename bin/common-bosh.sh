@@ -31,7 +31,7 @@ VARIABLES_BOSH_LITE_OPS_FILENAMES="${VARIABLES_BOSH_LITE_OPS_FILENAMES:-lite-var
 
 [ -n "$DEPLOYMENT_NAME" ] || FATAL 'No Bosh deployment name provided'
 
-#
+INFO 'Loading AWS outputs'
 load_outputs "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
 
 # MultiAZ assumes HA
@@ -60,7 +60,7 @@ else
 fi
 
 #
-BOSH_LITE_STATE_FILE="$DEPLOYMENT_DIR_RELATIVE/$BOSH_LITE_MANIFEST_NAME-Lite-state.json"
+BOSH_LITE_STATE_FILE="$DEPLOYMENT_DIR_RELATIVE/$BOSH_LITE_MANIFEST_NAME-$CPI_TYPE-Lite-state.json"
 
 # Expand manifests dir to full path
 findpath MANIFESTS_DIR "$MANIFESTS_DIR_RELATIVE"
@@ -136,19 +136,19 @@ BOSH_FULL_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$BOSH_FUL
 # Check we have bosh installed
 installed_bin bosh
 
-SSL_DIR="$DEPLOYMENT_DIR/ssl"
-SSL_DIR_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssl"
-SSL_YML="$SSL_DIR/ssl_config.yml"
-SSL_YML_RELATIVE="$SSL_DIR_RELATIVE/ssl_config.yml"
+#SSL_DIR="$DEPLOYMENT_DIR/ssl"
+#SSL_DIR_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssl"
+#SSL_YML="$SSL_DIR/ssl_config.yml"
+#SSL_YML_RELATIVE="$SSL_DIR_RELATIVE/ssl_config.yml"
 
 INFO 'Setting additional variables'
 export ${ENV_PREFIX}internal_domain="$INTERNAL_DOMAIN"
 eval domain_name="\$${ENV_PREFIX}domain_name"
 eval director_dns="\$${ENV_PREFIX}director_dns"
 eval deployment_name="\$${ENV_PREFIX}deployment_name"
-INTERNAL_SSL_DIR="$SSL_DIR/$internal_domain"
-EXTERNAL_SSL_DIR="$SSL_DIR/$domain_name"
+#INTERNAL_SSL_DIR="$SSL_DIR/$internal_domain"
+#EXTERNAL_SSL_DIR="$SSL_DIR/$domain_name"
 # Used for Bosh CA cert
-EXTERNAL_SSL_DIR_RELATIVE="$SSL_DIR_RELATIVE/$domain_name"
+#EXTERNAL_SSL_DIR_RELATIVE="$SSL_DIR_RELATIVE/$domain_name"
 
 [ x"$deployment_name" = x"$DEPLOYMENT_NAME" ] || FATAL "Deployment names do not match: $deployment_name != $DEPLOYMENT_NAME"

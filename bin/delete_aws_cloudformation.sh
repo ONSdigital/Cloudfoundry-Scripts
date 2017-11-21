@@ -24,6 +24,7 @@ empty_bucket(){
 	fi
 }
 
+INFO 'Loading AWS outputs'
 load_outputs "$STACK_OUTPUTS_DIR"
 
 [ -n "$aws_region" ] && export AWS_DEFAULT_REGION="$aws_region"

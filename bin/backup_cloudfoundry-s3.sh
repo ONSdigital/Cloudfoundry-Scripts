@@ -26,6 +26,7 @@ done
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
 [ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"
 
+INFO 'Loading AWS outputs'
 load_outputs "$STACK_OUTPUTS_DIR"
 
 [ -n "$aws_region" ] && export AWS_DEFAULT_REGION="$aws_region"
