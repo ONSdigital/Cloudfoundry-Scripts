@@ -335,15 +335,21 @@ findpath(){
 
 	local real_dir=
 
-	if which realpath >/dev/null 2>&1; then
+	if [ s"$_findpath" = x'realpath' ] || which realpath >/dev/null 2>&1; then
 		# Newer Linux distributions have realpath
 		real_dir="`realpath \"$path\"`"
 
-	elif readlink --version 2>&1 | grep -q 'GNU GPL'; then
+		_findpath='realpath'
+
+	elif [ s"$_findpath" = x'reallink' ] || readlink --version 2>&1 | grep -q 'GNU GPL'; then
 		# Older ones should have readlink -k
 		real_dir="`readlink -f \"$path\"`"
+
+		
+		_findpath='reallink'
 	fi
 
+	# If we fail to find real_dir, or we lack realpath/readlink, we'll run this as a last resort
 	if [ -z "$real_dir" ]; then
 		# Everything else falls here
 		[ -d "$path" ] || path="`dirname \"$path\"`"
