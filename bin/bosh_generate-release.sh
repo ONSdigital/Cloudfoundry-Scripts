@@ -36,4 +36,4 @@ fi
 
 "$BOSH_CLI" create-release --force
 
-"$BOSH_CLI" upload-release --rebase
+[ x"$NO_RELEASE_UPLOAD" = x"true" ] || "$BOSH_CLI" upload-release --rebase
