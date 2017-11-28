@@ -93,6 +93,14 @@ if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 	rm -f "$BOSH_LITE_STATE_FILE"
 fi
 
+# Allow running of a custom script that can do other things (eg create a local release)
+if [ x"$RUN_PREDEPLOY" = x"true" -a x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
+	[ -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] || chmod +x "$TOP_LEVEL_DIR/pre_deploy.sh"
+
+	"$TOP_LEVEL_DIR/pre_deploy.sh"
+fi
+
+
 # Do we need to (re)generate a new Bosh bootstrap environment?
 if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 	if [ -n "$DEBUG" ]; then
@@ -250,13 +258,6 @@ if [ x"$REUPLOAD_STEMCELL" = x"true" -a -n "$STEMCELL_URL" ]; then
 elif [ x"$REUPLOAD_STEMCELL" = x"true" -a -z "$STEMCELL_URL" ]; then
 	FATAL 'No STEMCELL_URL provided, unable to upload a stemcell'
 
-fi
-
-# Allow running of a custom script that can do other things (eg upload a local release)
-if [ x"$RUN_PREDEPLOY" = x"true" -a x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
-	[ -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] || chmod +x "$TOP_LEVEL_DIR/pre_deploy.sh"
-
-	"$TOP_LEVEL_DIR/pre_deploy.sh"
 fi
 
 if [ x"$RUN_BOSH_PREAMBLE" = x"true" ] || [ ! -f "$BOSH_PREAMBLE_MANIFEST_INT_YML" -a ! -f "$BOSH_FULL_MANIFEST_INT_YML" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then

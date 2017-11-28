@@ -8,23 +8,22 @@ set -e
 BASE_DIR="`dirname \"$0\"`"
 
 DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
-RELEASE_DIR="${2:-$RELEASE_DIR}"
+RELEASE_NAME="${2:-$RELEASE_NAME}"
 
 RELEASE_BLOB_DESTINATION="${RELEASE_BLOB_DESTINATION:-blobs}"
 
 . "$BASE_DIR/common.sh"
-. "$BASE_DIR/common-bosh-login.sh"
 
-[ -z "$RELEASE_DIR" ] && FATAL 'No release dir provided'
-[ -d "$RELEASE_DIR" ] || FATAL "Bosh release directory does not exist: $RELEASE_DIR"
+[ -z "$RELEASE_NAME" ] && FATAL 'No release name provided'
+[ -d "$RELEASE_NAME" ] || FATAL "Bosh release directory does not exist: $RELEASE_NAME"
 
-cd "$RELEASE_DIR"
+cd "$RELEASE_NAME"
 
 # Ensure required dirs & files exist
 [ -d "config" ] || mkdir config
 [ -f config/blobs.yml ] || touch config/blobs.yml
 
-if [ -n "$3" ]; then
+if [ -n "$2" ]; then
 	shift 2
 
 	for _s in $@; do
@@ -34,6 +33,4 @@ if [ -n "$3" ]; then
 	done
 fi
 
-"$BOSH_CLI" create-release --force
-
-[ x"$NO_RELEASE_UPLOAD" = x"true" ] || "$BOSH_CLI" upload-release --rebase
+"$BOSH_CLI" create-release --force --tarball "$RELEASE_NAME.tgz"
