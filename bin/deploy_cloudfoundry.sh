@@ -93,8 +93,8 @@ if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 	rm -f "$BOSH_LITE_STATE_FILE"
 fi
 
-# Allow running of a custom script that can do other things (eg create a local release)
-if [ x"$RUN_PREDEPLOY" = x"true" -a x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
+# Allow running of a custom script that can do other things (eg create a local release) - it'd be nice if this could be made more intelligent
+if [ x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
 	[ -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] || chmod +x "$TOP_LEVEL_DIR/pre_deploy.sh"
 
 	"$TOP_LEVEL_DIR/pre_deploy.sh"
@@ -160,9 +160,6 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
 
 		FATAL 'Bosh lite deployment failed'
 	fi
-
-	# We may need to run the pre-deploy script
-	RUN_PREDEPLOY='true'
 
 	# (Re)upload the stemcell
 	REUPLOAD_STEMCELL='true'
@@ -260,7 +257,7 @@ elif [ x"$REUPLOAD_STEMCELL" = x"true" -a -z "$STEMCELL_URL" ]; then
 
 fi
 
-if [ x"$RUN_BOSH_PREAMBLE" = x"true" ] || [ ! -f "$BOSH_PREAMBLE_MANIFEST_INT_YML" -a ! -f "$BOSH_FULL_MANIFEST_INT_YML" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then
+if [ x"$RUN_BOSH_PREAMBLE" = x"true" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then
 	if [ x"$RUN_DRY_RUN" = x"true" -o -n "$DEBUG" ]; then
 		INFO 'Checking Bosh preamble dry-run'
 		"$BOSH_CLI" deploy \
