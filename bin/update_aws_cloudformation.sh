@@ -158,6 +158,8 @@ for _action in validate update; do
 		STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
 
 		if [ x"$_action" = x"update" ]; then
+			check_existing_parameters "$CLOUDFORMATION_DIR/$_file"
+
 			if [ -f "$STACK_PARAMETERS" ]; then
 				INFO "Updating $STACK_NAME parameters"
 				update_parameters_file "$CLOUDFORMATION_DIR/$_file" "$STACK_PARAMETERS"

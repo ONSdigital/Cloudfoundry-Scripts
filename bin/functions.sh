@@ -139,6 +139,64 @@ find_aws_parameters(){
 		'{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); if($1 ~ search_regex) print $1 } }' "$stack_json"
 }
 
+# Quite badly named as if does more than check existing parameters
+check_existing_parameters(){
+	local stack_json="$1"
+
+	[ -n "$stack_json" ] || FATAL 'No Cloudformation stack JSON file provided'
+	[ -f "$stack_json" ] || FATAL "Cloudformation stack JSON file does not exist: '$stack_json'"
+
+	# Retain existing parameters
+	for upper_varname in `find_aws_parameters "$stack_json" '^[A-Za-z0-9]+$' | capitalise_aws`; do
+		# eg rds_cf_instance_password
+		lower_varname="`echo $upper_var_name | tr '[[:upper:]]' '[[:lower:]]'`"
+
+		# Check if this is a password
+		if echo "$lower_varname" | grep -Eq '_password$'; then
+			password=1
+
+			grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE" && password_exists=1
+
+			# Create a header for our password file
+			[ -f "$AWS_PASSWORD_CONFIG_FILE" ] || echo '# AWS Passwords' >"$AWS_PASSWORD_CONFIG_FILE"
+
+		# ... or a MultAZ setting
+		elif [ x"$lower_varname" = x'multi_az' ]; then
+			azs=1
+		fi
+
+		if [ 0$password -eq 1 ] && [ x"$IGNORE_EXISTING_PASSWORDS" = x'true' ]; then
+			reset_password=1
+
+		elif [ x"$lower_varname" = x'multi_az' ] && [ x"$IGNORE_EXISTING_MULTIAZ_CONFIG" = x"false" ]; then
+			reset_azs=1
+
+		fi
+
+		# If we don't have an existing password, or we've been told to reset the password
+		if [ 0$password_exists -eq 0 -o 0$reset_password -eq 1 ]; then
+			# eg RDS_CF_INSTANCE_PASSWORD
+			new_password="`generate_password 32`"
+
+			eval "$upper_varname"="\$$new_password"
+
+		# If we've not been asked to reset the parameter we retain if for feeding into the AWS parameters file later on
+		elif [ 0$password -eq 1 ] || [ 0$reset_azs -eq 0 ] || [ x"$IGNORE_EXISTING_PARAMETERS" = x"false" ]; then
+			eval "$upper_varname"="\$$lower_varname"
+
+		fi
+
+		if [ -n "$new_password" -a 0$password_exists -eq 1 ]; then
+			sed $SED_EXTENDED -e "s/^($lower_varname)=.*/\1='$new_password'/g" "$AWS_PASSWORD_CONFIG_FILE"
+
+		elif [ -n "$new_password" ]; then
+			echo "$upper_varname='$new_password'" >>"$AWS_PASSWORD_CONFIG_FILE"
+		fi
+
+		unset azs reset_azs password reset_passwords new_password
+	done
+}
+
 generate_parameters_file(){
 	local stack_json="$1"
 
@@ -163,11 +221,13 @@ EOF
 }
 
 capitalise_aws(){
+	# Turn FooBarBaz -> FOO_BAR_BAZ
 	perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'
 }
 
 # decapitalise/uncapitalise doesn't sound 100% correct as it sounds as if they would revert back to original case
 lowercase_aws(){
+	# Turn FooBarBaz -> foo_bar_baz
 	perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print lc($_)'
 }
 

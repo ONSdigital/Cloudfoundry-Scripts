@@ -35,6 +35,9 @@ cd - >/dev/null
 if [ ! -d "$STACK_OUTPUTS_DIR" ]; then
 	INFO "Creating directory to hold stack outputs"
 	mkdir -p "$STACK_OUTPUTS_DIR"
+elif [ x"$IGNORE_EXISTING_AWS_CONFIG" != x"true" ]; then
+	INFO 'Loading AWS outputs'
+	load_outputs "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
 fi
 
 if [ ! -d "$STACK_PARAMETERS_DIR" ]; then
@@ -114,26 +117,7 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 		STACK_EXISTS=1
 	fi
 
-	[ -f "$AWS_PASSWORD_CONFIG_FILE" ] || echo '# AWS Passwords' >"$AWS_PASSWORD_CONFIG_FILE"
-	for i in `find_aws_parameters "$CLOUDFORMATION_DIR/$stack_file" '^[A-Za-z]+Password$' | capitalise_aws`; do
-		# eg rds_cf_instance_password
-		lower_varname="`echo $i | tr '[[:upper:]]' '[[:lower:]]'`"
-
-		if grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"; then
-			eval `grep -E "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE"`
-
-			eval "$i"="\$$lower_varname"
-
-			continue
-		fi
-
-		# eg RDS_CF_INSTANCE_PASSWORD
-		password="`generate_password 32`"
-
-		eval "$i='$password'"
-
-		echo "$lower_varname='$password'"
-	done >>"$AWS_PASSWORD_CONFIG_FILE"
+	check_existing_parameters "$CLOUDFORMATION_DIR/$stack_file"
 
 	# Always renegerate the parameters file
 	if [ -z "$STACK_EXISTS" -o ! -f "$STACK_PARAMETERS" ]; then
