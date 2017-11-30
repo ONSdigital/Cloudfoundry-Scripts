@@ -174,7 +174,7 @@ done
 
 if [ -n "$NEW_OUTPUTS" ]; then
 	INFO 'Configuring DNS settings'
-	load_output_vars "$STACK_OUTPUTS_DIR" NONE vpc_cidr
+	load_outputs "$STACK_OUTPUTS_DIR"
 	calculate_dns "$vpc_cidr" >"$STACK_OUTPUTS_DIR/outputs-dns.$STACK_OUTPUTS_SUFFIX"
 fi
 
