@@ -122,9 +122,9 @@ cd "$CLOUDFORMATION_DIR" >/dev/null
 validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES $STACK_TEMPLATES_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT
 cd - >/dev/null
 
-# We need to suck in the region from the existing outputs.sh
 INFO 'Loading AWS outputs'
 load_outputs "$STACK_OUTPUTS_DIR"
+
 if [ -n "$aws_region" ]; then
 	INFO "Checking if we need to update AWS region to $aws_region"
 	export AWS_DEFAULT_REGION="$aws_region"

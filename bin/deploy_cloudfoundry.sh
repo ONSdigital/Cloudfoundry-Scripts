@@ -101,69 +101,75 @@ if [ x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
 fi
 
 
-# Do we need to (re)generate a new Bosh bootstrap environment?
-if [ ! -f "$BOSH_LITE_STATE_FILE" -o x"$REGENERATE_BOSH_ENV" = x"true" ]; then
-	if [ -n "$DEBUG" ]; then
-		INFO 'Interpolated Bosh lite manifest'
-		sh -c "'$BOSH_CLI' interpolate \
-				--tty \
-				--var-errs \
-				$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
-				$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-				--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
-				--vars-env='$ENV_PREFIX_NAME' \
-				--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-				--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
-				'$BOSH_LITE_MANIFEST_FILE'"
-	fi
-
-	INFO 'Creating Bosh environment'
-	sh -c "'$BOSH_CLI' create-env \
+if [ -n "$DEBUG" ]; then
+	INFO 'Interpolated Bosh lite manifest'
+	sh -c "'$BOSH_CLI' interpolate \
 			--tty \
-			 --non-interactive \
+			--var-errs \
 			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
 			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
 			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
-			--state='$BOSH_LITE_STATE_FILE' \
 			--vars-env='$ENV_PREFIX_NAME' \
 			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
 			--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
 			'$BOSH_LITE_MANIFEST_FILE'"
+fi
 
-
-	INFO 'Storing Bosh Director certificate'
-	sh -c "'$BOSH_CLI' interpolate \
-			--no-color \
-			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
-			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
-			--vars-env='$ENV_PREFIX_NAME' \
-			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-			--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
-			--path='/metadata/director_ca' \
-			$BOSH_LITE_MANIFEST_FILE" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
-
-
-	INFO 'Storing Bosh Director password'
-	BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate \
-		--no-color \
-		--ops-file="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml" \
-		--vars-env=$ENV_PREFIX_NAME \
-		--vars-file=$BOSH_LITE_STATIC_IPS_YML \
-		--vars-store="$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml" \
-		--path '/metadata/director_secret' \
-		"$BOSH_LITE_MANIFEST_FILE"`"
-
-	# Do not keep any state file if things fail
-	if [ 0$? -ne 0 ]; then
-		[ -n "$KEEP_BOSH_STATE" ] || rm -f "$BOSH_LITE_STATE_FILE"
-
-		FATAL 'Bosh lite deployment failed'
-	fi
+if [ ! -f "$BOSH_LITE_STATE_FILE" ]; then
+	CREATE_ACTION='Creating'
+	STORE_ACTION='Storing'
 
 	# (Re)upload the stemcell
 	REUPLOAD_STEMCELL='true'
+else
+	CREATE_ACTION='Updating'
+	STORE_ACTION='Potentially updating'
 fi
+
+INFO "$CREATE_ACTION Bosh environment"
+sh -c "'$BOSH_CLI' create-env \
+		--tty \
+		--non-interactive \
+		$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
+		$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
+		--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
+		--state='$BOSH_LITE_STATE_FILE' \
+		--vars-env='$ENV_PREFIX_NAME' \
+		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
+		--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
+		'$BOSH_LITE_MANIFEST_FILE'"
+
+
+INFO "$STORE_ACTION Bosh Director certificate"
+sh -c "'$BOSH_CLI' interpolate \
+		--no-color \
+		$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
+		$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
+		--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
+		--vars-env='$ENV_PREFIX_NAME' \
+		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
+		--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
+		--path='/metadata/director_ca' \
+		$BOSH_LITE_MANIFEST_FILE" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
+
+
+INFO "$UPDATE_ACTION Bosh Director password"
+BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate \
+	--no-color \
+	--ops-file="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml" \
+	--vars-env=$ENV_PREFIX_NAME \
+	--vars-file=$BOSH_LITE_STATIC_IPS_YML \
+	--vars-store="$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml" \
+	--path '/metadata/director_secret' \
+	"$BOSH_LITE_MANIFEST_FILE"`" || rc=$?
+
+# Do not keep any state file if things fail
+if [ 0$rc -ne 0 ]; then
+	[ -n "$KEEP_BOSH_STATE" ] || rm -f "$BOSH_LITE_STATE_FILE"
+
+	FATAL 'Bosh lite deployment failed'
+fi
+
 
 if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ] || ! grep -Eq "^BOSH_CLIENT_SECRET='$BOSH_CLIENT_SECRET'" "$BOSH_DIRECTOR_CONFIG"; then
 	INFO 'Generating Bosh configuration'
