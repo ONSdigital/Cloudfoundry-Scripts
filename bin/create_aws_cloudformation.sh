@@ -37,7 +37,7 @@ if [ ! -d "$STACK_OUTPUTS_DIR" ]; then
 	mkdir -p "$STACK_OUTPUTS_DIR"
 elif [ x"$IGNORE_EXISTING_AWS_CONFIG" != x"true" ]; then
 	INFO 'Loading AWS outputs'
-	load_outputs "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
+	load_outputs "$STACK_OUTPUTS_DIR"
 fi
 
 if [ ! -d "$STACK_PARAMETERS_DIR" ]; then
