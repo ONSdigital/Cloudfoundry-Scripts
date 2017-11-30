@@ -149,7 +149,7 @@ check_existing_parameters(){
 	# Retain existing parameters
 	for upper_varname in `find_aws_parameters "$stack_json" '^[A-Za-z0-9]+$' | capitalise_aws`; do
 		# eg rds_cf_instance_password
-		lower_varname="`echo $upper_var_name | tr '[[:upper:]]' '[[:lower:]]'`"
+		lower_varname="`echo $upper_varname | tr '[[:upper:]]' '[[:lower:]]'`"
 
 		# Check if this is a password
 		if echo "$lower_varname" | grep -Eq '_password$'; then
@@ -174,7 +174,7 @@ check_existing_parameters(){
 		fi
 
 		# If we don't have an existing password, or we've been told to reset the password
-		if [ 0$password_exists -eq 0 -o 0$reset_password -eq 1 ]; then
+		if [ 0$password -eq 1 -a 0$password_exists -eq 0 -o 0$reset_password -eq 1 ]; then
 			# eg RDS_CF_INSTANCE_PASSWORD
 			new_password="`generate_password 32`"
 
@@ -182,7 +182,11 @@ check_existing_parameters(){
 
 		# If we've not been asked to reset the parameter we retain if for feeding into the AWS parameters file later on
 		elif [ 0$password -eq 1 ] || [ 0$reset_azs -eq 0 ] || [ x"$IGNORE_EXISTING_PARAMETERS" = x"false" ]; then
-			eval "$upper_varname"="\$$lower_varname"
+			# Check if we already have a value
+			value="\$$lower_varname"
+
+			# Only update if we have a value to update to
+			[ -n "$value" ] && eval "$upper_varname"="\$$lower_varname"
 
 		fi
 
