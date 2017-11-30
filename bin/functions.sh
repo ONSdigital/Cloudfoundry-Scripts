@@ -168,7 +168,7 @@ check_existing_parameters(){
 		if [ 0$password -eq 1 ] && [ x"$IGNORE_EXISTING_PASSWORDS" = x'true' ]; then
 			reset_password=1
 
-		elif [ x"$lower_varname" = x'multi_az' ] && [ x"$IGNORE_EXISTING_MULTIAZ_CONFIG" = x"false" ]; then
+		elif [ x"$lower_varname" = x'multi_az' ] && [ x"$IGNORE_EXISTING_MULTIAZ_CONFIG" = x"true" ]; then
 			reset_azs=1
 
 		fi
