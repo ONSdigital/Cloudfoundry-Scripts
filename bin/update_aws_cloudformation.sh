@@ -160,7 +160,7 @@ for _action in validate update; do
 			check_existing_parameters "$CLOUDFORMATION_DIR/$_file"
 
 			if [ -f "$STACK_PARAMETERS" ]; then
-				INFO "Updating $STACK_NAME parameters"
+				INFO "Checking if we need to update $STACK_NAME parameters"
 				update_parameters_file "$CLOUDFORMATION_DIR/$_file" "$STACK_PARAMETERS"
 			else
                 		INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
