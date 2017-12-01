@@ -263,48 +263,48 @@ elif [ x"$REUPLOAD_STEMCELL" = x"true" -a -z "$STEMCELL_URL" ]; then
 
 fi
 
-if [ x"$RUN_BOSH_PREAMBLE" = x"true" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then
-	if [ x"$RUN_DRY_RUN" = x"true" -o -n "$DEBUG" ]; then
-		INFO 'Checking Bosh preamble dry-run'
-		"$BOSH_CLI" deploy \
-			--non-interactive \
-			--dry-run \
-			--tty \
-			--vars-env="$ENV_PREFIX_NAME" \
-			"$BOSH_PREAMBLE_MANIFEST_FILE"
-	fi
-
-	INFO 'Deploying Bosh preamble'
-	"$BOSH_CLI" deploy \
-		--non-interactive \
-		--tty \
-		--vars-env="$ENV_PREFIX_NAME" \
-		"$BOSH_PREAMBLE_MANIFEST_FILE"
-
-	# For some reason Bosh lists the errands in the preamble manifest and an additional one that has the same name
-	# as the release we install on the errand VMs (2017/09/07)
-	for _e in `"$BOSH_CLI" errands`; do
-		# TEMPORARY until the output of 'bosh errands' is fixed and only prints a list of errands
-		if ! awk -v errand="$_e" 'BEGIN{ rc=1 }/^- name:/{if($NF == errand) rc=0 }END{ exit rc }' "$BOSH_PREAMBLE_MANIFEST_FILE"; then
-			WARN "Ignoring non-existant errand: $_e"
-
-			ignored=1
-
-			continue
-		fi
-		# TEMPORARY
-
-		INFO "Running errand: $_e"
-		"$BOSH_CLI" run-errand --tty "$_e"
-	done
-
-	# TEMPORARY report when workaround is no longer required
-	[ -z "$ignored" ] && FATAL 'Working around additional errand is no longer required, please remove the sections between TEMPORARY & TEMPORARY'
-	# TEMPORARY
-
-	INFO 'Deleting Bosh premable deployment'
-	"$BOSH_CLI" delete-deployment --force --tty --non-interactive
-fi
+#if [ x"$RUN_BOSH_PREAMBLE" = x"true" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then
+#	if [ x"$RUN_DRY_RUN" = x"true" -o -n "$DEBUG" ]; then
+#		INFO 'Checking Bosh preamble dry-run'
+#		"$BOSH_CLI" deploy \
+#			--non-interactive \
+#			--dry-run \
+#			--tty \
+#			--vars-env="$ENV_PREFIX_NAME" \
+#			"$BOSH_PREAMBLE_MANIFEST_FILE"
+#	fi
+#
+#	INFO 'Deploying Bosh preamble'
+#	"$BOSH_CLI" deploy \
+#		--non-interactive \
+#		--tty \
+#		--vars-env="$ENV_PREFIX_NAME" \
+#		"$BOSH_PREAMBLE_MANIFEST_FILE"
+#
+#	# For some reason Bosh lists the errands in the preamble manifest and an additional one that has the same name
+#	# as the release we install on the errand VMs (2017/09/07)
+#	for _e in `"$BOSH_CLI" errands`; do
+#		# TEMPORARY until the output of 'bosh errands' is fixed and only prints a list of errands
+#		if ! awk -v errand="$_e" 'BEGIN{ rc=1 }/^- name:/{if($NF == errand) rc=0 }END{ exit rc }' "$BOSH_PREAMBLE_MANIFEST_FILE"; then
+#			WARN "Ignoring non-existant errand: $_e"
+#
+#			ignored=1
+#
+#			continue
+#		fi
+#		# TEMPORARY
+#
+#		INFO "Running errand: $_e"
+#		"$BOSH_CLI" run-errand --tty "$_e"
+#	done
+#
+#	# TEMPORARY report when workaround is no longer required
+#	[ -z "$ignored" ] && FATAL 'Working around additional errand is no longer required, please remove the sections between TEMPORARY & TEMPORARY'
+#	# TEMPORARY
+#
+#	INFO 'Deleting Bosh premable deployment'
+#	"$BOSH_CLI" delete-deployment --force --tty --non-interactive
+#fi
 
 # This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'
 if [ x"$RUN_DRY_RUN" = x'true' -o -n "$DEBUG" ]; then
