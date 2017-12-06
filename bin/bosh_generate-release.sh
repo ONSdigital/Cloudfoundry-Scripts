@@ -29,8 +29,10 @@ if [ -n "$2" ]; then
 	for _s in $@; do
 		filename="`basename "$_s"`"
 
+		INFO "Adding Blob: $_s"
 		"$BOSH_CLI" add-blob "$_s" "$RELEASE_BLOB_DESTINATION/$filename"
 	done
 fi
 
+INFO "Creating release: $RELEASE_NAME"
 "$BOSH_CLI" create-release --force --tarball "$RELEASE_NAME.tgz"

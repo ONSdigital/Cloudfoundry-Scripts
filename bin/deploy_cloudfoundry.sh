@@ -97,6 +97,7 @@ fi
 if [ x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
 	[ -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] || chmod +x "$TOP_LEVEL_DIR/pre_deploy.sh"
 
+	INFO 'Running pre_deploy.sh script'
 	"$TOP_LEVEL_DIR/pre_deploy.sh"
 fi
 
