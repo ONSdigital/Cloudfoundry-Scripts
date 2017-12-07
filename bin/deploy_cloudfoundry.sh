@@ -85,7 +85,6 @@ if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 			--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 			--state='$BOSH_LITE_STATE_FILE' \
 			--vars-env='$ENV_PREFIX_NAME' \
-			--vars-file='$BOSH_COMMON_RELEASE_URLS' \
 			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
 			--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 			'$BOSH_LITE_MANIFEST_FILE'"
@@ -97,23 +96,21 @@ fi
 if [ x"$NO_CREATE_RELEASES" != x'true' ]; then
 	INFO 'Creating releases'
 
-	[ -f "$BOSH_COMMON_RELEASE_URLS" ] || echo --- >"$BOSH_COMMON_RELEASE_URLS"
-
 	for _r in `ls releases`; do
-		release_varname="`echo "$_r" | tr -- '-' '_'`"
+		release_name="`echo $_r | sed $SED_EXTENDED -e 's/-release$//g'`"
+		release_varname="`echo $release_name | sed $SED_EXTENDED -e 's/-/_/g'`"
 		release_url_value="file://$TOP_LEVEL_DIR/releases/$_r/$_r.tgz"
 		release_url_varname="${release_varname}_url"
+		release_version_varname="${release_varname}_version"
 
 		INFO "Creating release $_r"
 		"$BASE_DIR/bosh-create_release.sh" "$_r" "releases/$_r"
 
-		if grep -Eq "^$release_url_varname: \"$release_url_value\"$" "$BOSH_COMMON_RELEASE_URLS"; then
-			INFO "Updating local $_r url"
-			sed -i $SED_EXTENDED -e "s|^($release_url_varname): .*$|\1: \"$release_url_value\"|g" "$BOSH_COMMON_RELEASE_URLS"
-		else
-			INFO "Adding local $_r url"
-			echo "$release_url_varname: \"$release_url_value\"" >>"$BOSH_COMMON_RELEASE_URLS"
-		fi
+		# We only use the file:// URL for the create-env Bosh. Once that is up, we upload the release - if we try to use a file:// URL Bosh
+		# complains if the version number isn't different and fails
+		update_yml_var "$BOSH_LITE_RELEASES" "$release_url_varname" "$release_url_value"
+
+		REUPLOAD_RELEASES='true'
 	done
 fi
 
@@ -126,8 +123,8 @@ if [ x"$DEBUG" = x'true' ]; then
 			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
 			--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 			--vars-env='$ENV_PREFIX_NAME' \
-			--vars-file='$BOSH_COMMON_RELEASE_URLS' \
 			--vars-file='$BOSH_COMMON_VARIABLES' \
+			--vars-file='$BOSH_LITE_RELEASES' \
 			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
 			--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 			'$BOSH_LITE_MANIFEST_FILE'"
@@ -160,8 +157,8 @@ sh -c "'$BOSH_CLI' create-env \
 		--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 		--state='$BOSH_LITE_STATE_FILE' \
 		--vars-env='$ENV_PREFIX_NAME' \
-		--vars-file='$BOSH_COMMON_RELEASE_URLS' \
 		--vars-file='$BOSH_COMMON_VARIABLES' \
+		--vars-file='$BOSH_LITE_RELEASES' \
 		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
 		--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 		'$BOSH_LITE_MANIFEST_FILE'"
@@ -174,8 +171,8 @@ sh -c "'$BOSH_CLI' interpolate \
 		$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
 		--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 		--vars-env='$ENV_PREFIX_NAME' \
-		--vars-file='$BOSH_COMMON_RELEASE_URLS' \
 		--vars-file='$BOSH_COMMON_VARIABLES' \
+		--vars-file='$BOSH_LITE_RELEASES' \
 		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
 		--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 		--path='/metadata/director_ca' \
@@ -188,7 +185,7 @@ BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate \
 	--ops-file="$BOSH_FULL_VARIABLES_OPS_FILE" \
 	--vars-env="$ENV_PREFIX_NAME" \
 	--vars-file="$BOSH_COMMON_VARIABLES" \
-	--vars-file="$BOSH_COMMON_RELEASE_URLS" \
+	--vars-file='$BOSH_LITE_RELEASES' \
 	--vars-file="$BOSH_LITE_STATIC_IPS_YML" \
 	--vars-store="$BOSH_LITE_VARIABLES_STORE" \
 	--path '/metadata/director_secret' \
@@ -243,7 +240,18 @@ INFO 'Setting CloudConfig'
 "$BOSH_CLI" update-cloud-config --tty --vars-env="$ENV_PREFIX_NAME" "$BOSH_FULL_CLOUD_CONFIG_FILE"
 
 # Set release versions
-for component_version in `"$BOSH_CLI" interpolate $BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS $BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
+for component_version in `sh -c "'$BOSH_CLI' interpolate \
+		--tty \
+		--non-interactive \
+		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
+		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
+		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
+		--vars-env='$ENV_PREFIX_NAME' \
+		--vars-file='$BOSH_COMMON_VARIABLES' \
+		--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
+		--vars-store='$BOSH_FULL_VARIABLES_STORE' \
+		'$BOSH_FULL_MANIFEST_FILE'" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
+
 	upper="`echo "$component_version" | tr '[[:lower:]]' '[[:upper:]]'`"
 
 	# eg CF_RELEASE=277
@@ -258,7 +266,7 @@ for component_version in `"$BOSH_CLI" interpolate $BOSH_FULL_PUBLIC_OPS_FILE_OPT
 		INFO "Overriding ${lower_value:-latest} version and using $upper_value for $component_version"
 		version="$upper_value"
 
-	elif [ -n "$lower_value" ]; then
+	elif [ x"$USE_EXISTING_VERSIONS" = x"true" -a -n "$lower_value" ]; then
 		INFO "Using previous version of $lower_value for $component_version"
 		version="$lower_value"
 
@@ -280,7 +288,7 @@ for component_version in `"$BOSH_CLI" interpolate $BOSH_FULL_PUBLIC_OPS_FILE_OPT
 done
 
 # Unfortunately, there is no way currently (2017/10/19) for Bosh/Director to automatically upload a stemcell in the same way it does for releases
-if [ x"$REUPLOAD_STEMCELL" = x"true" -a -n "$STEMCELL_URL" ]; then
+if [ x"$REUPLOAD_STEMCELL" = x'true' -a -n "$STEMCELL_URL" ]; then
 	[ -n "$BOSH_STEMCELL_VERSION" ] && URL_EXTENSION="?v=$BOSH_STEMCELL_VERSION"
 
 	UPLOAD_URL="$STEMCELL_URL$URL_EXTENSION"
@@ -291,6 +299,13 @@ if [ x"$REUPLOAD_STEMCELL" = x"true" -a -n "$STEMCELL_URL" ]; then
 elif [ x"$REUPLOAD_STEMCELL" = x"true" -a -z "$STEMCELL_URL" ]; then
 	FATAL 'No STEMCELL_URL provided, unable to upload a stemcell'
 
+fi
+
+if [ x"$REUPLOAD_RELEASES" = x'true' ]; then
+	for _r in `ls releases`; do
+		INFO "Uploading release $_r"
+		"$BOSH_CLI" upload-release --tty "releases/$_r/$_r.tgz"
+	done
 fi
 
 # This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'
@@ -305,7 +320,6 @@ if [ x"$RUN_DRY_RUN" = x'true' -o x"$DEBUG" = x'true' ]; then
 			--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
 			--vars-env='$ENV_PREFIX_NAME' \
 			--vars-file='$BOSH_COMMON_VARIABLES' \
-			--vars-file='$BOSH_COMMON_RELEASE_URLS' \
 			--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
 			--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 			'$BOSH_FULL_MANIFEST_FILE'"
@@ -321,7 +335,6 @@ sh -c "'$BOSH_CLI' deploy \
 		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
 		--vars-env='$ENV_PREFIX_NAME' \
 		--vars-file='$BOSH_COMMON_VARIABLES' \
-		--vars-file='$BOSH_COMMON_RELEASE_URLS' \
 		--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
 		--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 		'$BOSH_FULL_MANIFEST_FILE'"
