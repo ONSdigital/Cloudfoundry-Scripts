@@ -17,15 +17,10 @@ BOSH_FULL_MANIFEST_PREFIX="${3:-${BOSH_FULL_MANIFEST_PREFIX:-Bosh-Template}}"
 BOSH_CLOUD_MANIFEST_PREFIX="${4:-${BOSH_CLOUD_MANIFEST_PREFIX:-$BOSH_FULL_MANIFEST_PREFIX-$CPI_TYPE-CloudConfig}}"
 # CPI type is appended:
 BOSH_LITE_MANIFEST_NAME="${5:-${BOSH_LITE_MANIFEST_NAME:-Bosh-Template}}"
-BOSH_PREAMBLE_MANIFEST_NAME="${6:-${BOSH_PREAMBLE_MANIFEST_NAME:-Bosh-Template-preamble}}"
-BOSH_STATIC_IPS_PREFIX="${7:-${BOSH_STATIC_IPS_PREFIX:-Bosh-static-ips}}"
+#BOSH_PREAMBLE_MANIFEST_NAME="${6:-${BOSH_PREAMBLE_MANIFEST_NAME:-Bosh-Template-preamble}}"
+BOSH_STATIC_IPS_PREFIX="${6:-${BOSH_STATIC_IPS_PREFIX:-Bosh-static-ips}}"
 
-MANIFESTS_DIR_RELATIVE="${8:-${MANIFESTS_DIR_RELATIVE:-Bosh-Manifests}}"
-INTERNAL_DOMAIN="${9:-${INTERNAL_DOMAIN:-cf.internal}}"
-
-
-#VARIABLES_BOSH_FULL_OPS_FILENAMES="${VARIABLES_BOSH_FULL_OPS_FILENAMES:-full-variables.yml}"
-VARIABLES_BOSH_LITE_OPS_FILENAMES="${VARIABLES_BOSH_LITE_OPS_FILENAMES:-lite-variables.yml}"
+MANIFESTS_DIR_RELATIVE="${7:-${MANIFESTS_DIR_RELATIVE:-Bosh-Manifests}}"
 
 . "$BASE_DIR/common.sh"
 
@@ -59,12 +54,8 @@ else
 	BOSH_FULL_STATIC_IPS_NAME="$BOSH_STATIC_IPS_PREFIX"
 fi
 
-#
-BOSH_LITE_STATE_FILE="$DEPLOYMENT_DIR_RELATIVE/$BOSH_LITE_MANIFEST_NAME-$CPI_TYPE-Lite-state.json"
-
 # Expand manifests dir to full path
 findpath MANIFESTS_DIR "$MANIFESTS_DIR_RELATIVE"
-
 
 # Private, per deployment, ops files, eq for installation specific operartions
 # Publically available ops files, eg adjustments for VMware
@@ -97,19 +88,22 @@ for i in Lite Full; do
 	done
 done
 
+# Common variables
+BOSH_COMMON_VARIABLES="$DEPLOYMENT_DIR_RELATIVE/common-variables.yml"
+BOSH_COMMON_VARIABLES_MANIFEST="$MANIFESTS_DIR_RELATIVE/Bosh-Common-Manifests/common-variables.yml"
+BOSH_COMMON_RELEASE_URLS="$DEPLOYMENT_DIR_RELATIVE/common-release-urls.yml"
+
+# Bosh Lite
+BOSH_LITE_STATE_FILE="$DEPLOYMENT_DIR_RELATIVE/$BOSH_LITE_MANIFEST_NAME-$CPI_TYPE-Lite-state.json"
 #
+BOSH_LITE_VARIABLES_STORE="$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml"
+BOSH_LITE_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml"
 BOSH_LITE_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/$BOSH_LITE_MANIFEST_NAME-$CPI_TYPE.yml"
 BOSH_LITE_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/$BOSH_LITE_STATIC_IPS_NAME.yml"
 
-if [ x"$BOSH_PREAMBLE_MANIFEST_NAME" = x"NONE" ]; then
-	# We may not always want to run the pre-amble manifest
-	 unset BOSH_PREAMBLE_MANIFEST_NAME
-	RUN_BOSH_PREAMBLE='false'
-	NORUN_BOSH_PREAMBLE='true'
-else
-	BOSH_PREAMBLE_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$BOSH_PREAMBLE_MANIFEST_NAME.yml"
-fi
-
+# Bosh Full
+BOSH_FULL_VARIABLES_STORE="$DEPLOYMENT_DIR_RELATIVE/full-var-store.yml"
+BOSH_FULL_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/full-variables.yml"
 BOSH_FULL_MANIFEST_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_FULL_MANIFEST_NAME.yml"
 BOSH_FULL_MANIFEST_FILE_RELATIVE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$BOSH_FULL_MANIFEST_NAME.yml"
 BOSH_FULL_CLOUD_CONFIG_FILE="$MANIFESTS_DIR/Bosh-Full-Manifests/$BOSH_CLOUD_MANIFEST_NAME.yml"
@@ -118,11 +112,11 @@ BOSH_FULL_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$BOSH_FUL
 # Check for required config
 [ -d "$MANIFESTS_DIR" ] || FATAL "$MANIFESTS_DIR directory does not exist"
 [ -d "$STACK_OUTPUTS_DIR" ] || FATAL "Cloud outputs directory '$STACK_OUTPUTS_DIR' does not exist"
+
 #
 [ -f "$BOSH_LITE_MANIFEST_FILE" ] || FATAL "Bosh Lite manifest file '$BOSH_LITE_MANIFEST_FILE' does not exist"
 [ -f "$BOSH_LITE_STATIC_IPS_FILE" ] || FATAL "Bosh Lite static IPs file '$BOSH_LITE_STATIC_IPS_FILE' does not exist"
-#
-[ -f "$BOSH_PREAMBLE_MANIFEST_FILE" ] || FATAL "Bosh manifest file '$BOSH_PREAMBLE_MANIFEST_FILE' does not exist"
+
 #
 [ -f "$BOSH_FULL_MANIFEST_FILE" ] || FATAL "Bosh manifest file '$BOSH_FULL_MANIFEST_FILE' does not exist"
 [ -f "$BOSH_FULL_STATIC_IPS_FILE" ] || FATAL "Bosh static IPs file '$BOSH_FULL_STATIC_IPS_FILE' does not exist"
@@ -142,13 +136,8 @@ installed_bin bosh
 #SSL_YML_RELATIVE="$SSL_DIR_RELATIVE/ssl_config.yml"
 
 INFO 'Setting additional variables'
-export ${ENV_PREFIX}internal_domain="$INTERNAL_DOMAIN"
 eval domain_name="\$${ENV_PREFIX}domain_name"
 eval director_dns="\$${ENV_PREFIX}director_dns"
 eval deployment_name="\$${ENV_PREFIX}deployment_name"
-#INTERNAL_SSL_DIR="$SSL_DIR/$internal_domain"
-#EXTERNAL_SSL_DIR="$SSL_DIR/$domain_name"
-# Used for Bosh CA cert
-#EXTERNAL_SSL_DIR_RELATIVE="$SSL_DIR_RELATIVE/$domain_name"
 
 [ x"$deployment_name" = x"$DEPLOYMENT_NAME" ] || FATAL "Deployment names do not match: $deployment_name != $DEPLOYMENT_NAME"

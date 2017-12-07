@@ -82,37 +82,54 @@ if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 			 --non-interactive \
 			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
 			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
+			--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 			--state='$BOSH_LITE_STATE_FILE' \
 			--vars-env='$ENV_PREFIX_NAME' \
+			--vars-file='$BOSH_COMMON_RELEASE_URLS' \
 			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-			--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
+			--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 			'$BOSH_LITE_MANIFEST_FILE'"
 
 	# ... and cleanup any state
 	rm -f "$BOSH_LITE_STATE_FILE"
 fi
 
-# Allow running of a custom script that can do other things (eg create a local release) - it'd be nice if this could be made more intelligent
-if [ x"$NORUN_PREDEPLOY" != x"true" -a -f "$TOP_LEVEL_DIR/pre_deploy.sh" ]; then
-	[ -x "$TOP_LEVEL_DIR/pre_deploy.sh" ] || chmod +x "$TOP_LEVEL_DIR/pre_deploy.sh"
+if [ x"$NO_CREATE_RELEASES" != x'true' ]; then
+	INFO 'Creating releases'
 
-	INFO 'Running pre_deploy.sh script'
-	"$TOP_LEVEL_DIR/pre_deploy.sh"
+	[ -f "$BOSH_COMMON_RELEASE_URLS" ] || echo --- >"$BOSH_COMMON_RELEASE_URLS"
+
+	for _r in `ls releases`; do
+		release_varname="`echo "$_r" | tr -- '-' '_'`"
+		release_url_value="file://$TOP_LEVEL_DIR/releases/$_r/$_r.tgz"
+		release_url_varname="${release_varname}_url"
+
+		INFO "Creating release $_r"
+		"$BASE_DIR/bosh-create_release.sh" "$_r" "releases/$_r"
+
+		if grep -Eq "^$release_url_varname: \"$release_url_value\"$" "$BOSH_COMMON_RELEASE_URLS"; then
+			INFO "Updating local $_r url"
+			sed -i $SED_EXTENDED -e "s|^($release_url_varname): .*$|\1: \"$release_url_value\"|g" "$BOSH_COMMON_RELEASE_URLS"
+		else
+			INFO "Adding local $_r url"
+			echo "$release_url_varname: \"$release_url_value\"" >>"$BOSH_COMMON_RELEASE_URLS"
+		fi
+	done
 fi
 
-
-if [ -n "$DEBUG" ]; then
+if [ x"$DEBUG" = x'true' ]; then
 	INFO 'Interpolated Bosh lite manifest'
 	sh -c "'$BOSH_CLI' interpolate \
 			--tty \
 			--var-errs \
 			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
 			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
+			--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 			--vars-env='$ENV_PREFIX_NAME' \
+			--vars-file='$BOSH_COMMON_RELEASE_URLS' \
+			--vars-file='$BOSH_COMMON_VARIABLES' \
 			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-			--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
+			--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 			'$BOSH_LITE_MANIFEST_FILE'"
 fi
 
@@ -127,17 +144,26 @@ else
 	STORE_ACTION='Potentially updating'
 fi
 
+INFO "$STORE_ACTION common passwords"
+"$BOSH_CLI" interpolate \
+	--tty \
+	--non-interactive \
+	--vars-store="$BOSH_COMMON_VARIABLES" \
+	"$BOSH_COMMON_VARIABLES_MANIFEST"
+
 INFO "$CREATE_ACTION Bosh environment"
 sh -c "'$BOSH_CLI' create-env \
 		--tty \
 		--non-interactive \
 		$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
 		$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-		--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
+		--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 		--state='$BOSH_LITE_STATE_FILE' \
 		--vars-env='$ENV_PREFIX_NAME' \
+		--vars-file='$BOSH_COMMON_RELEASE_URLS' \
+		--vars-file='$BOSH_COMMON_VARIABLES' \
 		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-		--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
+		--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 		'$BOSH_LITE_MANIFEST_FILE'"
 
 
@@ -146,21 +172,25 @@ sh -c "'$BOSH_CLI' interpolate \
 		--no-color \
 		$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
 		$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-		--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml' \
+		--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 		--vars-env='$ENV_PREFIX_NAME' \
+		--vars-file='$BOSH_COMMON_RELEASE_URLS' \
+		--vars-file='$BOSH_COMMON_VARIABLES' \
 		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-		--vars-store='$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml' \
+		--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 		--path='/metadata/director_ca' \
 		$BOSH_LITE_MANIFEST_FILE" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
 
 
-INFO "$UPDATE_ACTION Bosh Director password"
+INFO "$STORE_ACTION Bosh Director password"
 BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate \
 	--no-color \
-	--ops-file="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/lite-variables.yml" \
-	--vars-env=$ENV_PREFIX_NAME \
-	--vars-file=$BOSH_LITE_STATIC_IPS_YML \
-	--vars-store="$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml" \
+	--ops-file="$BOSH_FULL_VARIABLES_OPS_FILE" \
+	--vars-env="$ENV_PREFIX_NAME" \
+	--vars-file="$BOSH_COMMON_VARIABLES" \
+	--vars-file="$BOSH_COMMON_RELEASE_URLS" \
+	--vars-file="$BOSH_LITE_STATIC_IPS_YML" \
+	--vars-store="$BOSH_LITE_VARIABLES_STORE" \
 	--path '/metadata/director_secret' \
 	"$BOSH_LITE_MANIFEST_FILE"`" || rc=$?
 
@@ -213,7 +243,6 @@ INFO 'Setting CloudConfig'
 "$BOSH_CLI" update-cloud-config --tty --vars-env="$ENV_PREFIX_NAME" "$BOSH_FULL_CLOUD_CONFIG_FILE"
 
 # Set release versions
-#for component_version in `NO_YML=1 NO_VAR_ERRS=1 bosh_full interpolate "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
 for component_version in `"$BOSH_CLI" interpolate $BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS $BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS "$BOSH_FULL_MANIFEST_FILE" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
 	upper="`echo "$component_version" | tr '[[:lower:]]' '[[:upper:]]'`"
 
@@ -264,51 +293,8 @@ elif [ x"$REUPLOAD_STEMCELL" = x"true" -a -z "$STEMCELL_URL" ]; then
 
 fi
 
-#if [ x"$RUN_BOSH_PREAMBLE" = x"true" -a x"$NORUN_BOSH_PREAMBLE" != x"true" ]; then
-#	if [ x"$RUN_DRY_RUN" = x"true" -o -n "$DEBUG" ]; then
-#		INFO 'Checking Bosh preamble dry-run'
-#		"$BOSH_CLI" deploy \
-#			--non-interactive \
-#			--dry-run \
-#			--tty \
-#			--vars-env="$ENV_PREFIX_NAME" \
-#			"$BOSH_PREAMBLE_MANIFEST_FILE"
-#	fi
-#
-#	INFO 'Deploying Bosh preamble'
-#	"$BOSH_CLI" deploy \
-#		--non-interactive \
-#		--tty \
-#		--vars-env="$ENV_PREFIX_NAME" \
-#		"$BOSH_PREAMBLE_MANIFEST_FILE"
-#
-#	# For some reason Bosh lists the errands in the preamble manifest and an additional one that has the same name
-#	# as the release we install on the errand VMs (2017/09/07)
-#	for _e in `"$BOSH_CLI" errands`; do
-#		# TEMPORARY until the output of 'bosh errands' is fixed and only prints a list of errands
-#		if ! awk -v errand="$_e" 'BEGIN{ rc=1 }/^- name:/{if($NF == errand) rc=0 }END{ exit rc }' "$BOSH_PREAMBLE_MANIFEST_FILE"; then
-#			WARN "Ignoring non-existant errand: $_e"
-#
-#			ignored=1
-#
-#			continue
-#		fi
-#		# TEMPORARY
-#
-#		INFO "Running errand: $_e"
-#		"$BOSH_CLI" run-errand --tty "$_e"
-#	done
-#
-#	# TEMPORARY report when workaround is no longer required
-#	[ -z "$ignored" ] && FATAL 'Working around additional errand is no longer required, please remove the sections between TEMPORARY & TEMPORARY'
-#	# TEMPORARY
-#
-#	INFO 'Deleting Bosh premable deployment'
-#	"$BOSH_CLI" delete-deployment --force --tty --non-interactive
-#fi
-
 # This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'
-if [ x"$RUN_DRY_RUN" = x'true' -o -n "$DEBUG" ]; then
+if [ x"$RUN_DRY_RUN" = x'true' -o x"$DEBUG" = x'true' ]; then
 	INFO 'Checking Bosh deployment dry-run'
 	sh -c "'$BOSH_CLI' deploy \
 			--tty \
@@ -316,10 +302,12 @@ if [ x"$RUN_DRY_RUN" = x'true' -o -n "$DEBUG" ]; then
 			--non-interactive \
 			$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 			$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
-			--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/full-variables.yml' \
+			--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
 			--vars-env='$ENV_PREFIX_NAME' \
+			--vars-file='$BOSH_COMMON_VARIABLES' \
+			--vars-file='$BOSH_COMMON_RELEASE_URLS' \
 			--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
-			--vars-store='$DEPLOYMENT_DIR_RELATIVE/full-var-store.yml' \
+			--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 			'$BOSH_FULL_MANIFEST_FILE'"
 fi
 
@@ -330,10 +318,12 @@ sh -c "'$BOSH_CLI' deploy \
 		--non-interactive \
 		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
-		--ops-file='$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/full-variables.yml' \
+		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
 		--vars-env='$ENV_PREFIX_NAME' \
+		--vars-file='$BOSH_COMMON_VARIABLES' \
+		--vars-file='$BOSH_COMMON_RELEASE_URLS' \
 		--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
-		--vars-store='$DEPLOYMENT_DIR_RELATIVE/full-var-store.yml' \
+		--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 		'$BOSH_FULL_MANIFEST_FILE'"
 
 # Do we need to run any errands (eg smoke tests, registrations)

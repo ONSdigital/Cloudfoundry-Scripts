@@ -7,26 +7,29 @@ set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
-RELEASE_NAME="${2:-$RELEASE_NAME}"
-
+RELEASE_NAME="${1:-$RELEASE_NAME}"
+RELEASE_DIR="${2:-${RELEASE_DIR:-$RELEASE_NAME}}"
+RELEASE_BLOB_SOURCE="${RELEASE_BLOB_SOURCE:-downloads}"
 RELEASE_BLOB_DESTINATION="${RELEASE_BLOB_DESTINATION:-blobs}"
 
 . "$BASE_DIR/common.sh"
 
 [ -z "$RELEASE_NAME" ] && FATAL 'No release name provided'
-[ -d "$RELEASE_NAME" ] || FATAL "Bosh release directory does not exist: $RELEASE_NAME"
+[ -d "$RELEASE_DIR" ] || FATAL "Bosh release directory does not exist: $RELEASE_NAME"
 
-cd "$RELEASE_NAME"
+shift 1
+
+cd "$RELEASE_DIR"
 
 # Ensure required dirs & files exist
 [ -d "config" ] || mkdir config
 [ -f config/blobs.yml ] || touch config/blobs.yml
 
-if [ -n "$2" ]; then
-	shift 2
+if [ -d "$RELEASE_BLOB_SOURCE" ]; then
+	# We blindy assume/hope that the files don't contain spaces
+	for _s in "$RELEASE_BLOB_SOURCE/"*; do
+		[ -f "$_s" ] || continue
 
-	for _s in $@; do
 		filename="`basename "$_s"`"
 
 		INFO "Adding Blob: $_s"
