@@ -185,7 +185,7 @@ BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate \
 	--ops-file="$BOSH_FULL_VARIABLES_OPS_FILE" \
 	--vars-env="$ENV_PREFIX_NAME" \
 	--vars-file="$BOSH_COMMON_VARIABLES" \
-	--vars-file='$BOSH_LITE_RELEASES' \
+	--vars-file="$BOSH_LITE_RELEASES" \
 	--vars-file="$BOSH_LITE_STATIC_IPS_YML" \
 	--vars-store="$BOSH_LITE_VARIABLES_STORE" \
 	--path '/metadata/director_secret' \
