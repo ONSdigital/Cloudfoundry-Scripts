@@ -9,6 +9,7 @@ BASE_DIR="`dirname \"$0\"`"
 
 RELEASE_NAME="${1:-$RELEASE_NAME}"
 RELEASE_DIR="${2:-${RELEASE_DIR:-$RELEASE_NAME}}"
+
 RELEASE_BLOB_SOURCE="${RELEASE_BLOB_SOURCE:-downloads}"
 RELEASE_BLOB_DESTINATION="${RELEASE_BLOB_DESTINATION:-blobs}"
 
@@ -33,9 +34,9 @@ if [ -d "$RELEASE_BLOB_SOURCE" ]; then
 		filename="`basename "$_s"`"
 
 		INFO "Adding Blob: $_s"
-		"$BOSH_CLI" add-blob "$_s" "$RELEASE_BLOB_DESTINATION/$filename"
+		"$BOSH_CLI" add-blob --tty "$_s" "$RELEASE_BLOB_DESTINATION/$filename"
 	done
 fi
 
 INFO "Creating release: $RELEASE_NAME"
-"$BOSH_CLI" create-release --force --tarball "$RELEASE_NAME.tgz"
+"$BOSH_CLI" create-release --tty --force --tarball "$RELEASE_NAME.tgz"
