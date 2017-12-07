@@ -1,11 +1,5 @@
 #!/bin/sh
 
-if which git >/dev/null 2>&1; then
-	echo Git is not available
-
-	exit 1
-fi
-
 if [ ! -d .git -o ! -f .git/config ]; then
 	echo Not a Git repository
 
