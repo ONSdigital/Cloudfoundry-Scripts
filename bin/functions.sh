@@ -36,6 +36,28 @@ post_deploy_scripts(){
 	find "$POST_DEPLOY_SCRIPTS_DIR/$subdir" -maxdepth 1 -mindepth 1 -exec /bin/sh "{}" \;
 }
 
+update_yml_var(){
+	local file="$1"
+	local var="$2"
+	local value="$3"
+
+	[ -z "$value" ] && FATAL 'Not enough parameters'
+
+	if [ ! -f "$file" ]; then
+		echo --- >"$file"
+	else
+		local existing_file=1
+	fi
+
+	if [ -n "$existing_file" ] && grep -Eq "^$var: \"$value\"$" "$file"; then
+		INFO "Updating local $_r url"
+		sed -i $SED_EXTENDED -e "s|^($var): .*$|\1: \"$value\"|g" "$file"
+	else
+		INFO "Adding local $_r url"
+		echo "$var: \"$value\"" >>"$file"
+	fi
+}
+
 export_file_vars(){
 	local file="$1"
 	# env_prefix may be empty
