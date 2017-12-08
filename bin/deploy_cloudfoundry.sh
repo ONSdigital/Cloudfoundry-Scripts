@@ -93,7 +93,7 @@ if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 	rm -f "$BOSH_LITE_STATE_FILE"
 fi
 
-if [ x"$NO_CREATE_RELEASES" != x'true' ]; then
+if [ x"$NO_CREATE_RELEASES" != x'true' -o ! -f "$BOSH_LITE_RELEASES" ]; then
 	INFO 'Creating releases'
 
 	for _r in `ls releases`; do
