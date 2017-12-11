@@ -254,8 +254,23 @@ for component_version in `sh -c "'$BOSH_CLI' interpolate \
 	export "$ENV_PREFIX$component_version"="$version"
 done
 
+# We can't do this before we have the versions set
+INFO 'Interpolating Bosh Full manifest'
+sh -c "'$BOSH_CLI' interpolate \
+	--no-color \
+	--non-interactive \
+	$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
+	$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
+	--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
+	--vars-env='$ENV_PREFIX_NAME' \
+	--vars-file='$BOSH_COMMON_VARIABLES' \
+	--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
+	--vars-store='$BOSH_FULL_VARIABLES_STORE' \
+	'$BOSH_FULL_MANIFEST_FILE'" >"$BOSH_FULL_INTERPOLATED_MANIFEST"
+
+
 INFO 'Checking if we need to upload any stemcells'
-for _s in `"$BOSH_CLI" interpolate --path /stemcells "$BOSH_FULL_MANIFEST_FILE"`; do
+for _s in `"$BOSH_CLI" interpolate --path /stemcells "$BOSH_FULL_INTERPOLATED_MANIFEST"`; do
 	"$BOSH_CLI" stemcells | awk -v stemcell="$_s" '{if($3 == stemcell) exit 0 }END{ exit 1}' || REUPLOAD_STEMCELL='true'
 done
 
@@ -274,7 +289,7 @@ elif [ x"$REUPLOAD_STEMCELL" = x"true" -a -z "$STEMCELL_URL" ]; then
 fi
 
 INFO 'Checking if we need to upload any releases'
-for _s in `"$BOSH_CLI" interpolate --path /stemcells "$BOSH_FULL_MANIFEST_FILE"`; do
+for _s in `"$BOSH_CLI" interpolate --path /stemcells "$BOSH_FULL_INTERPOLATED_MANIFEST"`; do
 	"$BOSH_CLI" stemcells | awk -v stemcell="$_s" '{if($3 == stemcell) exit 0 }END{ exit 1}' || REUPLOAD_STEMCELL='true'
 done
 
@@ -305,20 +320,6 @@ if [ x"$REUPLOAD_RELEASES" = x'true' ]; then
 		unset upload_release
 	done
 fi
-
-
-INFO 'Interpolating Bosh Full manifest'
-sh -c "'$BOSH_CLI' interpolate \
-	--no-color \
-	--non-interactive \
-	$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
-	$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
-	--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
-	--vars-env='$ENV_PREFIX_NAME' \
-	--vars-file='$BOSH_COMMON_VARIABLES' \
-	--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
-	--vars-store='$BOSH_FULL_VARIABLES_STORE' \
-	'$BOSH_FULL_MANIFEST_FILE'" >"$BOSH_FULL_INTERPOLATED_MANIFEST"
 
 # This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'
 if [ x"$RUN_DRY_RUN" = x'true' -o x"$DEBUG" = x'true' ]; then
