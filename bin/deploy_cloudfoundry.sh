@@ -99,18 +99,21 @@ if [ x"$NO_CREATE_RELEASES" != x'true' -o ! -f "$BOSH_LITE_RELEASES" ]; then
 	for _r in `ls releases`; do
 		release_name="`echo $_r | sed $SED_EXTENDED -e 's/-release$//g'`"
 		release_varname="`echo $release_name | sed $SED_EXTENDED -e 's/-/_/g'`"
-		release_url_value="file://$TOP_LEVEL_DIR/releases/$_r/$_r.tgz"
+		release_filename="$TOP_LEVEL_DIR/releases/$_r/$_r.tgz"
+		release_url_value="file://$release_filename"
 		release_url_varname="${release_varname}_url"
 		release_version_varname="${release_varname}_version"
 
-		INFO "Creating release $_r"
-		"$BASE_DIR/bosh-create_release.sh" "$_r" "releases/$_r"
+		if [ ! -f "$release_filename" -o x"$RECREATE_RELEASES" = x'true' ]; then
+			INFO "Creating release $_r"
+			"$BASE_DIR/bosh-create_release.sh" "$_r" "releases/$_r"
 
-		# We only use the file:// URL for the create-env Bosh. Once that is up, we upload the release - if we try to use a file:// URL Bosh
-		# complains if the version number isn't different and fails
-		update_yml_var "$BOSH_LITE_RELEASES" "$release_url_varname" "$release_url_value"
+			# We only use the file:// URL for the create-env Bosh. Once that is up, we upload the release - if we try to use a file:// URL Bosh
+			# complains if the version number isn't different and fails
+			update_yml_var "$BOSH_LITE_RELEASES" "$release_url_varname" "$release_url_value"
 
-		REUPLOAD_RELEASES='true'
+			REUPLOAD_RELEASES='true'
+		fi
 	done
 fi
 
@@ -303,6 +306,8 @@ fi
 
 if [ x"$REUPLOAD_RELEASES" = x'true' ]; then
 	for _r in `ls releases`; do
+		[ -f "releases/$_r/$_r.tgz" ] || FATAL "Missing required release $_r archive"
+
 		INFO "Uploading release $_r"
 		"$BOSH_CLI" upload-release --tty "releases/$_r/$_r.tgz"
 	done
