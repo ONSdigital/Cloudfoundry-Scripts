@@ -80,13 +80,11 @@ if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 	if [ -f "$BOSH_LITE_INTERPOLATED_MANIFEST" ]; then
 		"$BOSH_CLI" delete-env \
 			--tty \
-			--non-interactive \
 			--state="$BOSH_LITE_STATE_FILE" \
 			"$BOSH_LITE_INTERPOLATED_MANIFEST"
 	else
 		sh -c "'$BOSH_CLI' delete-env \
 			--tty \
-			--non-interactive \
 			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
 			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
 			--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
@@ -140,7 +138,6 @@ fi
 INFO "$STORE_ACTION common passwords"
 "$BOSH_CLI" interpolate \
 	--tty \
-	--non-interactive \
 	--vars-store="$BOSH_COMMON_VARIABLES" \
 	"$BOSH_COMMON_VARIABLES_MANIFEST"
 
@@ -158,7 +155,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	'$BOSH_LITE_MANIFEST_FILE'" >"$BOSH_LITE_INTERPOLATED_MANIFEST"
 
 INFO "$CREATE_ACTION Bosh environment"
-"$BOSH_CLI" create-env --tty --non-interactive --state="$BOSH_LITE_STATE_FILE" "$BOSH_LITE_INTERPOLATED_MANIFEST"
+"$BOSH_CLI" create-env --tty --state="$BOSH_LITE_STATE_FILE" "$BOSH_LITE_INTERPOLATED_MANIFEST"
 
 INFO "$STORE_ACTION Bosh Director certificate"
 "$BOSH_CLI" interpolate --no-color --path='/metadata/director_ca' "$BOSH_LITE_INTERPOLATED_MANIFEST" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
@@ -209,7 +206,6 @@ INFO 'Setting CloudConfig'
 # Set release versions
 for component_version in `sh -c "'$BOSH_CLI' interpolate \
 		--no-color \
-		--non-interactive \
 		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
 		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
@@ -255,10 +251,12 @@ for component_version in `sh -c "'$BOSH_CLI' interpolate \
 done
 
 # We can't do this before we have the versions set
+# XXX
+# XXX Unfortunately, running 'interpolate' causes Bosh to upload releases and stemcells and then they get re-uploaded during 'deploy'
+# XXX
 INFO 'Interpolating Bosh Full manifest'
 sh -c "'$BOSH_CLI' interpolate \
 	--no-color \
-	--non-interactive \
 	$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 	$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
 	--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
@@ -319,12 +317,12 @@ fi
 # This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'
 if [ x"$RUN_DRY_RUN" = x'true' -o x"$DEBUG" = x'true' ]; then
 	INFO 'Checking Bosh deployment dry-run'
-	"$BOSH_CLI" deploy --tty --dry-run --non-interactive "$BOSH_FULL_INTERPOLATED_MANIFEST"
+	"$BOSH_CLI" deploy --tty --dry-run "$BOSH_FULL_INTERPOLATED_MANIFEST"
 fi
 
 # ... finally we get around to running the Bosh/CF deployment
 INFO 'Deploying Bosh'
-"$BOSH_CLI" deploy --tty --non-interactive "$BOSH_FULL_INTERPOLATED_MANIFEST"
+"$BOSH_CLI" deploy --tty "$BOSH_FULL_INTERPOLATED_MANIFEST"
 
 # Do we need to run any errands (eg smoke tests, registrations)
 if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"true" -a -n "$POST_DEPLOY_ERRANDS" ]; then
