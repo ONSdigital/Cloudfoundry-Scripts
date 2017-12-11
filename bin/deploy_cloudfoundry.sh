@@ -293,7 +293,7 @@ if [ x"$REUPLOAD_RELEASES" = x'true' ]; then
 
 		if "$BOSH_CLI" releases | awk -v release="$release_name" 'BEGIN{ rc=1 }{ if($0 == release) rc=0 }END{ exit rc }'; then
 			INFO 'Checking for release version'
-			version="`"$BOSH_CLI" releases | awk -v release="$release_name" '{ if($0 == release){ version=$2; exit 0 }'`"
+			version="`"$BOSH_CLI" releases --no-color | awk -v release="$release_name" '{ if($1 == release){ version=$2; exit 0 }'`"
 
 			# Check the latest version in the version file
 			latest_version="`awk '{ if($1 == "version:" ) print $2 }' "$_r"/dev_releases/$release_name/index.yml | sort | head -n 1`"
