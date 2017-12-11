@@ -208,7 +208,7 @@ INFO 'Setting CloudConfig'
 
 # Set release versions
 for component_version in `sh -c "'$BOSH_CLI' interpolate \
-		--tty \
+		--no-color \
 		--non-interactive \
 		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
@@ -270,12 +270,14 @@ sh -c "'$BOSH_CLI' interpolate \
 
 
 INFO 'Checking if we need to upload any stemcells'
-for _s in `"$BOSH_CLI" interpolate --path /stemcells "$BOSH_FULL_INTERPOLATED_MANIFEST"`; do
-	"$BOSH_CLI" stemcells | awk -v stemcell="$_s" '{if($3 == stemcell) exit 0 }END{ exit 1}' || REUPLOAD_STEMCELL='true'
+for _s in `"$BOSH_CLI" interpolate --no-color --path /stemcells "$BOSH_FULL_INTERPOLATED_MANIFEST" | awk '{if($1 == "os:") print $2}'`; do
+	"$BOSH_CLI" stemcells --no-color | awk -v stemcell="$_s" 'BEGIN{ rc=1 }{if($3 == stemcell) rc=0 }END{ exit rc }' || REUPLOAD_STEMCELL='true'
 done
 
 # Unfortunately, there is no way currently (2017/10/19) for Bosh/Director to automatically upload a stemcell in the same way it does for releases
-if [ x"$REUPLOAD_STEMCELL" = x'true' -a -n "$STEMCELL_URL" ]; then
+if [ x"$REUPLOAD_STEMCELL" = x'true' ]; then
+	[ -z "$STEMCELL_URL" ] && FATAL 'No STEMCELL_URL provided, unable to upload a stemcell'
+
 	[ -n "$BOSH_STEMCELL_VERSION" ] && URL_EXTENSION="?v=$BOSH_STEMCELL_VERSION"
 
 	UPLOAD_URL="$STEMCELL_URL$URL_EXTENSION"
@@ -283,21 +285,13 @@ if [ x"$REUPLOAD_STEMCELL" = x'true' -a -n "$STEMCELL_URL" ]; then
 	INFO "Uploading $UPLOAD_URL to Bosh"
 	"$BOSH_CLI" upload-stemcell --tty "$UPLOAD_URL"
 
-elif [ x"$REUPLOAD_STEMCELL" = x"true" -a -z "$STEMCELL_URL" ]; then
-	FATAL 'No STEMCELL_URL provided, unable to upload a stemcell'
-
 fi
-
-INFO 'Checking if we need to upload any releases'
-for _s in `"$BOSH_CLI" interpolate --path /stemcells "$BOSH_FULL_INTERPOLATED_MANIFEST"`; do
-	"$BOSH_CLI" stemcells | awk -v stemcell="$_s" '{if($3 == stemcell) exit 0 }END{ exit 1}' || REUPLOAD_STEMCELL='true'
-done
 
 if [ x"$REUPLOAD_RELEASES" = x'true' ]; then
 	for _r in `ls releases`; do
 		release_name="`echo $_r | sed $SED_EXTENDED -e 's/-release$//g'`"
 
-		if "$BOSH_CLI" releases | awk -v release="$release_name" '{ if($0 == release) exit 0 }END{ exit 1}'; then
+		if "$BOSH_CLI" releases | awk -v release="$release_name" 'BEGIN{ rc=1 }{ if($0 == release) rc=0 }END{ exit rc }'; then
 			INFO 'Checking for release version'
 			version="`"$BOSH_CLI" releases | awk -v release="$release_name" '{ if($0 == release){ version=$2; exit 0 }'`"
 
