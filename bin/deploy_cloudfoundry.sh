@@ -77,9 +77,16 @@ fi
 # Remove Bosh?
 if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 	INFO 'Removing existing Bosh bootstrap environment'
-	sh -c "'$BOSH_CLI' delete-env \
+	if [ -f "$BOSH_LITE_INTERPOLATED_MANIFEST" ]; then
+		"$BOSH_CLI" delete-env \
 			--tty \
-			 --non-interactive \
+			--non-interactive \
+			--state="$BOSH_LITE_STATE_FILE" \
+			"$BOSH_LITE_INTERPOLATED_MANIFEST"
+	else
+		sh -c "'$BOSH_CLI' delete-env \
+			--tty \
+			--non-interactive \
 			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
 			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
 			--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
@@ -88,6 +95,7 @@ if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
 			--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 			'$BOSH_LITE_MANIFEST_FILE'"
+	fi
 
 	# ... and cleanup any state
 	rm -f "$BOSH_LITE_STATE_FILE"
@@ -117,21 +125,6 @@ if [ x"$NO_CREATE_RELEASES" != x'true' -o ! -f "$BOSH_LITE_RELEASES" ]; then
 	done
 fi
 
-if [ x"$DEBUG" = x'true' ]; then
-	INFO 'Interpolated Bosh lite manifest'
-	sh -c "'$BOSH_CLI' interpolate \
-			--tty \
-			--var-errs \
-			$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
-			$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-			--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
-			--vars-env='$ENV_PREFIX_NAME' \
-			--vars-file='$BOSH_COMMON_VARIABLES' \
-			--vars-file='$BOSH_LITE_RELEASES' \
-			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-			--vars-store='$BOSH_LITE_VARIABLES_STORE' \
-			'$BOSH_LITE_MANIFEST_FILE'"
-fi
 
 if [ ! -f "$BOSH_LITE_STATE_FILE" ]; then
 	CREATE_ACTION='Creating'
@@ -151,56 +144,27 @@ INFO "$STORE_ACTION common passwords"
 	--vars-store="$BOSH_COMMON_VARIABLES" \
 	"$BOSH_COMMON_VARIABLES_MANIFEST"
 
-INFO "$CREATE_ACTION Bosh environment"
-sh -c "'$BOSH_CLI' create-env \
-		--tty \
-		--non-interactive \
-		$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
-		$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-		--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
-		--state='$BOSH_LITE_STATE_FILE' \
-		--vars-env='$ENV_PREFIX_NAME' \
-		--vars-file='$BOSH_COMMON_VARIABLES' \
-		--vars-file='$BOSH_LITE_RELEASES' \
-		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-		--vars-store='$BOSH_LITE_VARIABLES_STORE' \
-		'$BOSH_LITE_MANIFEST_FILE'"
+INFO 'Interpolating Bosh Lite manifest'
+sh -c "'$BOSH_CLI' interpolate \
+	--var-errs \
+	$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
+	$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
+	--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
+	--vars-env='$ENV_PREFIX_NAME' \
+	--vars-file='$BOSH_COMMON_VARIABLES' \
+	--vars-file='$BOSH_LITE_RELEASES' \
+	--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
+	--vars-store='$BOSH_LITE_VARIABLES_STORE' \
+	'$BOSH_LITE_MANIFEST_FILE'" >"$BOSH_LITE_INTERPOLATED_MANIFEST"
 
+INFO "$CREATE_ACTION Bosh environment"
+"$BOSH_CLI" create-env --tty --non-interactive --state="$BOSH_LITE_STATE_FILE" "$BOSH_LITE_INTERPOLATED_MANIFEST"
 
 INFO "$STORE_ACTION Bosh Director certificate"
-sh -c "'$BOSH_CLI' interpolate \
-		--no-color \
-		$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
-		$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-		--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
-		--vars-env='$ENV_PREFIX_NAME' \
-		--vars-file='$BOSH_COMMON_VARIABLES' \
-		--vars-file='$BOSH_LITE_RELEASES' \
-		--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
-		--vars-store='$BOSH_LITE_VARIABLES_STORE' \
-		--path='/metadata/director_ca' \
-		$BOSH_LITE_MANIFEST_FILE" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
-
+"$BOSH_CLI" interpolate --no-color --path='/metadata/director_ca' "$BOSH_LITE_INTERPOLATED_MANIFEST" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
 
 INFO "$STORE_ACTION Bosh Director password"
-BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate \
-	--no-color \
-	--ops-file="$BOSH_FULL_VARIABLES_OPS_FILE" \
-	--vars-env="$ENV_PREFIX_NAME" \
-	--vars-file="$BOSH_COMMON_VARIABLES" \
-	--vars-file="$BOSH_LITE_RELEASES" \
-	--vars-file="$BOSH_LITE_STATIC_IPS_YML" \
-	--vars-store="$BOSH_LITE_VARIABLES_STORE" \
-	--path '/metadata/director_secret' \
-	"$BOSH_LITE_MANIFEST_FILE"`" || rc=$?
-
-# Do not keep any state file if things fail
-if [ 0$rc -ne 0 ]; then
-	[ -n "$KEEP_BOSH_STATE" ] || rm -f "$BOSH_LITE_STATE_FILE"
-
-	FATAL 'Bosh lite deployment failed'
-fi
-
+BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate --no-color --path='/metadata/director_secret' "$BOSH_LITE_INTERPOLATED_MANIFEST"`"
 
 if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ] || ! grep -Eq "^BOSH_CLIENT_SECRET='$BOSH_CLIENT_SECRET'" "$BOSH_DIRECTOR_CONFIG"; then
 	INFO 'Generating Bosh configuration'
@@ -290,6 +254,11 @@ for component_version in `sh -c "'$BOSH_CLI' interpolate \
 	export "$ENV_PREFIX$component_version"="$version"
 done
 
+INFO 'Checking if we need to upload any stemcells'
+for _s in `"$BOSH_CLI" interpolate --path /stemcells "$BOSH_FULL_MANIFEST_FILE"`; do
+	"$BOSH_CLI" stemcells | awk -v stemcell="$_s" '{if($3 == stemcell) exit 0 }END{ exit 1}' || REUPLOAD_STEMCELL='true'
+done
+
 # Unfortunately, there is no way currently (2017/10/19) for Bosh/Director to automatically upload a stemcell in the same way it does for releases
 if [ x"$REUPLOAD_STEMCELL" = x'true' -a -n "$STEMCELL_URL" ]; then
 	[ -n "$BOSH_STEMCELL_VERSION" ] && URL_EXTENSION="?v=$BOSH_STEMCELL_VERSION"
@@ -304,45 +273,62 @@ elif [ x"$REUPLOAD_STEMCELL" = x"true" -a -z "$STEMCELL_URL" ]; then
 
 fi
 
+INFO 'Checking if we need to upload any releases'
+for _s in `"$BOSH_CLI" interpolate --path /stemcells "$BOSH_FULL_MANIFEST_FILE"`; do
+	"$BOSH_CLI" stemcells | awk -v stemcell="$_s" '{if($3 == stemcell) exit 0 }END{ exit 1}' || REUPLOAD_STEMCELL='true'
+done
+
 if [ x"$REUPLOAD_RELEASES" = x'true' ]; then
 	for _r in `ls releases`; do
-		[ -f "releases/$_r/$_r.tgz" ] || FATAL "Missing required release $_r archive"
+		release_name="`echo $_r | sed $SED_EXTENDED -e 's/-release$//g'`"
 
-		INFO "Uploading release $_r"
-		"$BOSH_CLI" upload-release --tty "releases/$_r/$_r.tgz"
+		if "$BOSH_CLI" releases | awk -v release="$release_name" '{ if($0 == release) exit 0 }END{ exit 1}'; then
+			INFO 'Checking for release version'
+			version="`"$BOSH_CLI" releases | awk -v release="$release_name" '{ if($0 == release){ version=$2; exit 0 }'`"
+
+			# Check the latest version in the version file
+			latest_version="`awk '{ if($1 == "version:" ) print $2 }' "$_r"/dev_releases/$release_name/index.yml | sort | head -n 1`"
+
+			[ x"$version" != x"$latest_version" ] && upload_release=1
+		else
+			INFO "Release does not exist: $release_name"
+			upload_release=1
+		fi
+
+		if [ -n "$upload_release" ]; then
+			[ -f "releases/$_r/$_r.tgz" ] || FATAL "Missing required release $_r archive"
+
+			INFO "Uploading release $_r"
+			"$BOSH_CLI" upload-release --tty "releases/$_r/$_r.tgz"
+		fi
+
+		unset upload_release
 	done
 fi
+
+
+INFO 'Interpolating Bosh Full manifest'
+sh -c "'$BOSH_CLI' interpolate \
+	--no-color \
+	--non-interactive \
+	$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
+	$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
+	--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
+	--vars-env='$ENV_PREFIX_NAME' \
+	--vars-file='$BOSH_COMMON_VARIABLES' \
+	--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
+	--vars-store='$BOSH_FULL_VARIABLES_STORE' \
+	'$BOSH_FULL_MANIFEST_FILE'" >"$BOSH_FULL_INTERPOLATED_MANIFEST"
 
 # This is disabled by default as it causes a re-upload of releases/stemcells if their version(s) have been set to 'latest'
 if [ x"$RUN_DRY_RUN" = x'true' -o x"$DEBUG" = x'true' ]; then
 	INFO 'Checking Bosh deployment dry-run'
-	sh -c "'$BOSH_CLI' deploy \
-			--tty \
-			--dry-run \
-			--non-interactive \
-			$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
-			$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
-			--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
-			--vars-env='$ENV_PREFIX_NAME' \
-			--vars-file='$BOSH_COMMON_VARIABLES' \
-			--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
-			--vars-store='$BOSH_FULL_VARIABLES_STORE' \
-			'$BOSH_FULL_MANIFEST_FILE'"
+	"$BOSH_CLI" deploy --tty --dry-run --non-interactive "$BOSH_FULL_INTERPOLATED_MANIFEST"
 fi
 
 # ... finally we get around to running the Bosh/CF deployment
 INFO 'Deploying Bosh'
-sh -c "'$BOSH_CLI' deploy \
-		--tty \
-		--non-interactive \
-		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
-		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
-		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
-		--vars-env='$ENV_PREFIX_NAME' \
-		--vars-file='$BOSH_COMMON_VARIABLES' \
-		--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
-		--vars-store='$BOSH_FULL_VARIABLES_STORE' \
-		'$BOSH_FULL_MANIFEST_FILE'"
+"$BOSH_CLI" deploy --tty --non-interactive "$BOSH_FULL_INTERPOLATED_MANIFEST"
 
 # Do we need to run any errands (eg smoke tests, registrations)
 if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"true" -a -n "$POST_DEPLOY_ERRANDS" ]; then
