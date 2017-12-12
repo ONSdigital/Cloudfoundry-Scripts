@@ -196,9 +196,7 @@ check_existing_parameters(){
 		if [ 0$password -eq 1 ] &&  [ 0$password_exists -eq 0 -o x"$IGNORE_EXISTING_PASSWORDS" = x'true' ]; then
 			# eg RDS_CF_INSTANCE_PASSWORD
 			INFO "Generating new password for $varname"
-			new_password="`generate_password 32`"
-
-			eval upper_varname="\$$new_password"
+			upper_varname="`generate_password 32`"
 		fi
 
 		# Reset AZ setting?
