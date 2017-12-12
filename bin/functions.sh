@@ -170,9 +170,17 @@ check_existing_parameters(){
 	[ -f "$stack_json" ] || FATAL "Cloudformation stack JSON file does not exist: '$stack_json'"
 
 	# Retain existing parameters
-	for upper_varname in `find_aws_parameters "$stack_json" | capitalise_aws`; do
-		# eg rds_cf_instance_password
+	for varname in `find_aws_parameters "$stack_json"`; do
+		# DeploymentName -> DEPLOYMENT_NAME
+		upper_varname="`echo $varname | capitalise_aws`"
+		# DEPLOYMENT_NAME -> deployment_name
 		lower_varname="`echo $upper_varname | tr '[[:upper:]]' '[[:lower:]]'`"
+
+		# Variable from AWS outputs
+		eval lower_value="\$$lower_varname"
+
+		# Environmental variable
+		eval upper_value="\$$upper_varname"
 
 		# Check if this is a password
 		if echo "$lower_varname" | grep -Eq '_password$'; then
@@ -182,37 +190,33 @@ check_existing_parameters(){
 
 			# Create a header for our password file
 			[ -f "$AWS_PASSWORD_CONFIG_FILE" ] || echo '# AWS Passwords' >"$AWS_PASSWORD_CONFIG_FILE"
-
-		# ... or a MultAZ setting
-		elif [ x"$lower_varname" = x'multi_az' ]; then
-			azs=1
-		fi
-
-		if [ 0$password -eq 1 ] && [ x"$IGNORE_EXISTING_PASSWORDS" = x'true' ]; then
-			reset_password=1
-
-		elif [ x"$lower_varname" = x'multi_az' ] && [ x"$IGNORE_EXISTING_MULTIAZ_CONFIG" = x"true" ]; then
-			reset_azs=1
-
 		fi
 
 		# If we don't have an existing password, or we've been told to reset the password
-		if [ 0$password -eq 1 -a 0$password_exists -eq 0 -o 0$reset_password -eq 1 ]; then
+		if [ 0$password -eq 1 ] &&  [ 0$password_exists -eq 0 -o x"$IGNORE_EXISTING_PASSWORDS" = x'true' ]; then
 			# eg RDS_CF_INSTANCE_PASSWORD
+			INFO "Generating new password for $varname"
 			new_password="`generate_password 32`"
 
-			eval "$upper_varname"="\$$new_password"
-
-		# If we've not been asked to reset the parameter we retain if for feeding into the AWS parameters file later on
-		elif [ 0$password -eq 1 ] || [ 0$reset_azs -eq 0 ] || [ x"$IGNORE_EXISTING_PARAMETERS" = x"false" ]; then
-			# Check if we already have a value
-			value="\$$lower_varname"
-
-			# Only update if we have a value to update to
-			[ -n "$value" ] && eval "$upper_varname"="\$$lower_varname"
-
+			eval upper_varname="\$$new_password"
 		fi
 
+		# Reset AZ setting?
+		# Reset password?
+		if [ x"$lower_varname" != x'multi_az' -o x"$IGNORE_EXISTING_MULTIAZ_CONFIG" = x'false' ] &&
+			[ 0$password -eq 0 -o x"$IGNORE_EXISTING_PASSWORDS" = x'false' ]; then
+
+			if [ 0$password -eq 1 -o x"$lower_value" = x'multi_az' ] ||
+				[ -z "$lower_value" -o x"$IGNORE_EXISTING_PARAMETERS" = x'false' ]; then
+				# No value or reset the value?
+				"$upper_varname"="$upper_value"
+			else
+				# Retain existing value
+				"$upper_varname"="$lower_value"
+			fi
+		fi
+
+		# We handle passwords, via another file
 		if [ -n "$new_password" -a 0$password_exists -eq 1 ]; then
 			sed $SED_EXTENDED -e "s/^($lower_varname)=.*/\1='$new_password'/g" "$AWS_PASSWORD_CONFIG_FILE"
 
