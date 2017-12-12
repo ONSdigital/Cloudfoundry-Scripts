@@ -209,10 +209,10 @@ check_existing_parameters(){
 			if [ 0$password -eq 1 -o x"$lower_value" = x'multi_az' ] ||
 				[ -z "$lower_value" -o x"$IGNORE_EXISTING_PARAMETERS" = x'false' ]; then
 				# No value or reset the value?
-				"$upper_varname"="$upper_value"
+				eval "$upper_varname"="$upper_value"
 			else
 				# Retain existing value
-				"$upper_varname"="$lower_value"
+				eval "$upper_varname"="$lower_value"
 			fi
 		fi
 
