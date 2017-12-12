@@ -185,47 +185,29 @@ check_existing_parameters(){
 		[ x"$lower_value" = x'$' ] && unset lower_value
 		[ x"$upper_value" = x'$' ] && unset upper_value
 
-		# Check if this is a password
-		if echo "$lower_varname" | grep -Eq '_password$'; then
-			password=1
-
-			grep -Eq "^$lower_varname=" "$AWS_PASSWORD_CONFIG_FILE" && password_exists=1
-
-			# Create a header for our password file
-			[ -f "$AWS_PASSWORD_CONFIG_FILE" ] || echo '# AWS Passwords' >"$AWS_PASSWORD_CONFIG_FILE"
-		fi
-
-		# If we don't have an existing password, or we've been told to reset the password
-		if [ 0$password -eq 1 ] &&  [ 0$password_exists -eq 0 -o x"$IGNORE_EXISTING_PASSWORDS" = x'true' ]; then
-			# eg RDS_CF_INSTANCE_PASSWORD
+		# Check if this is a password and if we need to re/generate a password
+		if echo "$lower_varname" | grep -Eq '_password$' && [ -z "$lower_value" -o x"$IGNORE_EXISTING_PASSWORDS" = x'true' ]; then
 			INFO "Generating new password for $varname"
-			upper_value="`generate_password 32`"
+			updated_value="`generate_password 32`"
+
+		# Do we need to reset the MultiAz option?
+		# Have we been given an updated value?
+		elif [ x"$lower_varname" = x'multi_az' -a x"$IGNORE_EXISTING_MULTIAZ_CONFIG" = x'true' ] ||
+			[ -n "$upper_value" -a x"$IGNORE_EXISTING_PARAMETERS" = x'true' ]; then
+
+			[ -n "$lower_value" ] && message='Updating' || message='Setting'
+
+			INFO "Setting $varname to $upper_value"
+			updated_value="$upper_value"
+		elif [ -n "$lower_value" ]; then
+			INFO "Retaining $varname value $lower_value"
+			updated_value="$lower_value"
 		fi
 
-		# Reset AZ setting?
-		# Reset password?
-		if [ x"$lower_varname" != x'multi_az' -o x"$IGNORE_EXISTING_MULTIAZ_CONFIG" = x'false' ] &&
-			[ 0$password -eq 0 -o x"$IGNORE_EXISTING_PASSWORDS" = x'false' ]; then
+		# Only update if we have a value
+		[ -n "$updated_value" ] && eval "$upper_varname"="$updated_value"
 
-			if [ 0$password -eq 1 -o x"$lower_value" = x'multi_az' ] ||
-				[ -z "$lower_value" -o x"$IGNORE_EXISTING_PARAMETERS" = x'false' ]; then
-				# No value or reset the value?
-				eval "$upper_varname"="$upper_value"
-			else
-				# Retain existing value
-				eval "$upper_varname"="$lower_value"
-			fi
-		fi
-
-		# We handle passwords, via another file
-		if [ -n "$new_password" -a 0$password_exists -eq 1 ]; then
-			sed $SED_EXTENDED -e "s/^($lower_varname)=.*/\1='$new_password'/g" "$AWS_PASSWORD_CONFIG_FILE"
-
-		elif [ -n "$new_password" ]; then
-			echo "$upper_varname='$new_password'" >>"$AWS_PASSWORD_CONFIG_FILE"
-		fi
-
-		unset azs reset_azs password reset_passwords new_password
+		unset password password_exists updated_value
 	done
 }
 

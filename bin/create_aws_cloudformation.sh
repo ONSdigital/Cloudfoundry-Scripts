@@ -117,6 +117,9 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 		STACK_EXISTS=1
 	fi
 
+	[ -f "$STACK_PARAMETERS" ] && message="Checking if we need to update any existing" || message="Generating" 
+
+	INFO "$message parameters for $STACK_NAME"
 	check_existing_parameters "$CLOUDFORMATION_DIR/$stack_file"
 
 	if [ -f "$STACK_PARAMETERS" ]; then
