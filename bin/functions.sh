@@ -149,12 +149,13 @@ parse_aws_cloudformation_outputs(){
 }
 
 find_aws_parameters(){
+	default_regex='^[A-Za-z0-9]+$'
+
 	local stack_json="$1"
-	local search_regex="$2"
+	local search_regex="${2:-$default_regex}"
 
 	[ -n "$stack_json" ] || FATAL 'No Cloudformation stack JSON file provided'
 	[ -f "$stack_json" ] || FATAL "Cloudformation stack JSON file does not exist: '$stack_json'"
-	[ -n "$search_regex" ] || FATAL 'No search regex provided'
 
 	# This assumes the AWS Cloudformation template is 'correctly' indented using two spaces per indent
 	awk -v search_regex="$search_regex" \
@@ -169,7 +170,7 @@ check_existing_parameters(){
 	[ -f "$stack_json" ] || FATAL "Cloudformation stack JSON file does not exist: '$stack_json'"
 
 	# Retain existing parameters
-	for upper_varname in `find_aws_parameters "$stack_json" '^[A-Za-z0-9]+$' | capitalise_aws`; do
+	for upper_varname in `find_aws_parameters "$stack_json" | capitalise_aws`; do
 		# eg rds_cf_instance_password
 		lower_varname="`echo $upper_varname | tr '[[:upper:]]' '[[:lower:]]'`"
 
@@ -230,7 +231,7 @@ generate_parameters_file(){
 	[ -f "$stack_json" ] || FATAL "Cloudformation stack JSON file does not exist: '$stack_json'"
 
 	echo '['
-	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1 } }' "$stack_json"`; do
+	for _key in `find_aws_parameters "$stack_json"`; do
 		local var_name="`echo $_key | capitalise_aws`"
 		eval _param="\$$var_name"
 
@@ -271,7 +272,7 @@ update_parameters_file(){
 
 	local updated_parameters="`mktemp "$parameters_file.XXXX"`"
 
-	for _key in `awk '{if($0 ~ /^  "Parameters"/){ o=1 }else if($0 ~ /^  "/){ o=0} if(o && /^    "/){ gsub("[\"{:]","",$1); print $1 } }' "$stack_json"`; do
+	for _key in `find_aws_parameters "$stack_json"`; do
 		var_name="`echo $_key | capitalise_aws`"
 		eval _value="\$$var_name"
 

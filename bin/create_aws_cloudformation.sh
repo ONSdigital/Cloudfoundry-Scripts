@@ -117,13 +117,14 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 		STACK_EXISTS=1
 	fi
 
+	check_existing_parameters "$CLOUDFORMATION_DIR/$stack_file"
 
-	# Always renegerate the parameters file
-	if [ -z "$STACK_EXISTS" -o ! -f "$STACK_PARAMETERS" ]; then
+	if [ -f "$STACK_PARAMETERS" ]; then
+		INFO "Checking if we need to update $STACK_NAME parameters"
+		update_parameters_file "$CLOUDFORMATION_DIR/$_file" "$STACK_PARAMETERS"
+	else
 		INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 		generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
-	else
-		check_existing_parameters "$CLOUDFORMATION_DIR/$stack_file"
 	fi
 
 	if [ -z "$STACK_EXISTS" ]; then
