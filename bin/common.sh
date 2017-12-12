@@ -75,11 +75,6 @@ EOF
 	RELEASE_CONFIG_FILE="$DEPLOYMENT_DIR/release-config.sh"
 	STEMCELL_CONFIG_FILE="$DEPLOYMENT_DIR/stemcells-config.sh"
 
-	BOSH_LITE_STATIC_IPS_YML="$DEPLOYMENT_DIR_RELATIVE/bosh-lite-static-ips.yml"
-	BOSH_FULL_STATIC_IPS_YML="$DEPLOYMENT_DIR_RELATIVE/bosh-full-static-ips.yml"
-
-	AWS_PASSWORD_CONFIG_FILE="$DEPLOYMENT_DIR/aws-passwords.sh"
-
 	# Load the environment config if we have been given one
 	if [ -f "$DEPLOYMENTS_CONFIG_DIR/$DEPLOYMENT_NAME/environment.sh" ]; then
 		# We want the vars in this script to be exported so that any subscript can see them, but we don't want to have all vars available

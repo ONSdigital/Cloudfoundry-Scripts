@@ -66,12 +66,11 @@ findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 
 # Bosh doesn't seem to be able to handle templating (eg ((variable))) and variables files at the same time, so we need to expand the variables and then use
 # the output when we do a bosh create-env/deploy
-if [ ! -f "$LITE_STATIC_IPS_YML" -o "$REINTERPOLATE_LITE_STATIC_IPS" = x"true" ]; then
+if [ ! -f "$BOSH_LITE_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_LITE_STATIC_IPS" = x"true" ]; then
 	INFO 'Generating Bosh Lite static IPs'
 	"$BOSH_CLI" interpolate \
 		--vars-env="$ENV_PREFIX_NAME" \
-		--vars-file="$BOSH_LITE_STATIC_IPS_FILE" \
-		"$BOSH_LITE_STATIC_IPS_FILE" >"$BOSH_LITE_STATIC_IPS_YML"
+		"$BOSH_LITE_STATIC_IPS_FILE" >"$BOSH_LITE_INTERPOLATED_STATIC_IPS"
 fi
 
 # Remove Bosh?
@@ -90,7 +89,7 @@ if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 			--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 			--state='$BOSH_LITE_STATE_FILE' \
 			--vars-env='$ENV_PREFIX_NAME' \
-			--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
+			--vars-file='$BOSH_LITE_INTERPOLATED_STATIC_IPS' \
 			--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 			'$BOSH_LITE_MANIFEST_FILE'"
 	fi
@@ -150,7 +149,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_LITE_RELEASES' \
-	--vars-file='$BOSH_LITE_STATIC_IPS_YML' \
+	--vars-file='$BOSH_LITE_INTERPOLATED_STATIC_IPS' \
 	--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 	'$BOSH_LITE_MANIFEST_FILE'" >"$BOSH_LITE_INTERPOLATED_MANIFEST"
 
@@ -191,13 +190,12 @@ INFO 'Pointing Bosh client at newly deployed Bosh Director'
 INFO 'Attempting to login'
 "$BOSH_CLI" log-in --tty >&2
 
-if [ ! -f "$FULL_STATIC_IPS_YML" -o "$REINTERPOLATE_FULL_STATIC_IPS" = x"true" ]; then
+if [ ! -f "$BOSH_FULL_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_FULL_STATIC_IPS" = x"true" ]; then
 	INFO 'Generating Bosh static IPs'
 	"$BOSH_CLI" interpolate \
 		--no-color \
 		--vars-env="$ENV_PREFIX_NAME" \
-		--vars-file="$BOSH_FULL_STATIC_IPS_FILE" \
-		"$BOSH_FULL_STATIC_IPS_FILE" >"$BOSH_FULL_STATIC_IPS_YML"
+		"$BOSH_FULL_STATIC_IPS_FILE" >"$BOSH_FULL_INTERPOLATED_STATIC_IPS"
 fi
 
 INFO 'Setting CloudConfig'
@@ -211,7 +209,7 @@ for component_version in `sh -c "'$BOSH_CLI' interpolate \
 		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
 		--vars-env='$ENV_PREFIX_NAME' \
 		--vars-file='$BOSH_COMMON_VARIABLES' \
-		--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
+		--vars-file='$BOSH_FULL_INTERPOLATED_STATIC_IPS' \
 		--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 		'$BOSH_FULL_MANIFEST_FILE'" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
 
@@ -262,7 +260,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
-	--vars-file='$BOSH_FULL_STATIC_IPS_YML' \
+	--vars-file='$BOSH_FULL_INTERPOLATED_STATIC_IPS' \
 	--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 	'$BOSH_FULL_MANIFEST_FILE'" >"$BOSH_FULL_INTERPOLATED_MANIFEST"
 
