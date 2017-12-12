@@ -182,6 +182,9 @@ check_existing_parameters(){
 		# Environmental variable
 		eval upper_value="\$$upper_varname"
 
+		[ x"$lower_value" = x'$' ] && unset lower_value
+		[ x"$upper_value" = x'$' ] && unset upper_value
+
 		# Check if this is a password
 		if echo "$lower_varname" | grep -Eq '_password$'; then
 			password=1
@@ -196,7 +199,7 @@ check_existing_parameters(){
 		if [ 0$password -eq 1 ] &&  [ 0$password_exists -eq 0 -o x"$IGNORE_EXISTING_PASSWORDS" = x'true' ]; then
 			# eg RDS_CF_INSTANCE_PASSWORD
 			INFO "Generating new password for $varname"
-			upper_varname="`generate_password 32`"
+			upper_value="`generate_password 32`"
 		fi
 
 		# Reset AZ setting?

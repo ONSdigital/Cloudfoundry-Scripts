@@ -59,6 +59,15 @@ for i in ${@:-`ls vendor/`}; do
 			else
 				diff -Ncrdx .git -x \*.swp "$subfolder$i" "vendor/$i" | patch -p1 -d "$subfolder$i"
 			fi
+
+			#
+			if [ x"$subfolder" = x'releases/' ]; then
+				if [ -f "${subfolder}version_file" ]; then
+					eval `awk -F\. '!/^#/{printf("major=%d minor=%d patch=%d",$1,$2,$3}' "${subfolder}version_file"`
+				fi
+
+				unset major minor patch
+			fi
 		fi
 	fi
 done
