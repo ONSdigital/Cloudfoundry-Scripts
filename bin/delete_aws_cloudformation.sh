@@ -29,13 +29,6 @@ load_outputs "$STACK_OUTPUTS_DIR"
 
 [ -n "$aws_region" ] && export AWS_DEFAULT_REGION="$aws_region"
 
-if [ -n "$BOSH_SSH_CONFIG" -a -f "$BOSH_SSH_CONFIG" ]; then
-	SSH_KEY_EXISTS=1
-
-	INFO "Loading: $BOSH_SSH_CONFIG"
-	. "$STACK_PREAMBLE_OUTPUTS"
-fi
-
 if [ -f "$STACK_PREAMBLE_OUTPUTS" ]; then
 	INFO "Loading: $STACK_PREAMBLE_OUTPUTS"
 	. "$STACK_PREAMBLE_OUTPUTS"
@@ -55,12 +48,7 @@ if [ -n "$s3_buckets" ]; then
 fi
 
 # Provide the ability to optionally delete existing AWS SSH key
-if [ -z "$KEEP_SSH_KEY" -o x"$KEEP_SSH_KEY" = x"false" ] && [ -n "$SSH_KEY_EXISTS" -a -n "$bosh_ssh_key_name" ] && \
-	"$AWS_CLI" ec2 describe-key-pairs --key-names "$bosh_ssh_key_name" >/dev/null 2>&1; then
-
-	INFO "Deleting SSH key: '$bosh_ssh_key_name'"
-	"$AWS_CLI" ec2 delete-key-pair --key-name "$bosh_ssh_key_name"
-fi
+[ x"$DELETE_AWS_SSH_KEY" = x"true" ] && delete_aws_key "$BOSH_SSH_KEY_NAME"
 
 # This is slight stupid when there are sub-Cloudformation stacks, as these get deleted as well. We could filter them out, but
 # unless our filtering is very strict & complicated it could incorrectly filter out stacks we want to delete. So, rather than

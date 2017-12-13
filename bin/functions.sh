@@ -104,6 +104,26 @@ stack_file_name(){
 	echo "$deployment_name-`echo $stack_file | sed $SED_EXTENDED -e "s/^$AWS_CONFIG_PREFIX-//g" -e 's/\.json$//g'`"
 }
 
+check_aws_key(){
+	local keyname="$1"
+
+	[ -z "$keyname" ] && FATAL 'No keyname provided'
+
+	# Check if we have an existing AWS SSH key that has the correct name
+	"$AWS_CLI" ec2 describe-key-pairs --key-names "$keyname" >/dev/null 2>&1 || return 1
+}
+
+delete_aws_key(){
+	local keyname="$1"
+
+	if check_aws_key "$keyname"; then
+		INFO 'Deleting AWS SSH key'
+		"$AWS_CLI" ec2 delete-key-pair --key-name "$keyname"
+	else
+		WARN "AWS SSH key does not exist: $keyname"
+	fi
+}
+
 find_aws(){
 	if which aws >/dev/null 2>&1; then
 		AWS_CLI="`which aws`"

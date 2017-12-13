@@ -15,7 +15,6 @@ if [ -d "$STACK_OUTPUTS_DIR" ] && [ -z "$SKIP_STACK_OUTPUTS_DIR" -o x"$SKIP_STAC
 fi
 
 PREAMBLE_STACK="$DEPLOYMENT_NAME-preamble"
-BOSH_SSH_KEY_NAME="$DEPLOYMENT_NAME-key"
 
 # We don't want to store the full path when we add the ssh-key location, so we use a relative one - but we use the absolute one for our checks
 BOSH_SSH_KEY_FILENAME="$DEPLOYMENT_DIR/ssh-key"
@@ -164,7 +163,7 @@ if [ -n "$NEW_OUTPUTS" ]; then
 fi
 
 # Check if we have an existing AWS SSH key that has the correct name
-"$AWS_CLI" ec2 describe-key-pairs --key-names "$BOSH_SSH_KEY_NAME" >/dev/null 2>&1 && AWS_KEY_EXISTS='true'
+check_aws_key "$BOSH_SSH_KEY_NAME" &&  && AWS_KEY_EXISTS='true'
 
 if [ x"$REGENERATE_SSH_KEY" = x"true" -a -f "$BOSH_SSH_KEY_FILENAME" ]; then
 	INFO 'Deleting local SSH key'
@@ -191,8 +190,7 @@ if [ x"$AWS_KEY_EXISTS" = x"true" -a x"$DELETE_AWS_SSH_KEY" != x"true" ]; then
 fi
 
 if [ x"$AWS_KEY_EXISTS" = x"true" -a x"$DELETE_AWS_SSH_KEY" = x"true" ]; then
-	INFO 'Deleting AWS SSH key'
-	"$AWS_CLI" ec2 delete-key-pair --key-name "$BOSH_SSH_KEY_NAME"
+	delete_aws_key "$BOSH_SSH_KEY_NAME"
 
 	AWS_KEY_EXISTS='false'
 fi
