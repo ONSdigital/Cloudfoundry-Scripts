@@ -62,10 +62,10 @@ for i in ${@:-`ls vendor/`}; do
 
 			#
 			if [ x"$subfolder" = x'releases/' ]; then
-				if [ -f "$subfolder$i/version_file" ]; then
-					eval `awk -F\. '!/^#/{printf("major=%d minor=%d patch=%d new_minor=%d",$1,$2,$3,$2+1}' "$subfolder$i/version_file"`
+				if [ -f "$subfolder$i/version.txt" ]; then
+					eval `awk -F\. '!/^#/{printf("major=%d minor=%d patch=%d new_minor=%d",$1,$2,$3,$2+1}' "$subfolder$i/version.txt"`
 
-					echo "${major:-0}.${new_minor:-1}.${patch:-0}" >"$subfolder$i/version_file"
+					echo "${major:-0}.${new_minor:-1}.${patch:-0}" >"$subfolder$i/version.txt"
 				fi
 			fi
 		fi
