@@ -215,12 +215,11 @@ check_existing_parameters(){
 		elif [ x"$lower_varname" = x'multi_az' -a x"$IGNORE_EXISTING_MULTIAZ_CONFIG" = x'true' ] ||
 			[ -n "$upper_value" -a x"$IGNORE_EXISTING_PARAMETERS" = x'true' ]; then
 
-			[ -n "$lower_value" ] && message='Updating' || message='Setting'
-
 			INFO "Setting $varname to $upper_value"
 			updated_value="$upper_value"
+
 		elif [ -n "$lower_value" ]; then
-			INFO "Retaining $varname value $lower_value"
+			DEBUG "Retaining $varname value $lower_value"
 			updated_value="$lower_value"
 		fi
 
