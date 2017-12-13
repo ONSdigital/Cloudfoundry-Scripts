@@ -205,8 +205,10 @@ check_existing_parameters(){
 		[ x"$lower_value" = x'$' ] && unset lower_value
 		[ x"$upper_value" = x'$' ] && unset upper_value
 
+		echo "$lower_varname" | grep -Eq '_password$' && password=1
+
 		# Check if this is a password and if we need to re/generate a password
-		if echo "$lower_varname" | grep -Eq '_password$' && [ -z "$lower_value" -o x"$IGNORE_EXISTING_PASSWORDS" = x'true' ]; then
+		if [ 0$password -eq 1 ] && [ -z "$lower_value" -o x"$IGNORE_EXISTING_PASSWORDS" = x'true' ]; then
 			INFO "Generating new password for $varname"
 			updated_value="`generate_password 32`"
 
@@ -219,14 +221,16 @@ check_existing_parameters(){
 			updated_value="$upper_value"
 
 		elif [ -n "$lower_value" ]; then
-			DEBUG "Retaining $varname value $lower_value"
+			[ 0$password -eq 1 ] && redacted='[REDACTED]'
+
+			DEBUG "Retaining $varname value ${redacted:-$lower_value}"
 			updated_value="$lower_value"
 		fi
 
 		# Only update if we have a value
 		[ -n "$updated_value" ] && eval "$upper_varname"="$updated_value"
 
-		unset password password_exists updated_value
+		unset password redacted updated_value
 	done
 }
 
@@ -308,7 +312,7 @@ EOF
 
 	if diff -q "$updated_parameters" "$parameters_file"; then
 		INFO 'No update required'
-	else	
+	else
 		INFO 'Updating'
 		mv -f "$updated_parameters" "$parameters_file"
 	fi
@@ -443,7 +447,7 @@ findpath(){
 		# Older ones should have readlink -k
 		real_dir="`readlink -f \"$path\"`"
 
-		
+
 		_findpath='reallink'
 	fi
 
