@@ -22,6 +22,10 @@ shift 1
 
 cd "$RELEASE_DIR"
 
+[ -f "release/$_r/version.txt" ] || echo "0.1.0" >version.txt
+
+version="`cat version.txt`"
+
 # Ensure required dirs & files exist
 [ -d "config" ] || mkdir config
 [ -f config/blobs.yml ] || touch config/blobs.yml
@@ -38,5 +42,7 @@ if [ -d "$RELEASE_BLOB_SOURCE" ]; then
 	done
 fi
 
+
+
 INFO "Creating release: $RELEASE_NAME"
-"$BOSH_CLI" create-release --tty --force --tarball "$RELEASE_NAME.tgz"
+"$BOSH_CLI" create-release --tty --force --version="$version" --tarball "$RELEASE_NAME.tgz"

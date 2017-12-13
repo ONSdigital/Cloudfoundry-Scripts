@@ -290,12 +290,15 @@ if [ x"$REUPLOAD_RELEASES" = x'true' ]; then
 		if "$BOSH_CLI" releases | awk -v release="$release_name" 'BEGIN{ rc=1 }{ if($1 == release) rc=0 }END{ exit rc }'; then
 			INFO "Checking for release version: $release_name"
 			# Bosh prints the versions for a release in decreasing order
-			version="`"$BOSH_CLI" releases --no-color | awk -v release="$release_name" '{ if($1 == release){ gsub("\\\*","",$2); printf("%s",$2); exit 0 } }'`"
+			current_version="`"$BOSH_CLI" releases --no-color | awk -v release="$release_name" '{ if($1 == release){ gsub("\\\*","",$2); printf("%s",$2); exit 0 } }'`"
+			local_version="`[ -f "releases/$_r/version.txt" ] && cat version.txt`"
 
 			# Check the latest version in the version file
 			latest_version="`awk '{ if($1 == "version:" ) print $2 }' "releases/$_r/dev_releases/$release_name/index.yml" | sort | head -n 1`"
 
-			[ x"$version" != x"$latest_version" ] && upload_release=1
+			[ x"$local_version" != x"$latest_version" ] && FATAL "Version mismatch version.txt:$local_version != index.yml:$latest_version"
+
+			[ x"$current_version" != x"$local_version" ] && upload_release=1
 		else
 			INFO "Release does not exist: $release_name"
 			upload_release=1
