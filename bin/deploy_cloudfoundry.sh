@@ -291,7 +291,7 @@ if [ x"$REUPLOAD_RELEASES" = x'true' ]; then
 			INFO "Checking for release version: $release_name"
 			# Bosh prints the versions for a release in decreasing order
 			current_version="`"$BOSH_CLI" releases --no-color | awk -v release="$release_name" '{ if($1 == release){ gsub("\\\*","",$2); printf("%s",$2); exit 0 } }'`"
-			local_version="`[ -f "releases/$_r/version.txt" ] && cat version.txt`"
+			local_version="`[ -f "releases/$_r/version.txt" ] && cat "releases/$_r/version.txt"`"
 
 			# Check the latest version in the version file
 			latest_version="`awk '{ if($1 == "version:" ) print $2 }' "releases/$_r/dev_releases/$release_name/index.yml" | sort | head -n 1`"

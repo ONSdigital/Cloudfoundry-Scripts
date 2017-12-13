@@ -22,7 +22,7 @@ shift 1
 
 cd "$RELEASE_DIR"
 
-[ -f "release/$_r/version.txt" ] || echo "0.1.0" >version.txt
+[ -f "version.txt" ] || echo "0.1.0" >version.txt
 
 version="`cat version.txt`"
 
