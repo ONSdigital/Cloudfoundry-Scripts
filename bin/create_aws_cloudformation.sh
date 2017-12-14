@@ -163,7 +163,7 @@ if [ -n "$NEW_OUTPUTS" ]; then
 fi
 
 # Check if we have an existing AWS SSH key that has the correct name
-check_aws_key "$BOSH_SSH_KEY_NAME" &&  && AWS_KEY_EXISTS='true'
+check_aws_key "$BOSH_SSH_KEY_NAME" && AWS_KEY_EXISTS='true'
 
 if [ x"$REGENERATE_SSH_KEY" = x"true" -a -f "$BOSH_SSH_KEY_FILENAME" ]; then
 	INFO 'Deleting local SSH key'
