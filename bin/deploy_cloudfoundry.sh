@@ -117,7 +117,7 @@ if [ x"$NO_CREATE_RELEASES" != x'true' -o ! -f "$BOSH_LITE_RELEASES" ]; then
 			# complains if the version number isn't different and fails
 			update_yml_var "$BOSH_LITE_RELEASES" "$release_url_varname" "$release_url_value"
 
-			REUPLOAD_RELEASES='true'
+			UPLOAD_RELEASES=1
 		fi
 	done
 fi
@@ -128,7 +128,7 @@ if [ ! -f "$BOSH_LITE_STATE_FILE" ]; then
 	STORE_ACTION='Storing'
 
 	# (Re)upload the stemcell
-	REUPLOAD_STEMCELL='true'
+	UPLOAD_STEMCELL='true'
 else
 	CREATE_ACTION='Updating'
 	STORE_ACTION='Potentially updating'
@@ -271,7 +271,7 @@ for _s in `"$BOSH_CLI" interpolate --no-color --path /stemcells "$BOSH_FULL_INTE
 done
 
 # Unfortunately, there is no way currently (2017/10/19) for Bosh/Director to automatically upload a stemcell in the same way it does for releases
-if [ x"$REUPLOAD_STEMCELL" = x'true' ]; then
+if [ 0$UPLOAD_STEMCELL -eq 1 -o x"$REUPLOAD_STEMCELL" = x'true' ]; then
 	[ -z "$STEMCELL_URL" ] && FATAL 'No STEMCELL_URL provided, unable to upload a stemcell'
 
 	[ -n "$BOSH_STEMCELL_VERSION" ] && URL_EXTENSION="?v=$BOSH_STEMCELL_VERSION"
@@ -283,10 +283,11 @@ if [ x"$REUPLOAD_STEMCELL" = x'true' ]; then
 
 fi
 
-if [ x"$REUPLOAD_RELEASES" = x'true' ]; then
+if [ 0$UPLOAD_RELEASES -eq 1 -o REUPLOAD_STEMCELLx"$REUPLOAD_RELEASES" = x'true' ]; then
 	for _r in `ls releases`; do
 		release_name="`echo $_r | sed $SED_EXTENDED -e 's/-release$//g'`"
 
+		INFO "Checking for release $_r"
 		if "$BOSH_CLI" releases | awk -v release="$release_name" 'BEGIN{ rc=1 }{ if($1 == release) rc=0 }END{ exit rc }'; then
 			INFO "Checking for release version: $release_name"
 			# Bosh prints the versions for a release in decreasing order
