@@ -69,7 +69,7 @@ findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 if [ ! -f "$BOSH_LITE_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_LITE_STATIC_IPS" = x"true" ]; then
 	INFO 'Generating Bosh Lite static IPs'
 	"$BOSH_CLI" interpolate \
-		--vars-errs \
+		--var-errs \
 		--vars-env="$ENV_PREFIX_NAME" \
 		"$BOSH_LITE_STATIC_IPS_FILE" >"$BOSH_LITE_INTERPOLATED_STATIC_IPS"
 fi
@@ -138,7 +138,7 @@ fi
 INFO "$STORE_ACTION common passwords"
 "$BOSH_CLI" interpolate \
 	--tty \
-	--vars-errs \
+	--var-errs \
 	--vars-store="$BOSH_COMMON_VARIABLES" \
 	"$BOSH_COMMON_VARIABLES_MANIFEST"
 
