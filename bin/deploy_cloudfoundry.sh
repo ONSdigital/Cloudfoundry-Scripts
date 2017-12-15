@@ -69,6 +69,7 @@ findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 if [ ! -f "$BOSH_LITE_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_LITE_STATIC_IPS" = x"true" ]; then
 	INFO 'Generating Bosh Lite static IPs'
 	"$BOSH_CLI" interpolate \
+		--vars-errs \
 		--vars-env="$ENV_PREFIX_NAME" \
 		"$BOSH_LITE_STATIC_IPS_FILE" >"$BOSH_LITE_INTERPOLATED_STATIC_IPS"
 fi
@@ -137,6 +138,7 @@ fi
 INFO "$STORE_ACTION common passwords"
 "$BOSH_CLI" interpolate \
 	--tty \
+	--vars-errs \
 	--vars-store="$BOSH_COMMON_VARIABLES" \
 	"$BOSH_COMMON_VARIABLES_MANIFEST"
 
@@ -157,10 +159,10 @@ INFO "$CREATE_ACTION Bosh environment"
 "$BOSH_CLI" create-env --tty --state="$BOSH_LITE_STATE_FILE" "$BOSH_LITE_INTERPOLATED_MANIFEST"
 
 INFO "$STORE_ACTION Bosh Director certificate"
-"$BOSH_CLI" interpolate --no-color --path='/metadata/director_ca' "$BOSH_LITE_INTERPOLATED_MANIFEST" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
+"$BOSH_CLI" interpolate --no-color --var-errs --path='/metadata/director_ca' "$BOSH_LITE_INTERPOLATED_MANIFEST" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
 
 INFO "$STORE_ACTION Bosh Director password"
-BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate --no-color --path='/metadata/director_secret' "$BOSH_LITE_INTERPOLATED_MANIFEST"`"
+BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate --no-color --var-errs --path='/metadata/director_secret' "$BOSH_LITE_INTERPOLATED_MANIFEST"`"
 
 if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ] || ! grep -Eq "^BOSH_CLIENT_SECRET='$BOSH_CLIENT_SECRET'" "$BOSH_DIRECTOR_CONFIG"; then
 	INFO 'Generating Bosh configuration'
@@ -194,6 +196,7 @@ if [ ! -f "$BOSH_FULL_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_FULL_STATIC_IP
 	INFO 'Generating Bosh static IPs'
 	"$BOSH_CLI" interpolate \
 		--no-color \
+		--var-errs \
 		--vars-env="$ENV_PREFIX_NAME" \
 		"$BOSH_FULL_STATIC_IPS_FILE" >"$BOSH_FULL_INTERPOLATED_STATIC_IPS"
 fi
@@ -204,6 +207,7 @@ INFO 'Setting CloudConfig'
 # Set release versions
 for component_version in `sh -c "'$BOSH_CLI' interpolate \
 		--no-color \
+		--var-errs \
 		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
 		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
@@ -255,6 +259,7 @@ done
 INFO 'Interpolating Bosh Full manifest'
 sh -c "'$BOSH_CLI' interpolate \
 	--no-color \
+	--var-errs \
 	$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 	$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
 	--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
@@ -266,7 +271,7 @@ sh -c "'$BOSH_CLI' interpolate \
 
 
 INFO 'Checking if we need to upload any stemcells'
-for _s in `"$BOSH_CLI" interpolate --no-color --path /stemcells "$BOSH_FULL_INTERPOLATED_MANIFEST" | awk '{if($1 == "os:") print $2}'`; do
+for _s in `"$BOSH_CLI" interpolate --no-color --var-errs --path /stemcells "$BOSH_FULL_INTERPOLATED_MANIFEST" | awk '{if($1 == "os:") print $2}'`; do
 	"$BOSH_CLI" stemcells --no-color | awk -v stemcell="$_s" 'BEGIN{ rc=1 }{if($3 == stemcell) rc=0 }END{ exit rc }' || REUPLOAD_STEMCELL='true'
 done
 
