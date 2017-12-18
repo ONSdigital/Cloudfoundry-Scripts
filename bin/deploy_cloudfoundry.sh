@@ -207,7 +207,6 @@ INFO 'Setting CloudConfig'
 # Set release versions
 for component_version in `sh -c "'$BOSH_CLI' interpolate \
 		--no-color \
-		--var-errs \
 		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
 		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
