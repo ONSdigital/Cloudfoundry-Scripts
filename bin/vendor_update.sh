@@ -37,7 +37,7 @@ for i in ${@:-`ls vendor/`}; do
 		read view_diff
 
 		if [ x"$view_diff" = x"Y" -o x"$view_diff" = x"y" ]; then
-			if sh -c "diff -Ncrdx .git -x \*.swp $diff_ignore_opt 'vendor/$i' '$subfolder$i'"; then
+			if sh -c "diff -Ncrdx .git -x \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'"; then
 				echo "No differences"
 
 				continue
