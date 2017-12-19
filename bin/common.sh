@@ -75,6 +75,9 @@ EOF
 	RELEASE_CONFIG_FILE="$DEPLOYMENT_DIR/release-config.sh"
 	STEMCELL_CONFIG_FILE="$DEPLOYMENT_DIR/stemcells-config.sh"
 
+	# Required by setup-cf_admin.sh
+	BOSH_FULL_VARIABLES_STORE="$DEPLOYMENT_DIR_RELATIVE/full-var-store.yml"
+
 	# Load the environment config if we have been given one
 	if [ -f "$DEPLOYMENTS_CONFIG_DIR/$DEPLOYMENT_NAME/environment.sh" ]; then
 		# We want the vars in this script to be exported so that any subscript can see them, but we don't want to have all vars available

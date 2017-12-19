@@ -268,7 +268,6 @@ sh -c "'$BOSH_CLI' interpolate \
 	--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 	'$BOSH_FULL_MANIFEST_FILE'" >"$BOSH_FULL_INTERPOLATED_MANIFEST"
 
-
 INFO 'Checking if we need to upload any stemcells'
 for _s in `"$BOSH_CLI" interpolate --no-color --var-errs --path /stemcells "$BOSH_FULL_INTERPOLATED_MANIFEST" | awk '{if($1 == "os:") print $2}'`; do
 	"$BOSH_CLI" stemcells --no-color | awk -v stemcell="$_s" 'BEGIN{ rc=1 }{if($3 == stemcell) rc=0 }END{ exit rc }' || REUPLOAD_STEMCELL='true'

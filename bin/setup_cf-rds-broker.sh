@@ -68,11 +68,11 @@ applications:
     # Should we create a special user just for this?
     AUTH_USER: $RDS_BROKER_USER
     AUTH_PASS: $RDS_BROKER_PASSWORD
-    DB_URL: $apps_rds_instance_dns
-    DB_PORT: $apps_rds_instance_port
+    DB_URL: $apps_db_dns
+    DB_PORT: $apps_db_port
     DB_NAME: $RDS_BROKER_DB_NAME
-    DB_USER: $apps_rds_instance_username
-    DB_PASS: $apps_rds_instance_password
+    DB_USER: $apps_db_admin_username
+    DB_PASS: $apps_db_admin_password
     DB_TYPE: postgres
     #DB_SSLMODE:''
     ENC_KEY: $RDS_BROKER_ENC_KEY

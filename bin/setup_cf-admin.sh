@@ -16,8 +16,6 @@ DONT_SKIP_SSL_VALIDATION="$6"
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
 
-WARN 'THIS WILL FAIL DUE TO LACK OF UPDATING TO USE INTERNAL TEMPLATE PASSWORDS'
-
 [ -f "$CF_CREDENTIALS" ] && . "$CF_CREDENTIALS"
 
 UAA_ADMIN_USERNAME="${UAA_ADMIN_USERNAME:-admin}"
@@ -25,6 +23,11 @@ UAA_ADMIN_USERNAME="${UAA_ADMIN_USERNAME:-admin}"
 [ -z "$USERNAME" ] && FATAL 'No username provided'
 [ -z "$EMAIL" ] && FATAL 'No email address supplied'
 [ -z "$CF_CREDENTIALS" ] && FATAL 'Unknown CF credentials filename'
+
+INFO "$STORE_ACTION CF Admin Password"
+UAA_ADMIN_CLIENT_SECRET="`"$BOSH_CLI" interpolate --no-color --var-errs --path='/uaa_admin_client_secret' "$BOSH_FULL_VARIABLES_STORE"`"
+
+[ -z "$UAA_ADMIN_CLIENT_SECRET" ] && FATAL 'Unable to determine UAA admin client secret'
 
 # Generate config if it does not exist, or if any of the values have changed
 if [ ! -f "$CF_CREDENTIALS" ] ||
@@ -59,7 +62,7 @@ INFO "Targetting UAA: $uaa_dns"
 uaac target "$uaa_dns" "$UAA_EXTRA_OPTS"
 
 INFO "Obtaining initial $UAA_ADMIN_USERNAME user token"
-uaac token client get "$UAA_ADMIN_USERNAME" -s "$uaa_admin_client_secret"
+uaac token client get "$UAA_ADMIN_USERNAME" -s "$UAA_ADMIN_CLIENT_SECRET"
 
 # Hmmm... there is a better way
 if uaac user get "$CF_ADMIN_USERNAME" >/dev/null || uaac client get "$CF_ADMIN_USERNAME" >/dev/null ; then

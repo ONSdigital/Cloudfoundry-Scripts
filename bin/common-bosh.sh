@@ -114,7 +114,7 @@ BOSH_FULL_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Full-V
 BOSH_FULL_INTERPOLATED_MANIFEST="$DEPLOYMENT_DIR_RELATIVE/full-interpolated.yml"
 BOSH_FULL_INTERPOLATED_STATIC_IPS="$DEPLOYMENT_DIR_RELATIVE/full-static-ips.yml"
 #
-BOSH_FULL_VARIABLES_STORE="$DEPLOYMENT_DIR_RELATIVE/full-var-store.yml"
+# BOSH_FULL_VARIABLES_STORE -> relocated to common.sh for use by setup-cf_admin.sh
 
 # Check for required config
 [ -d "$MANIFESTS_DIR" ] || FATAL "$MANIFESTS_DIR directory does not exist"
