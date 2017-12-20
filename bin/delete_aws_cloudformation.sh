@@ -48,7 +48,10 @@ if [ -n "$s3_buckets" ]; then
 fi
 
 # Provide the ability to optionally delete existing AWS SSH key
-[ x"$DELETE_AWS_SSH_KEY" = x"true" ] && delete_aws_key "$BOSH_SSH_KEY_NAME"
+if [ x"$DELETE_AWS_SSH_KEY" = x"true" ]; then
+	INFO "Deleting AWS key '$BOSH_SSH_KEY_NAME'"
+	delete_aws_key "$BOSH_SSH_KEY_NAME"
+fi
 
 # This is slight stupid when there are sub-Cloudformation stacks, as these get deleted as well. We could filter them out, but
 # unless our filtering is very strict & complicated it could incorrectly filter out stacks we want to delete. So, rather than
