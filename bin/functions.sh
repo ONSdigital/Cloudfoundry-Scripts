@@ -214,7 +214,7 @@ check_existing_parameters(){
 
 		# Do we need to reset the MultiAz option?
 		# Have we been given an updated value?
-		elif [ x"$lower_varname" = x'multi_az' -a x"$IGNORE_EXISTING_MULTIAZ_CONFIG" = x'true' ] ||
+		elif [ x"$lower_varname" = x'availability:' -a x"$IGNORE_EXISTING_AVAILABILITY_CONFIG" = x'true' ] ||
 			[ -n "$upper_value" -a x"$IGNORE_EXISTING_PARAMETERS" = x'true' ]; then
 
 			INFO "Setting $varname to $upper_value"

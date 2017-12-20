@@ -29,20 +29,18 @@ MANIFESTS_DIR_RELATIVE="${7:-${MANIFESTS_DIR_RELATIVE:-Bosh-Manifests}}"
 INFO 'Loading AWS outputs'
 load_outputs "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
 
-# MultiAZ assumes HA
-eval multi_az="\$${ENV_PREFIX}multi_az"
-# SingleAZ with HA
-eval single_az_ha="\$${ENV_PREFIX}single_az_ha"
+# Availability type
+eval availability="\$${ENV_PREFIX}availability:"
 
 # Bosh Lite is not HA
 BOSH_LITE_STATIC_IPS_NAME="$BOSH_STATIC_IPS_PREFIX"
 
-if [ x"$multi_az" = x"true" ]; then
+if [ x"$availability" = x"MultiAZ" ]; then
 	BOSH_FULL_MANIFEST_NAME="$BOSH_FULL_MANIFEST_PREFIX-MultiAZ"
 	# The only differences between MultiAZ and singleAZ +/- HA are the number of availability zones
 	BOSH_CLOUD_MANIFEST_NAME="$BOSH_CLOUD_MANIFEST_PREFIX-MultiAZ"
 	BOSH_FULL_STATIC_IPS_NAME="$BOSH_STATIC_IPS_PREFIX-MultiAZ"
-elif [ x"$single_az_ha" = x"true" ]; then
+elif [ x"$availability" = x"SingleAZ-HA" ]; then
 	BOSH_FULL_MANIFEST_NAME="$BOSH_FULL_MANIFEST_PREFIX-HA"
 	# The singleAZ HA CPI manifest is the same as a singleAZ CPI manifest, the differences occur within the main Cloudfoundry manifest
 	BOSH_CLOUD_MANIFEST_NAME="$BOSH_CLOUD_MANIFEST_PREFIX"
