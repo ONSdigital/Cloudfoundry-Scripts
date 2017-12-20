@@ -96,11 +96,12 @@ for i in Lite Full; do
 	done
 done
 
+# XXX This needs tidying
 # Common variables
 BOSH_COMMON_VARIABLES="$DEPLOYMENT_DIR_RELATIVE/common-variables.yml"
 BOSH_COMMON_VARIABLES_MANIFEST="$MANIFESTS_DIR_RELATIVE/Bosh-Common-Manifests/Common-Variables.yml"
 BOSH_COMMON_AVAILABILITY_VARIABLES="$MANIFESTS_DIR_RELATIVE/Bosh-Common-Manifests/$BOSH_AVAILABILITY_VARIABLES_NAME.yml"
-
+BOSH_COMMON_AVAILABILITY_INTERPOLATED="$DEPLOYMENT_DIR_RELATIVE/common-variables-interpolated.yml"
 
 # Bosh Lite
 BOSH_LITE_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/$BOSH_LITE_MANIFEST_NAME-$CPI_TYPE.yml"
@@ -128,6 +129,7 @@ BOSH_FULL_INTERPOLATED_STATIC_IPS="$DEPLOYMENT_DIR_RELATIVE/full-static-ips.yml"
 #
 # BOSH_FULL_VARIABLES_STORE -> relocated to common.sh for use by setup-cf_admin.sh
 
+# This needs simplifying
 # Check for required config
 [ -d "$MANIFESTS_DIR" ] || FATAL "$MANIFESTS_DIR directory does not exist"
 [ -d "$STACK_OUTPUTS_DIR" ] || FATAL "Cloud outputs directory '$STACK_OUTPUTS_DIR' does not exist"
