@@ -14,12 +14,12 @@ BASE_DIR="`dirname \"$0\"`"
 
 # Check if we have any existing Bosh state
 if [ -f "$BOSH_LITE_STATE_FILE" ]; then
-	if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
+	if [ x"$DELETE_BOSH_ENV" = x'true' ]; then
 		# If we have been asked to delete the Bosh env, we need to retain the state file, otherwise we cannot
 		# find the correct VM to delete
 		WARN "Not deleting Bootstrap Bosh state file as we need this to delete the Bootstrap Bosh environment"
 		WARN "The state file will be deleted after we successfully, delete Bosh"
-	elif [ x"$DELETE_BOSH_STATE" = x"true" ]; then
+	elif [ x"$DELETE_BOSH_STATE" = x'true' ]; then
 		# If we have manually deleted the Bosh VM, we should delete the state file
 		INFO 'Removing Bosh state file'
 		rm -f "$BOSH_LITE_STATE_FILE"
@@ -29,13 +29,15 @@ if [ -f "$BOSH_LITE_STATE_FILE" ]; then
 fi
 
 # Do we need to generate the network configuration?
-if [ ! -f "$NETWORK_CONFIG_FILE" -o x"$REGENERATE_NETWORKS_CONFIG" = x"true" ]; then
+if [ ! -f "$NETWORK_CONFIG_FILE" -o x"$REGENERATE_NETWORKS_CONFIG" = x'true' ]; then
 	INFO 'Generating network configuration'
 	echo '# Cloudfoundry network configuration' >"$NETWORK_CONFIG_FILE"
-	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*)_cidr\)\).*/\1/gp' "$BOSH_FULL_CLOUD_CONFIG_FILE" "$BOSH_LITE_MANIFEST_FILE" | sort -u`; do
+	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*)_cidr\)\).*/\1/gp' "$BOSH_CLOUD_CONFIG_FILE" "$BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE" "$BOSH_LITE_MANIFEST_FILE" | sort -u`; do
 		eval cidr="\$${ENV_PREFIX}${i}_cidr"
 		"$BASE_DIR/process_cidrs.sh" "$i" "$cidr"
 	done >>"$NETWORK_CONFIG_FILE"
+
+	REGENERATE_NETWORKS_CONFIG=true
 fi
 
 INFO 'Setting Bosh deployment name'
@@ -47,7 +49,7 @@ export_file_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"
 
 # Do we want to use the existing versions of stemcells/releases?  Individual items can still be overridden if required
 # We default to using existing versions unless we have been told not to
-if [ x"$USE_EXISTING_VERSIONS" != x"false" ]; then
+if [ x"$USE_EXISTING_VERSIONS" != x'false' ]; then
 	if [ -f "$RELEASE_CONFIG_FILE" ]; then
 		INFO 'Loading Bosh release versions'
 		. "$RELEASE_CONFIG_FILE"
@@ -66,7 +68,7 @@ findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 
 # Bosh doesn't seem to be able to handle templating (eg ((variable))) and variables files at the same time, so we need to expand the variables and then use
 # the output when we do a bosh create-env/deploy
-if [ ! -f "$BOSH_LITE_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_LITE_STATIC_IPS" = x"true" ]; then
+if [ ! -f "$BOSH_LITE_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_LITE_STATIC_IPS" = x'true' ]; then
 	INFO 'Generating Bosh Lite static IPs'
 	"$BOSH_CLI" interpolate \
 		--var-errs \
@@ -75,7 +77,7 @@ if [ ! -f "$BOSH_LITE_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_LITE_STATIC_IP
 fi
 
 # Remove Bosh?
-if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
+if [ x"$DELETE_BOSH_ENV" = x'true' ]; then
 	INFO 'Removing existing Bosh bootstrap environment'
 	if [ -f "$BOSH_LITE_INTERPOLATED_MANIFEST" ]; then
 		"$BOSH_CLI" delete-env \
@@ -168,7 +170,7 @@ INFO "$STORE_ACTION Bosh Director certificate"
 INFO "$STORE_ACTION Bosh Director password"
 BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate --no-color --var-errs --path='/metadata/director_secret' "$BOSH_LITE_INTERPOLATED_MANIFEST"`"
 
-if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x"true" ] || ! grep -Eq "^BOSH_CLIENT_SECRET='$BOSH_CLIENT_SECRET'" "$BOSH_DIRECTOR_CONFIG"; then
+if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x'true' ] || ! grep -Eq "^BOSH_CLIENT_SECRET='$BOSH_CLIENT_SECRET'" "$BOSH_DIRECTOR_CONFIG"; then
 	INFO 'Generating Bosh configuration'
 	cat <<EOF >"$BOSH_DIRECTOR_CONFIG"
 # Bosh deployment config
@@ -196,7 +198,7 @@ INFO 'Pointing Bosh client at newly deployed Bosh Director'
 INFO 'Attempting to login'
 "$BOSH_CLI" log-in --tty >&2
 
-if [ ! -f "$BOSH_FULL_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_FULL_STATIC_IPS" = x"true" ]; then
+if [ ! -f "$BOSH_FULL_INTERPOLATED_STATIC_IPS" -o x"$REGENERATE_NETWORKS_CONFIG" = x'true' ]; then
 	INFO 'Generating Bosh static IPs'
 	"$BOSH_CLI" interpolate \
 		--no-color \
@@ -205,8 +207,12 @@ if [ ! -f "$BOSH_FULL_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_FULL_STATIC_IP
 		"$BOSH_FULL_STATIC_IPS_FILE" >"$BOSH_FULL_INTERPOLATED_STATIC_IPS"
 fi
 
-INFO 'Setting CloudConfig'
-"$BOSH_CLI" update-cloud-config --tty --vars-env="$ENV_PREFIX_NAME" --vars-file="$BOSH_FULL_CLOUD_AVAILABILITY_FILE" "$BOSH_FULL_CLOUD_CONFIG_FILE"
+# Bosh doesn't expand variables from within variables files
+INFO 'Generating Cloud Config Variables'
+"$BOSH_CLI" interpolate --var-errs --vars-env="$ENV_PREFIX_NAME" "$BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE" >"$BOSH_CLOUD_VARIABLES_AVAILABILITY_INTERPOLATED"
+
+INFO 'Setting Cloud Config'
+"$BOSH_CLI" update-cloud-config --tty --vars-env="$ENV_PREFIX_NAME" --vars-file="$BOSH_CLOUD_VARIABLES_AVAILABILITY_INTERPOLATED" "$BOSH_CLOUD_CONFIG_FILE"
 
 # Set release versions
 for component_version in `sh -c "'$BOSH_CLI' interpolate \
@@ -235,7 +241,7 @@ for component_version in `sh -c "'$BOSH_CLI' interpolate \
 		INFO "Overriding ${lower_value:-latest} version and using $upper_value for $component_version"
 		version="$upper_value"
 
-	elif [ x"$USE_EXISTING_VERSIONS" = x"true" -a -n "$lower_value" ]; then
+	elif [ x"$USE_EXISTING_VERSIONS" = x'true' -a -n "$lower_value" ]; then
 		INFO "Using previous version of $lower_value for $component_version"
 		version="$lower_value"
 
@@ -336,13 +342,13 @@ INFO 'Deploying Bosh'
 "$BOSH_CLI" deploy --tty "$BOSH_FULL_INTERPOLATED_MANIFEST"
 
 # Do we need to run any errands (eg smoke tests, registrations)
-if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x"true" -a -n "$POST_DEPLOY_ERRANDS" ]; then
+if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x'true' -a -n "$POST_DEPLOY_ERRANDS" ]; then
 	INFO 'Running post deployment smoke tests'
 	for _e in $POST_DEPLOY_ERRANDS; do
 		INFO "Running errand: $_e"
 		"$BOSH_CLI" run-errand --tty "$_e"
 	done
-elif [ x"$SKIP_POST_DEPLOY_ERRANDS" = x"true" ]; then
+elif [ x"$SKIP_POST_DEPLOY_ERRANDS" = x'true' ]; then
 	INFO 'Skipping run of post deploy errands'
 
 elif [ -z "$POST_DEPLOY_ERRANDS" ]; then
