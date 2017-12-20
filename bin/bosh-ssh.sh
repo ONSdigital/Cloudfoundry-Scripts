@@ -17,12 +17,9 @@ GATEWAY_HOST="${4:-$GATEWAY_HOST}"
 
 [ -z "$SSH_HOST" ] && FATAL 'No host to ssh onto'
 
+
 if [ -f "$BOSH_SSH_CONFIG" ]; then
 	. "$BOSH_SSH_CONFIG"
-
-	GATEWAY="${GATEWAY_HOST:-$BOSH_ENVIRONMENT}"
-
-	[ -z "$GATEWAY" ] && FATAL 'No gateway host available'
 
 	# Store existing path, in case the full path contains spaces
 	bosh_ssh_key_file_org="$bosh_ssh_key_file"
@@ -44,6 +41,9 @@ if [ -f "$BOSH_SSH_CONFIG" ]; then
 	SSH_OPT="--gw-private-key='$bosh_ssh_key_file'"
 fi
 
+GATEWAY="${GATEWAY_HOST:-$BOSH_ENVIRONMENT}"
+
+[ -z "$GATEWAY" ] && FATAL 'No gateway host available'
 [ -z "$GATEWAY_USER" ] && GATEWAY_USER='vcap'
 
 "$BOSH_CLI" ssh $SSH_OPT --gw-user="$GATEWAY_USER" --gw-host="$GATEWAY" "$SSH_HOST"
