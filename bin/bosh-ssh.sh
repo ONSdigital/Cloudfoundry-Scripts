@@ -17,30 +17,33 @@ GATEWAY_HOST="${4:-$GATEWAY_HOST}"
 
 [ -z "$SSH_HOST" ] && FATAL 'No host to ssh onto'
 
-[ -f "$BOSH_SSH_CONFIG" ] || FATAL "Bosh SSH config does not exist: $BOSH_SSH_CONFIG"
+if [ -f "$BOSH_SSH_CONFIG" ]; then
+	. "$BOSH_SSH_CONFIG"
 
-. "$BOSH_SSH_CONFIG"
+	GATEWAY="${GATEWAY_HOST:-$BOSH_ENVIRONMENT}"
 
-GATEWAY="${GATEWAY_HOST:-$BOSH_ENVIRONMENT}"
+	[ -z "$GATEWAY" ] && FATAL 'No gateway host available'
+
+	# Store existing path, in case the full path contains spaces
+	bosh_ssh_key_file_org="$bosh_ssh_key_file"
+	findpath bosh_ssh_key_file "$bosh_ssh_key_file"
+
+	if stat -c "%a" "$bosh_ssh_key_file" | grep -Evq '^0?600$'; then
+		WARN "Fixing permissions SSH key file: $bosh_ssh_key_file"
+		chmod 0600 "$bosh_ssh_key_file"
+	fi
+
+	# Bosh SSH doesn't handle spaces in the key filename/path
+	if echo "$bosh_ssh_key_file" | grep -q " "; then
+		WARN "Bosh SSH does not handle spaces in the key filename/path: '$bosh_ssh_key_file'"
+		WARN "Using relative path: $bosh_ssh_key_file_org"
+
+		bosh_ssh_key_file="$bosh_ssh_key_file_org"
+	fi
+
+	SSH_OPT="--gw-private-key='$bosh_ssh_key_file'"
+fi
+
 [ -z "$GATEWAY_USER" ] && GATEWAY_USER='vcap'
 
-[ -z "$GATEWAY" ] && FATAL 'No gateway host available'
-
-# Store existing path, in case the full path contains spaces
-bosh_ssh_key_file_org="$bosh_ssh_key_file"
-findpath bosh_ssh_key_file "$bosh_ssh_key_file"
-
-if stat -c "%a" "$bosh_ssh_key_file" | grep -Evq '^0?600$'; then
-	WARN "Fixing permissions SSH key file: $bosh_ssh_key_file"
-	chmod 0600 "$bosh_ssh_key_file"
-fi
-
-# Bosh SSH doesn't handle spaces in the key filename/path
-if echo "$bosh_ssh_key_file" | grep -q " "; then
-	WARN "Bosh SSH does not handle spaces in the key filename/path: '$bosh_ssh_key_file'"
-	WARN "Using relative path: $bosh_ssh_key_file_org"
-
-	bosh_ssh_key_file="$bosh_ssh_key_file_org"
-fi
-
-"$BOSH_CLI" ssh --gw-private-key="$bosh_ssh_key_file" --gw-user="$GATEWAY_USER" --gw-host "$GATEWAY" "$SSH_HOST"
+"$BOSH_CLI" ssh $SSH_OPT --gw-user="$GATEWAY_USER" --gw-host="$GATEWAY" "$SSH_HOST"
