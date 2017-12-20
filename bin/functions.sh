@@ -262,6 +262,16 @@ capitalise_aws(){
 	perl -ne 's/([a-z0-9])([A-Z])/\1_\2/g; print uc($_)'
 }
 
+englishify_aws(){
+	# Turn FooBarBaz -> Foo Bar Baz
+	perl -ne 's/([a-z0-9])([A-Z])/\1 \2/g; print $_'
+}
+
+englishify(){
+	# FOO_BAR_BAZ -> Foo Bar Baz
+	perl -ne 's/([A-Z0-9])([A-Za-z0-9]+)(_|$)/\1\L\2 /g; s/ $//g; print $_'
+}
+
 # decapitalise/uncapitalise doesn't sound 100% correct as it sounds as if they would revert back to original case
 lowercase_aws(){
 	# Turn FooBarBaz -> foo_bar_baz

@@ -131,9 +131,6 @@ INFO "$STORE_ACTION common passwords"
 	--vars-store="$BOSH_COMMON_VARIABLES" \
 	"$BOSH_COMMON_VARIABLES_MANIFEST"
 
-INFO 'Generating Common Variables'
-"$BOSH_CLI" interpolate --var-errs --vars-env="$ENV_PREFIX_NAME" "$BOSH_COMMON_AVAILABILITY_VARIABLES" >"$BOSH_COMMON_AVAILABILITY_INTERPOLATED"
-
 INFO 'Interpolating Bosh Lite manifest'
 sh -c "'$BOSH_CLI' interpolate \
 	--var-errs \
@@ -142,10 +139,9 @@ sh -c "'$BOSH_CLI' interpolate \
 	--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
-	--vars-file='$BOSH_COMMON_AVAILABILITY_INTERPOLATED' \
 	--vars-file='$BOSH_LITE_RELEASES' \
 	--vars-file='$BOSH_LITE_INTERPOLATED_STATIC_IPS' \
-	--vars-store='$BOSH_LITE_VARIABLES_STORE' \
+	--vars-store='$BOSH_LITE_VARS_STORE' \
 	'$BOSH_LITE_MANIFEST_FILE'" >"$BOSH_LITE_INTERPOLATED_MANIFEST"
 
 INFO "$CREATE_ACTION Bosh environment"
@@ -194,12 +190,15 @@ if [ ! -f "$BOSH_FULL_INTERPOLATED_STATIC_IPS" -o x"$REGENERATE_NETWORKS_CONFIG"
 		"$BOSH_FULL_STATIC_IPS_FILE" >"$BOSH_FULL_INTERPOLATED_STATIC_IPS"
 fi
 
+INFO 'Generating Availability Variables'
+"$BOSH_CLI" interpolate --var-errs --vars-env="$ENV_PREFIX_NAME" "$BOSH_FULL_AVAILABILITY_VARIABLES" >"$BOSH_FULL_INTERPOLATED_AVAILABILITY"
+
 # Bosh doesn't expand variables from within variables files
 INFO 'Generating Cloud Config Variables'
-"$BOSH_CLI" interpolate --var-errs --vars-env="$ENV_PREFIX_NAME" "$BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE" >"$BOSH_CLOUD_VARIABLES_AVAILABILITY_INTERPOLATED"
+"$BOSH_CLI" interpolate --var-errs --vars-env="$ENV_PREFIX_NAME" "$BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE" >"$BOSH_FULL_INTERPOLATED_CLOUD_CONFIG_VARS"
 
 INFO 'Setting Cloud Config'
-"$BOSH_CLI" update-cloud-config --tty --vars-env="$ENV_PREFIX_NAME" --vars-file="$BOSH_CLOUD_VARIABLES_AVAILABILITY_INTERPOLATED" "$BOSH_CLOUD_CONFIG_FILE"
+"$BOSH_CLI" update-cloud-config --tty --vars-env="$ENV_PREFIX_NAME" --vars-file="$BOSH_FULL_INTERPOLATED_CLOUD_CONFIG_VARS" "$BOSH_CLOUD_CONFIG_FILE"
 
 # Set release versions
 for component_version in `sh -c "'$BOSH_CLI' interpolate \
@@ -209,7 +208,7 @@ for component_version in `sh -c "'$BOSH_CLI' interpolate \
 		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
 		--vars-env='$ENV_PREFIX_NAME' \
 		--vars-file='$BOSH_COMMON_VARIABLES' \
-		--vars-file='$BOSH_COMMON_AVAILABILITY_INTERPOLATED' \
+		--vars-file='$BOSH_FULL_INTERPOLATED_AVAILABILITY' \
 		--vars-file='$BOSH_FULL_INTERPOLATED_STATIC_IPS' \
 		--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 		'$BOSH_FULL_MANIFEST_FILE'" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
@@ -262,7 +261,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
-	--vars-file='$BOSH_COMMON_AVAILABILITY_INTERPOLATED' \
+	--vars-file='$BOSH_FULL_INTERPOLATED_AVAILABILITY' \
 	--vars-file='$BOSH_FULL_INTERPOLATED_STATIC_IPS' \
 	--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 	'$BOSH_FULL_MANIFEST_FILE'" >"$BOSH_FULL_INTERPOLATED_MANIFEST"
