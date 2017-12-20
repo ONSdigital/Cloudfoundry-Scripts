@@ -90,6 +90,9 @@ if [ x"$DELETE_BOSH_ENV" = x"true" ]; then
 			--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 			--state='$BOSH_LITE_STATE_FILE' \
 			--vars-env='$ENV_PREFIX_NAME' \
+			--vars-file='$BOSH_COMMON_VARIABLES' \
+			--vars-file='$BOSH_COMMON_AVAILABILITY_VARIABLES' \
+			--vars-file='$BOSH_LITE_RELEASES' \
 			--vars-file='$BOSH_LITE_INTERPOLATED_STATIC_IPS' \
 			--vars-store='$BOSH_LITE_VARIABLES_STORE' \
 			'$BOSH_LITE_MANIFEST_FILE'"
@@ -150,6 +153,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
+	--vars-file='$BOSH_COMMON_AVAILABILITY_VARIABLES' \
 	--vars-file='$BOSH_LITE_RELEASES' \
 	--vars-file='$BOSH_LITE_INTERPOLATED_STATIC_IPS' \
 	--vars-store='$BOSH_LITE_VARIABLES_STORE' \
@@ -202,7 +206,7 @@ if [ ! -f "$BOSH_FULL_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_FULL_STATIC_IP
 fi
 
 INFO 'Setting CloudConfig'
-"$BOSH_CLI" update-cloud-config --tty --vars-env="$ENV_PREFIX_NAME" "$BOSH_FULL_CLOUD_CONFIG_FILE"
+"$BOSH_CLI" update-cloud-config --tty --vars-env="$ENV_PREFIX_NAME" --vars-file="$BOSH_FULL_CLOUD_AVAILABILITY_FILE" "$BOSH_FULL_CLOUD_CONFIG_FILE"
 
 # Set release versions
 for component_version in `sh -c "'$BOSH_CLI' interpolate \
@@ -212,6 +216,7 @@ for component_version in `sh -c "'$BOSH_CLI' interpolate \
 		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
 		--vars-env='$ENV_PREFIX_NAME' \
 		--vars-file='$BOSH_COMMON_VARIABLES' \
+		--vars-file='$BOSH_COMMON_AVAILABILITY_VARIABLES' \
 		--vars-file='$BOSH_FULL_INTERPOLATED_STATIC_IPS' \
 		--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 		'$BOSH_FULL_MANIFEST_FILE'" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
@@ -264,6 +269,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
+	--vars-file='$BOSH_COMMON_AVAILABILITY_VARIABLES' \
 	--vars-file='$BOSH_FULL_INTERPOLATED_STATIC_IPS' \
 	--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 	'$BOSH_FULL_MANIFEST_FILE'" >"$BOSH_FULL_INTERPOLATED_MANIFEST"
