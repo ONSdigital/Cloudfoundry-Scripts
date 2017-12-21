@@ -191,7 +191,7 @@ if [ ! -f "$BOSH_FULL_INTERPOLATED_STATIC_IPS" -o x"$REGENERATE_NETWORKS_CONFIG"
 fi
 
 INFO 'Generating Availability Variables'
-"$BOSH_CLI" interpolate --var-errs --vars-env="$ENV_PREFIX_NAME" "$BOSH_FULL_AVAILABILITY_VARIABLES" >"$BOSH_FULL_INTERPOLATED_AVAILABILITY"
+"$BOSH_CLI" interpolate --var-errs --vars-env="$ENV_PREFIX_NAME" --vars-file="$BOSH_FULL_INTERPOLATED_STATIC_IPS" "$BOSH_FULL_AVAILABILITY_VARIABLES" >"$BOSH_FULL_INTERPOLATED_AVAILABILITY"
 
 # Bosh doesn't expand variables from within variables files
 INFO 'Generating Cloud Config Variables'
