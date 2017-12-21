@@ -36,9 +36,12 @@ MANIFESTS_DIR_RELATIVE="Bosh-Manifests"
 # Expand manifests dir to full path
 findpath MANIFESTS_DIR "$MANIFESTS_DIR_RELATIVE"
 
+
 # Private, per deployment, ops files, eq for installation specific operartions
 # Publically available ops files, eg adjustments for VMware
 for i in Lite Full; do
+	[ -d "$MANIFESTS_DIR_RELATIVE/Bosh-$i-Manfests/$CPI_TYPE" ] || FATAL "Unknown CPI type: $CPI_TYPE"
+
 	for j in PUBLIC PRIVATE; do
 		upper="`echo $i | tr '[[:lower:]]' '[[:upper:]]'`"
 
@@ -89,9 +92,9 @@ BOSH_FULL_INTERPOLATED_AVAILABILITY="$DEPLOYMENT_DIR_RELATIVE/full-variables-int
 BOSH_COMMON_VARIABLES_MANIFEST="$MANIFESTS_DIR_RELATIVE/Bosh-Common-Manifests/Common-Variables.yml"
 
 # Bosh Lite Manifests
-BOSH_LITE_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/Bosh-Template-$CPI_TYPE.yml"
+BOSH_LITE_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/$CPI_TYPE/Bosh-Lite.yml"
 BOSH_LITE_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/Bosh-Static-IPs.yml"
-BOSH_LITE_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/Lite-Variables.yml"
+BOSH_LITE_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/Bosh-Variables.yml"
 
 # Bosh Full Manifests
 BOSH_FULL_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Bosh-Template.yml"
@@ -100,8 +103,8 @@ BOSH_FULL_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Full-V
 BOSH_FULL_AVAILABILITY_VARIABLES="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Bosh-Availability-$availability.yml"
 
 # Bosh Cloud Config Manifests
-BOSH_CLOUD_CONFIG_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Bosh-Template-$CPI_TYPE-CloudConfig.yml"
-BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Bosh-Availability-$CPI_TYPE-$availability.yml"
+BOSH_CLOUD_CONFIG_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$CPI_TYPE/Bosh-CloudConfig.yml"
+BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$CPI_TYPE/Bosh-Availability-$availability.yml"
 #
 #
 # BOSH_FULL_VARIABLES_STORE -> relocated to common.sh for use by setup-cf_admin.sh
