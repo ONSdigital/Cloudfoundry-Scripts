@@ -210,6 +210,7 @@ for component_version in `sh -c "'$BOSH_CLI' interpolate \
 		--vars-file='$BOSH_COMMON_VARIABLES' \
 		--vars-file='$BOSH_FULL_INTERPOLATED_AVAILABILITY' \
 		--vars-file='$BOSH_FULL_INTERPOLATED_STATIC_IPS' \
+		--vars-file='$BOSH_FULL_INSTANCES_FILE' \
 		--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 		'$BOSH_FULL_MANIFEST_FILE'" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
 
@@ -263,6 +264,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_FULL_INTERPOLATED_AVAILABILITY' \
 	--vars-file='$BOSH_FULL_INTERPOLATED_STATIC_IPS' \
+	--vars-file='$BOSH_FULL_INSTANCES_FILE' \
 	--vars-store='$BOSH_FULL_VARIABLES_STORE' \
 	'$BOSH_FULL_MANIFEST_FILE'" >"$BOSH_FULL_INTERPOLATED_MANIFEST"
 
