@@ -40,7 +40,7 @@ findpath MANIFESTS_DIR "$MANIFESTS_DIR_RELATIVE"
 # Private, per deployment, ops files, eq for installation specific operartions
 # Publically available ops files, eg adjustments for VMware
 for i in Lite Full; do
-	[ x"$i" = x'Full' -a ! -d "$MANIFESTS_DIR_RELATIVE/Bosh-$i-Manifests/$CPI_TYPE" ] && FATAL "Unknown CPI type: $CPI_TYPE"
+	[ -d "$MANIFESTS_DIR_RELATIVE/Bosh-$i-Manifests/$CPI_TYPE" ] || FATAL "Unknown CPI type: $CPI_TYPE"
 
 	for j in PUBLIC PRIVATE; do
 		upper="`echo $i | tr '[[:lower:]]' '[[:upper:]]'`"
@@ -93,7 +93,7 @@ BOSH_COMMON_VARIABLES_MANIFEST="$MANIFESTS_DIR_RELATIVE/Bosh-Common-Manifests/Co
 
 # Bosh Lite Manifests
 BOSH_LITE_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/Bosh-Template.yml"
-BOSH_LITE_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/$CPI_TYPE-Adjustments.yml"
+BOSH_LITE_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/$CPI_TYPE/Adjustments.yml"
 BOSH_LITE_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/Static-IPs/Bosh-Static-IPs.yml"
 BOSH_LITE_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/Common-Variables.yml"
 
