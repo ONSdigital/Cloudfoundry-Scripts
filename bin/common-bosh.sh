@@ -40,7 +40,7 @@ findpath MANIFESTS_DIR "$MANIFESTS_DIR_RELATIVE"
 # Private, per deployment, ops files, eq for installation specific operartions
 # Publically available ops files, eg adjustments for VMware
 for i in Lite Full; do
-	[ -d "$MANIFESTS_DIR_RELATIVE/Bosh-$i-Manifests/$CPI_TYPE" ] || FATAL "Unknown CPI type: $CPI_TYPE"
+	[ x"$i" = x'Full' -a -d "$MANIFESTS_DIR_RELATIVE/Bosh-$i-Manifests/$CPI_TYPE" ] || FATAL "Unknown CPI type: $CPI_TYPE"
 
 	for j in PUBLIC PRIVATE; do
 		upper="`echo $i | tr '[[:lower:]]' '[[:upper:]]'`"
