@@ -207,6 +207,7 @@ for component_version in `sh -c "'$BOSH_CLI' interpolate \
 		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
 		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
+		--ops-file='$BOSH_FULL_CPI_SPECIFIC_OPS_FILE' \
 		--vars-env='$ENV_PREFIX_NAME' \
 		--vars-file='$BOSH_COMMON_VARIABLES' \
 		--vars-file='$BOSH_FULL_INTERPOLATED_AVAILABILITY' \
@@ -261,6 +262,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
 	$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
 	--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
+	--ops-file='$BOSH_FULL_CPI_SPECIFIC_OPS_FILE' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_FULL_INTERPOLATED_AVAILABILITY' \

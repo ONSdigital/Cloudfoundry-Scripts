@@ -103,6 +103,7 @@ BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manife
 
 # Bosh Full Manifests
 BOSH_FULL_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Bosh-Template.yml"
+BOSH_FULL_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$CPI_TYPE/Adjustments.yml"
 BOSH_FULL_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Static-IPs/Bosh-Static-IPs-$availability.yml"
 BOSH_FULL_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Common-Variables.yml"
 BOSH_FULL_AVAILABILITY_VARIABLES="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Availability/Bosh-Availability-$availability.yml"
