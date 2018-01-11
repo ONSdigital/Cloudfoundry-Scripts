@@ -137,6 +137,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
 	$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
 	--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
+	--ops-file='$BOSH_LITE_CPI_SPECIFIC_OPS_FILE' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_LITE_RELEASES' \
