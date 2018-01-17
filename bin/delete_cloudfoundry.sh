@@ -16,7 +16,7 @@ INFO 'Deleting Bosh Deployment'
 "$BOSH_CLI" delete-deployment --force --tty
 
 INFO 'Deleting Bosh bootstrap environment'
-"$BOSH_CLI" delete-env --tty "$BOSH_LITE_INTERPOLATED_MANIFEST" || FATAL 'Bosh environment deletion failed'
+"$BOSH_CLI" delete-env --tty --state="$BOSH_LITE_STATE_FILE" "$BOSH_LITE_INTERPOLATED_MANIFEST" || FATAL 'Bosh environment deletion failed'
 
 # It 'should' exist
 if [ -f "$BOSH_LITE_STATE_FILE" ]; then
