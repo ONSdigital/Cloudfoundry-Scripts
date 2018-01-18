@@ -4,8 +4,6 @@
 #
 # https://bosh.io/docs/addons-common.html#misc-users
 #
-# Set specific stemcell & release versions and match manifest & upload_releases_stemcells.sh
-
 set -e
 
 BASE_DIR="`dirname \"$0\"`"
@@ -107,7 +105,7 @@ if [ x"$NO_CREATE_RELEASES" != x'true' -o ! -f "$BOSH_LITE_RELEASES" ]; then
 			# complains if the version number isn't different and fails
 			update_yml_var "$BOSH_LITE_RELEASES" "$release_url_varname" "$release_url_value"
 
-			UPLOAD_RELEASES=1
+			UPLOAD_RELEASES='true'
 		fi
 	done
 fi
@@ -116,9 +114,6 @@ fi
 if [ ! -f "$BOSH_LITE_STATE_FILE" ]; then
 	CREATE_ACTION='Creating'
 	STORE_ACTION='Storing'
-
-	# (Re)upload the stemcell
-	UPLOAD_STEMCELL='true'
 else
 	CREATE_ACTION='Updating'
 	STORE_ACTION='Potentially updating'
@@ -273,11 +268,11 @@ sh -c "'$BOSH_CLI' interpolate \
 
 INFO 'Checking if we need to upload any stemcells'
 for _s in `"$BOSH_CLI" interpolate --no-color --var-errs --path /stemcells "$BOSH_FULL_INTERPOLATED_MANIFEST" | awk '{if($1 == "os:") print $2}'`; do
-	"$BOSH_CLI" stemcells --no-color | awk -v stemcell="$_s" 'BEGIN{ rc=1 }{if($3 == stemcell) rc=0 }END{ exit rc }' || REUPLOAD_STEMCELL='true'
+	"$BOSH_CLI" stemcells --no-color | awk -v stemcell="$_s" 'BEGIN{ rc=1 }{if($3 == stemcell) rc=0 }END{ exit rc }' || UPLOAD_STEMCELL='true'
 done
 
 # Unfortunately, there is no way currently (2017/10/19) for Bosh/Director to automatically upload a stemcell in the same way it does for releases
-if [ 0$UPLOAD_STEMCELL -eq 1 -o x"$REUPLOAD_STEMCELL" = x'true' ]; then
+if [ x"$UPLOAD_STEMCELL" = x'true' ]; then
 	[ -z "$STEMCELL_URL" ] && FATAL 'No STEMCELL_URL provided, unable to upload a stemcell'
 
 	[ -n "$BOSH_STEMCELL_VERSION" ] && URL_EXTENSION="?v=$BOSH_STEMCELL_VERSION"
@@ -289,7 +284,7 @@ if [ 0$UPLOAD_STEMCELL -eq 1 -o x"$REUPLOAD_STEMCELL" = x'true' ]; then
 
 fi
 
-if [ 0$UPLOAD_RELEASES -eq 1 -o REUPLOAD_STEMCELLx"$REUPLOAD_RELEASES" = x'true' ]; then
+if [ x"$UPLOAD_RELEASES" = x'true' ]; then
 	for _r in `ls releases`; do
 		release_name="`echo $_r | sed $SED_EXTENDED -e 's/-release$//g'`"
 
@@ -301,6 +296,7 @@ if [ 0$UPLOAD_RELEASES -eq 1 -o REUPLOAD_STEMCELLx"$REUPLOAD_RELEASES" = x'true'
 			local_version="`[ -f "releases/$_r/version.txt" ] && cat "releases/$_r/version.txt"`"
 
 			# Check the latest version in the version file
+			# Should this include more then 'dev_releases'?
 			latest_version="`awk '{ if($1 == "version:" ) print $2 }' "releases/$_r/dev_releases/$release_name/index.yml" | sort | head -n 1`"
 
 			[ x"$local_version" != x"$latest_version" ] && FATAL "Version mismatch version.txt:$local_version != index.yml:$latest_version"
