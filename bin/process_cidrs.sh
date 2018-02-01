@@ -71,20 +71,20 @@ reserved_start_offset="${reserved_start_offset:-$DEFAULT_RESERVED_START_OFFSET}"
 # Automatically size network based on scale options
 case "$PREFIX_SIZE" in
 	[01][0-9]|2[0-3])
-		eval RESERVED_STATIC_SCALE="\${${NETWORK_UC}_RESERVED_STATIC_SCALE:-LARGE}"
-		eval STATIC_RESERVED_SCALE="\${${NETWORK_UC}_STATIC_RESERVED_SCALE:-LARGE}"
+		eval RESERVED_SCALE="\${${NETWORK_UC}_RESERVED_SCALE:-LARGE}"
+		eval STATIC_SCALE="\${${NETWORK_UC}_STATIC_SCALE:-LARGE}"
 		;;
 	24)
-		eval RESERVED_STATIC_SCALE="\${${NETWORK_UC}_RESERVED_STATIC_SCALE:-MEDIUM}"
-		eval STATIC_RESERVED_SCALE="\${${NETWORK_UC}_STATIC_RESERVED_SCALE:-MEDIUM}"
+		eval RESERVED_SCALE="\${${NETWORK_UC}_RESERVED_SCALE:-MEDIUM}"
+		eval STATIC_SCALE="\${${NETWORK_UC}_STATIC_SCALE:-MEDIUM}"
 		;;
 	2[5-7])
-		eval RESERVED_STATIC_SCALE="\${${NETWORK_UC}_RESERVED_STATIC_SCALE:-DEFAULT}"
-		eval STATIC_RESERVED_SCALE="\${${NETWORK_UC}_STATIC_RESERVED_SCALE:-DEFAULT}"
+		eval RESERVED_SCALE="\${${NETWORK_UC}_RESERVED_SCALE:-DEFAULT}"
+		eval STATIC_SCALE="\${${NETWORK_UC}_STATIC_SCALE:-DEFAULT}"
 		;;
 	28)
-		eval RESERVED_STATIC_SCALE="\${${NETWORK_UC}_RESERVED_STATIC_SCALE:-SMALL}"
-		eval STATIC_RESERVED_SCALE="\${${NETWORK_UC}_STATIC_RESERVED_SCALE:-SMALL}"
+		eval RESERVED_SCALE="\${${NETWORK_UC}_RESERVED_SCALE:-SMALL}"
+		eval STATIC_SCALE="\${${NETWORK_UC}_STATIC_SCALE:-SMALL}"
 		;;
 	*)
 		FATAL "$NETWORK_UC Network size too small"
@@ -92,8 +92,8 @@ case "$PREFIX_SIZE" in
 esac
 
 
-[ -z "$reserved_size" ] && eval reserved_size="\$${RESERVED_STATIC_SCALE}_RESERVED_SIZE"
-[ -z "$static_size" ] && eval static_size="\$${STATIC_RESERVED_SCALE}_STATIC_SIZE"
+[ -z "$reserved_size" ] && eval reserved_size="\$${RESERVED_SCALE}_RESERVED_SIZE"
+[ -z "$static_size" ] && eval static_size="\$${STATIC_SCALE}_STATIC_SIZE"
 
 reserved_stop_offset="`expr "$reserved_start_offset" + "$reserved_size" - 1`"
 
