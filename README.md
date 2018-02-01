@@ -37,6 +37,8 @@ These are non-user facing scripts and are pulled in by the 'Scripts'
 
 ## Scripts
 
+### Scripts to backup Cloudfoundry bits
+
 - `backup_cloudfoundry-branch.sh`
   - Backs up the current deployment branch to an S3 bucket.
 
@@ -51,14 +53,14 @@ These are non-user facing scripts and are pulled in by the 'Scripts'
   - Backup various internal Bosh/Cloudfoundry buckets to another S3 bucket.  This uses subdirectories that are named
     after the S3 source bucket
 
+### Helper scripts to save having to setup the environment to run the Bosh CLI
+
 - `bosh-cmd.sh`
   - Helper script that pulls in the correct configuration to run the Bosh CLI. Any parameters after the *DEPLOYMENT_NAME*
     are passed directly to the Bosh CLI
 
-- bosh-ssh.sh
+- `bosh-ssh.sh`
   - Helper script to call the Bosh CLI with the correct options to allow SSH'ing onto a given host
-    - Parameters: `DEPLOYMENT_NAME SSH_HOST [GATEWAY_USER] [GATEWAY_HOST]`
-    - Defaults: `GATEWAY_USER='vcap' GATEWAY_HOST='$director_dns'`
 
 - bosh\_generate\_release.sh
   - Script to generate a release for upload onto Bosh
