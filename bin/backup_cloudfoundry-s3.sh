@@ -2,6 +2,17 @@
 #
 # Backup/restore all of a deployments S3 buckets to/from the shared backup S3 bucket
 #
+#
+# Variables:
+#	DEPLOYMENT_NAME=[Deployment Name]
+#
+# Parameters:
+#	[Deployment Name]
+#	[backup|restore]
+#	[backup/restore folder]
+#	
+# Requires:
+#	common-aws.sh
 
 set -e
 

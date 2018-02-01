@@ -11,7 +11,8 @@
 #	[restore|backup]
 #	[S3 Bucket location]
 #
-# Requires common-aws.sh
+# Requires:
+#	 common-aws.sh
 #
 
 set -e

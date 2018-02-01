@@ -2,6 +2,15 @@
 #
 # Run Bosh errands that are prefxed with 'backup-'
 #
+# Variables:
+#	DEPLOYMENT_NAME=[Deployment name]
+#
+# Parameters:
+#	[Deployment name]
+#
+# Requires:
+#	common.sh
+# 	common-bosh-login.sh
 
 set -e
 
