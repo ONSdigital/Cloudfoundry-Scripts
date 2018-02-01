@@ -1,23 +1,46 @@
-
+#
+# Variables:
+#	DEPLOYMENT_NAME=[Deployment name]
+#	NON_AWS_DEPLOY=[non-empty-value]
+#	HOSTED_ZONE=[Hosted zone]
+#	AWS_DEFAULT_REGION=[AWS Default region]
+#	AWS_REGION=[AWS region]
+#	AWS_ACCESS_KEY_ID=[AWS access key ID]
+#	AWS_SECRET_ACCESS_KEY=[AWS secret access key]
+#	AWS_DEFAULT_OUTPUT=[table|text|json]
+#	AWS_PROFILE=[AWS CLI profile name]
+#	AWS_DEBUG=[true|false]
+#
+# Parameters:
+#	[Deployment Name]
+#
+#	Next parameter are only used for AWS deployments (eg NON_AWS_DEPLOY is set to a non-null value)
+#	[Hosted Zone]
+#
+#	[AWS Default region]
+#	[AWS access key ID]
+#	[AWS secret access key]
+#	[table|text|json] - AWS CLI default output type
+#
+# Requires common.sh
 
 DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 [ -n "$1" ] && shift
 
 # Allow script to be used by non-AWS Cloudformation deployment steps
 if [ -z "$NON_AWS_DEPLOY" ]; then
-	AWS_CONFIG_PREFIX="${1:-AWS-Bosh}"
-	[ -n "$1" ] && shift
-
 	HOSTED_ZONE="${HOSTED_ZONE:-$1}"
 	[ -n "$1" ] && shift
 fi
-
 
 # Set AWS specific variables (http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html)
 export AWS_DEFAULT_REGION="${1:-${AWS_DEFAULT_REGION:-$AWS_REGION}}"
 export AWS_ACCESS_KEY_ID="${2:-$AWS_ACCESS_KEY_ID}"
 export AWS_SECRET_ACCESS_KEY="${3:-$AWS_SECRET_ACCESS_KEY}"
 export AWS_DEFAULT_OUTPUT="${AWS_DEFAULT_OUTPUT:-table}"
+
+# Prefix for all AWS manifest files
+AWS_CONFIG_PREFIX="${AWS_CONFIG_PREFIX:-AWS-Bosh}"
 
 [ -n "$AWS_PROFILE" ] && export AWS_PROFILE
 
