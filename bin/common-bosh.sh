@@ -51,7 +51,7 @@ for i in Lite Full; do
 		IFS=','
 
 		for file in $files; do
-			[ x"$j" != x"PRIVATE" ] && filename="$MANIFESTS_DIR_RELATIVE/Bosh-$i-Manifests/$file" || filename="$OPS_FILES_CONFIG_DIR/$file"
+			[ x"$j" != x"PRIVATE" ] && filename="$MANIFESTS_DIR_RELATIVE/Bosh-$i-Manifests/Ops/$file" || filename="$OPS_FILES_CONFIG_DIR/$file"
 
 			if [ -n "$filename" ]; then
 				[ ! -f "$filename" ] && FATAL "$filename does not exist"
