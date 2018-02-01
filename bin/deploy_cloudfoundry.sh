@@ -129,15 +129,15 @@ INFO "$STORE_ACTION common passwords"
 INFO 'Interpolating Bosh Lite manifest'
 sh -c "'$BOSH_CLI' interpolate \
 	--var-errs \
-	$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
-	$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
-	--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
-	--ops-file='$BOSH_LITE_CPI_SPECIFIC_OPS_FILE' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_LITE_RELEASES' \
 	--vars-file='$BOSH_LITE_INTERPOLATED_STATIC_IPS' \
 	--vars-store='$BOSH_LITE_VARS_STORE' \
+	--ops-file='$BOSH_LITE_VARIABLES_OPS_FILE' \
+	--ops-file='$BOSH_LITE_CPI_SPECIFIC_OPS_FILE' \
+	$BOSH_LITE_PUBLIC_OPS_FILE_OPTIONS \
+	$BOSH_LITE_PRIVATE_OPS_FILE_OPTIONS \
 	'$BOSH_LITE_MANIFEST_FILE'" >"$BOSH_LITE_INTERPOLATED_MANIFEST"
 
 INFO "$CREATE_ACTION Bosh environment"
@@ -199,16 +199,16 @@ INFO 'Setting Cloud Config'
 # Set release versions
 for component_version in `sh -c "'$BOSH_CLI' interpolate \
 		--no-color \
-		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
-		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
-		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
-		--ops-file='$BOSH_FULL_CPI_SPECIFIC_OPS_FILE' \
 		--vars-env='$ENV_PREFIX_NAME' \
 		--vars-file='$BOSH_COMMON_VARIABLES' \
 		--vars-file='$BOSH_FULL_INTERPOLATED_AVAILABILITY' \
 		--vars-file='$BOSH_FULL_INTERPOLATED_STATIC_IPS' \
 		--vars-file='$BOSH_FULL_INSTANCES_FILE' \
 		--vars-store='$BOSH_FULL_VARIABLES_STORE' \
+		--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
+		--ops-file='$BOSH_FULL_CPI_SPECIFIC_OPS_FILE' \
+		$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
+		$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
 		'$BOSH_FULL_MANIFEST_FILE'" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
 
 	upper="`echo "$component_version" | tr '[[:lower:]]' '[[:upper:]]'`"
@@ -254,16 +254,16 @@ INFO 'Interpolating Bosh Full manifest'
 sh -c "'$BOSH_CLI' interpolate \
 	--no-color \
 	--var-errs \
-	$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
-	$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
-	--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
-	--ops-file='$BOSH_FULL_CPI_SPECIFIC_OPS_FILE' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_FULL_INTERPOLATED_AVAILABILITY' \
 	--vars-file='$BOSH_FULL_INTERPOLATED_STATIC_IPS' \
 	--vars-file='$BOSH_FULL_INSTANCES_FILE' \
 	--vars-store='$BOSH_FULL_VARIABLES_STORE' \
+	$BOSH_FULL_PUBLIC_OPS_FILE_OPTIONS \
+	$BOSH_FULL_PRIVATE_OPS_FILE_OPTIONS \
+	--ops-file='$BOSH_FULL_VARIABLES_OPS_FILE' \
+	--ops-file='$BOSH_FULL_CPI_SPECIFIC_OPS_FILE' \
 	'$BOSH_FULL_MANIFEST_FILE'" >"$BOSH_FULL_INTERPOLATED_MANIFEST"
 
 INFO 'Checking if we need to upload any stemcells'
