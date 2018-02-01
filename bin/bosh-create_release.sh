@@ -2,6 +2,20 @@
 #
 # Run 'bosh create-release' and 'bosh upload-release' to create and upload the given release
 #
+# Variables:
+#	RELEASE_NAME=[Release name]
+#	RELEASE_DIR=[Release directory]
+#	RELEASE_BLOB_SOURCE=[Release blob source]
+#	RELEASE_BLOB_DESTINATION=[Release blob destination]
+#
+# Parameters:
+#	[Release name]
+#	[Release directory]
+#	[Release blob source]
+#	[Release blob destination]
+#
+# Requires:
+#	common.sh
 
 set -e
 

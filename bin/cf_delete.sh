@@ -3,6 +3,18 @@
 # Very simplified CF delete - there is a more full fat CF suite within the CF repo
 # This is here so we can bootstrap/test enough of CF to make sure things work
 #
+# Variables:
+#	DEPLOYMENT_NAME=[Deployment name]
+#	CF_APP=[Cloudfoundry application]
+#
+# Parameters:
+#	[Deployment name]
+#	[Cloudfoundry application]
+#
+# Requires:
+#	common.sh
+#	bosh-env.sh
+
 
 set -e
 

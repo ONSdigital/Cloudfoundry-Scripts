@@ -53,7 +53,9 @@ These are non-user facing scripts and are pulled in by the 'Scripts'
   - Backup various internal Bosh/Cloudfoundry buckets to another S3 bucket.  This uses subdirectories that are named
     after the S3 source bucket
 
-### Helper scripts to save having to setup the environment to run the Bosh CLI
+### Helper scripts to perform Bosh CLI actions
+
+These scripts setup the environment for the Bosh CLI to save having to setup the environment
 
 - `bosh-cmd.sh`
   - Helper script that pulls in the correct configuration to run the Bosh CLI. Any parameters after the *DEPLOYMENT_NAME*
@@ -62,36 +64,24 @@ These are non-user facing scripts and are pulled in by the 'Scripts'
 - `bosh-ssh.sh`
   - Helper script to call the Bosh CLI with the correct options to allow SSH'ing onto a given host
 
-- bosh\_generate\_release.sh
-  - Script to generate a release for upload onto Bosh
+- `bosh-create_release.sh`
+  - Script to create a release for upload onto Bosh
     - Parameters: `DEPLOYMENT_NAME RELEASE_DIR [Blob_1 ... Blob_N]`
     - Environmental Variables: `DEPLOYMENT_NAME RELEASE_DIR RELEASE_BLOB_DESTINATION`
     - Defaults: `RELEASE_BLOB_DESTINATION='blobs'`
 
-- ca-tool.sh
+###
+
+- `ca-tool.sh` - *NO LONGER USED*
   - Generic script that creates CA and key pairs signed by the CA
-    - Parameters: `--ca-name|-C CA_NAME [--new-ca|-N] [--update-ca] [--name|-n NAME] [--update-name] [--key-size|-k KEY_SIZE]
-                      [--not-basic-critical|-b] [--not-extended-critical|-c]
-                      [--organisation|-o Organisation_Part1 ... Organisation_PartN]
-                      [--generate-public-key|-p] [--generate-public-key-ssh-fingerprint|-f]
-                      [--subject-alt-names|-s Subject_Alt_Name_Part1 ...Subject_Alt_Name_PartN] [--not-trusted|-t]`
-    - Environmental Variables: `KEY_SIZE HASH_TYPE ORGANISTAION VALID_DAYS CA_NAME NEW_CA=[1] NAME UPDATE_NAME=[1]'
-                                GENERATE_PUBLIC_KEY=[1] GENERATE_PUBLIC_KEY_SSH_FINGER_PRINT=[1] TRUST_OPT BASIC_USAGE
-                                EXTENDED_USAGE`
-    - Defaults: `KEY_SIZE='4096' HASH_TYPE='sha512' ORGANISTAION='Organisation' VALID_DAYS='3650' TRUST_OPT='--trustout'
-                 BASIC_USAGE='critical,' EXTENDED_USAGE='critical,'`
 
-- cf\_delete.sh
+### Cloudfoundry CLI related scripts
+
+- `cf_delete.sh`
   - Simple script to login to Cloudfoundry and delete the named app
-    - Parameters: `DEPLOYMENT_NAME CF_APP`
-    - Environmental Variables: `DEPLOYMENT_NAME CF_APP`
 
-- cf\_push.sh
+- `cf_push.sh`
   - Simple script to login to Cloudfoundry and push the named app
-    - Parameters: `DEPLOYMENT_NAME CF_APP [CF_SPACE] [CF_ORGANISATION]`
-    - Environmental Variables: `DEPLOYMENT_NAME CF_APP CF_SPACE CF_ORGANISATION`
-    - Defaults: `CF_APP='Test' CF_ORGANISATION="$organisation"`
-
 
 - create\_aws\_cloudformation.sh
   - Creates an AWS infrastructure using various Cloudformation Templates
