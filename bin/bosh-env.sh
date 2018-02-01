@@ -1,4 +1,4 @@
-#!/bin/echo Should be sourced
+#
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
 shift

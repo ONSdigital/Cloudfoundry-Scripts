@@ -8,46 +8,52 @@ Generally, the way to get a full deployment of Cloudfoundry is to run the follow
 - `create_aws_cloudformation.sh`
 - `deploy_cloudfoundry.sh`
 
-Currently, the deploying Cloudfoundry (using `deploy_cloudfoundry.sh`) fails first time due to some problems with
-package compilation.  If the script is re-run with `REUPLOAD_COMPONENTS=true` then the deployment generally
-completes.
 
+# CURRENTLY BEING UPDATED - script details without extra details and in `backslashes` have been updated
+
+## Template(s)
+
+- template.sh
+  - Base template
+
+## Sourced scripts
+
+These are non-user facing scripts and are pulled in by the 'Scripts'
+
+- `bosh-env.sh`
+  - Called by the various setup\_cf-\* scripts to set some required variables
+
+- `common.sh`
+  - Common parts for the various scripts
+
+- `common-aws.sh`
+  - Common parts for the various AWS scripts
+
+- common-bosh.sh
+  - Common parts for the various Bosh scripts
+
+- functions.sh
+  - General functions used by the various scripts
 
 ## Scripts
 
-- backup\_cloudfoundry-branch.sh
+- `backup_cloudfoundry-branch.sh`
   - Backs up the current deployment branch to an S3 bucket.
-    - Parameters: `DEPLOYMENT_NAME ACTION=backup|restore SRC_OR_DST=s3://destinaion|dir_destination`
-    - Environmental Variables: `DEPLOYMENT_NAME ACTION SRC_OR_DST`
-    - Defaults: `ACTION='backup' SRC_OR_DST='s3_backets'`
 
-- backup\_cloudfoundry-databases.sh
+- `backup_cloudfoundry-databases.sh`
   - Run backup errands.
-    - Parameters: `DEPLOYMENT_NAME`
-    - Environmental Variables: `DEPLOYMENT_NAME`
 
-- backup\_cloudfoundry-metadata.sh
+- `backup_cloudfoundry-metadata.sh`
   - Calls cf-mgnt to backup/restore Cloudfoundry org, space, user & role metadata.  The data is stored under the deployment
     directory under another directory called `metadata`
-    - Parameters: `DEPLOYMENT_NAME ACTION=backup|restore`
-    - Environmental Variables: `DEPLOYMENT_NAME ACTION`
-    - Defaults: `ACTION='backup'`
 
-- backup\_cloudfoundry-s3.sh
+- `backup_cloudfoundry-s3.sh`
   - Backup various internal Bosh/Cloudfoundry buckets to another S3 bucket.  This uses subdirectories that are named
     after the S3 source bucket
-    - Parameters: `DEPLOYMENT_NAME ACTION=backup|restore SRC_OR_DST=s3://destinaion|dir_destination`
-    - Environmental Variables: `DEPLOYMENT_NAME ACTION SRC_OR_DST`
-    - Defaults: `ACTION='backup' SRC_OR_DST='s3_backets'`
 
-- bosh-cmd.sh
+- `bosh-cmd.sh`
   - Helper script that pulls in the correct configuration to run the Bosh CLI. Any parameters after the *DEPLOYMENT_NAME*
     are passed directly to the Bosh CLI
-    - Parameters: `DEPLOYMENT_NAME [Parameter1 ... ParameterN]`
-    - Environmental Variables: `DEPLOYMENT_NAME`
-
-- bosh-env.sh
-  - Called by the various setup\_cf-\* scripts to set some required variables
 
 - bosh-ssh.sh
   - Helper script to call the Bosh CLI with the correct options to allow SSH'ing onto a given host
@@ -84,14 +90,6 @@ completes.
     - Environmental Variables: `DEPLOYMENT_NAME CF_APP CF_SPACE CF_ORGANISATION`
     - Defaults: `CF_APP='Test' CF_ORGANISATION="$organisation"`
 
-- common-aws.sh
-  - Common parts for the various AWS scripts
-
-- common-bosh.sh
-  - Common parts for the various Bosh scripts
-
-- common.sh
-  - Common parts for the various scripts
 
 - create\_aws\_cloudformation.sh
   - Creates an AWS infrastructure using various Cloudformation Templates
@@ -174,15 +172,6 @@ completes.
 - find\_external\_ip.sh
   - Simple script to find a hosts external IP
 
-- functions.sh
-  - General functions used by the various scripts
-    - Functions: `FATAL() DEBUG() WARN() INFO() _date() calculate_dns() ip_to_decimal() decimal_to_ip() stack_file_name()
-                aws_region() aws_credentials() find_aws() validate_json_files() parse_aws_cloudformation_outputs()
-                find_aws_parameters() generate_parameters_file() capitalise_aws() lowercase_aws() update_parameters_file()
-                stack_exists() check_cloudformation_stack() calculate_dns_ip() show_duplicate_output_names() bosh_int()
-                bosh_env() bosh_deploy() cf_app_url() installed_bin() findpath() prefix_vars() generate_password()
-                load_outputs() load_output_vars()`
-
 - generate-ssl.sh
   - Wrapper script around ca-tool.sh that creates the various CAs & keypairs required by Cloudfoundry.  Everything is
     outputted into a YML file that can be sucked in by Bosh
@@ -242,9 +231,6 @@ completes.
   - Generic script to setup a Cloudfoundry service broker
     - Parameters: `DEPLOYMENT_NAME [SERVICE_NAME] [SERVICE_USERNAME] [SERVICE_PASSWORD] [SERVICE_URL]`
     - Environmental Variables: `DEPLOYMENT_NAME SERVICE_NAME SERVICE_USERNAME SERVICE_PASSWORD SERVICE_URL DONT_SKIP_SSL_VALIDATION IGNORE_EXISTING`
-
-- template.sh
-  - Base template
 
 - update\_aws\_cloudformation.sh
   - Update an existing set of AWS Cloudformation templates
