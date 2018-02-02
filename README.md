@@ -70,10 +70,11 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
     - Environmental Variables: `DEPLOYMENT_NAME RELEASE_DIR RELEASE_BLOB_DESTINATION`
     - Defaults: `RELEASE_BLOB_DESTINATION='blobs'`
 
-###
-
-- `ca-tool.sh` - *NO LONGER USED*
-  - Generic script that creates CA and key pairs signed by the CA
+- bosh-display\_vms.sh
+  - Wraps `bosh vms` to provide a continually updated list of instances
+    - Parameters: `DEPLOYMENT_NAME [--failing|failing|f|--vitals|vitals|v] [INTERVAL] [OUTPUT_TYPE]`
+    - Environmental Variables: `DEPLOYMENT_NAME OPTION INTERVAL OUTPUT_TYPE BOSH_OPTS`
+    - Defaults: `OPTION='vitals' INTERVAL=5 OUTPUT_TYPE='tty'`
 
 ### Cloudfoundry CLI related scripts
 
@@ -82,6 +83,8 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
 
 - `cf_push.sh`
   - Simple script to login to Cloudfoundry and push the named app
+
+### AWS related scripts
 
 - create\_aws\_cloudformation.sh
   - Creates an AWS infrastructure using various Cloudformation Templates
@@ -94,29 +97,14 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
                  CLOUDFORMATION_DIR='Cloudformation' IGNORE_MISSING=true SKIP_EXISTING=true REGENERATE_SSH_KEY=false
                  DELETE_AWS_SSH_KEY=false AWS_DEBUG=false`
 
-- create\_dbs.sh
-  - Reads the named Bosh manifest and creates the named databases
-    - Environmental Variables: `BOSH_FULL_MANIFEST_FILE`
-
-- create\_postgresql\_db.sh
-  - Create the named database and user
-    - Parameters: `--admin-username ADMIN_USERNAME --new-database-name NEW_DATABASE_NAME
-                   [--admin-database ADMIN_DATABASE] [--admin-password ADMIN_PASSWORD]
-                   [--postgres-hostname POSTGRESQL_HOSTNAME] [--postgresql-hostname POSTGRESQL_HOSTNAME]
-                   [--postgres-port POSTGRESQL_PORT] [--postgresql-port POSTGRESQL_PORT]
-                   [--new-database-username NEW_DATABASE_USERNAME] [--new-database-password NEW_DATABASE_PASSWORD]
-                   [--jump-userhost JUMP_USERHOST] [--ssh-key SSH_KEY] [--extensions EXTENSIONS]`
-    - Environmental Variables: `ADMIN_DATABASE_NAME ADMIN_USERNAME ADMIN_PASSWORD POSTGRESQL_HOSTNAME POSTGRESQL_PORT
-                                NEW_DATABASE_NAME NEW_DATABASE_USERNAME NEW_DATABASE_PASSWORD JUMP_USERHOST SSH_KEY
-                                EXTENSIONS`
-    - Defaults: `ADMIN_DATABASE_NAME='postgres' ADMIN_USERNAME='postgres'`
-
 - delete\_aws\_cloudformation.sh
   - Delete a group of AWS Cloudformation stacks
     - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
     - Environmental Variables: `AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEBUG=true|false AWS_PROFILE
                                 CLOUDFORMATION_DIR BOSH_SSH_CONFIG KEEP_SSH_KEY`
     - Defaults: `AWS_REGION='eu-central-1' AWS_DEBUG=false KEEP_SSH_KEY=false AWS_CONFIG_PREFIX='AWS-Bosh' AWS_PROFILE='default'`
+
+### Cloudfoundry related scripts
 
 - delete\_cloudfoundry.sh
   - Delete a Bosh deployment and delete the Bosh initial environment
@@ -145,13 +133,7 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
                 DELETE_BOSH_ENV=false REGENERATE_BOSH_ENV=false REINTERPOLATE_FULL_STATIC_IPS=false REUPLOAD_COMPONENTS=false
                 NORUN_PREDEPLOY=false NORUN_BOSH_PREAMBLE=false SKIP_POST_DEPLOY_ERRANDS=false`
 
-- display\_cf\_vms.sh
-  - Wraps `bosh vms` to provide a continually updated list of instances
-    - Parameters: `DEPLOYMENT_NAME [--failing|failing|f|--vitals|vitals|v] [INTERVAL] [OUTPUT_TYPE]`
-    - Environmental Variables: `DEPLOYMENT_NAME OPTION INTERVAL OUTPUT_TYPE BOSH_OPTS`
-    - Defaults: `OPTION='vitals' INTERVAL=5 OUTPUT_TYPE='tty'`
-
-- emergency\_delete\_aws\_stack.sh
+- simple-delete\_aws\_stack.sh
   - Very simple/stupid script that deletes any AWS Cloudformation stacks that match a given prefix
     - Parameters: `STACK_PREFIX`
     - Environmental Variables: `AWS_PROFILE`
