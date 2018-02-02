@@ -84,6 +84,11 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
 - `cf_push.sh`
   - Simple script to login to Cloudfoundry and push the named app
 
+- cf-export-roles-orgs-user.sh
+  - Simple script that generates various scripts to create users, organisations, spaces and roles when pointed at a given Cloudfoundry.
+    Additionally the script will generate a few text files that contain data about services & service brokers.
+
+
 ### AWS related scripts
 
 - create\_aws\_cloudformation.sh
@@ -139,9 +144,6 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
     - Environmental Variables: `AWS_PROFILE`
     - Defaults: `AWS_PROFILE='default'`
 
-- export-roles-orgs-user.sh
-  - Simple script that generates various scripts to create users, organisations, spaces and roles when pointed at a given Cloudfoundry.
-    Additionally the script will generate a few text files that contain data about services & service brokers.
 
 - find\_external\_ip.sh
   - Simple script to find a hosts external IP
