@@ -17,7 +17,8 @@ fi
 PREAMBLE_STACK="$DEPLOYMENT_NAME-preamble"
 
 # We don't want to store the full path when we add the ssh-key location, so we use a relative one - but we use the absolute one for our checks
-BOSH_SSH_KEY_FILENAME="$DEPLOYMENT_DIR/ssh-key"
+BOSH_SSH_KEY_FILENAME_ONLY='ssh-key'
+BOSH_SSH_KEY_FILENAME="$DEPLOYMENT_DIR/$BOSH_SSH_KEY_FILENAME_ONLY"
 BOSH_SSH_KEY_FILENAME_RELATIVE="$DEPLOYMENT_DIR_RELATIVE/ssh-key"
 
 # We use older options in find due to possible lack of -printf and/or -regex options
@@ -208,8 +209,12 @@ if [ ! -f "$BOSH_SSH_CONFIG" ]; then
 	INFO 'Creating additional environment configuration'
 	cat >"$BOSH_SSH_CONFIG" <<EOF
 # Bosh SSH vars
+# AWS key name:
 bosh_ssh_key_name='$BOSH_SSH_KEY_NAME'
+# Relative path of SSH key
 bosh_ssh_key_file='$BOSH_SSH_KEY_FILENAME_RELATIVE'
+# Filename only
+bosh_ssh_key_filename='$BOSH_SSH_KEY_FILENAME_ONLY'
 EOF
 fi
 

@@ -45,6 +45,15 @@ export_file_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"
 INFO 'Loading Bosh network configuration'
 export_file_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"
 
+if [ -n "$BOSH_LITE_PRIVATE_IP" ]; then
+
+	grep -Eq "^director_az[1-9]_reserved_ip[0-9]+='$BOSH_LITE_PRIVATE_IP'$" "$NETWORK_CONFIG_FILE" || \
+		FATAL "Bosh Lite/Director IP '$BOSH_LITE_PRIVATE_IP' does not exist as a reserved IP within '$NETWORK_CONFIG_FILE'"
+
+	eval "${ENV_PREFIX}bosh_lite_private_ip"="$BOSH_LITE_PRIVATE_IP"
+fi
+
+
 # Do we want to use the existing versions of stemcells/releases?  Individual items can still be overridden if required
 # We default to using existing versions unless we have been told not to
 if [ x"$USE_EXISTING_VERSIONS" != x'false' ]; then
@@ -61,8 +70,9 @@ fi
 
 # The file is recorded relative to the base directory, but Bosh changes its directory internally, whilst running, to the location of the manifest,
 # so we need to make sure the SSH file is an absolute location
-eval bosh_ssh_key_file="\$${ENV_PREFIX}bosh_ssh_key_file"
-findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
+#eval bosh_ssh_key_file="\$${ENV_PREFIX}bosh_ssh_key_file"
+# We don't want the interpolated Bosh Lite manifest to contain a full path to the SSH file
+#findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 
 # Bosh doesn't seem to be able to handle templating (eg ((variable))) and variables files at the same time, so we need to expand the variables and then use
 # the output when we do a bosh create-env/deploy
