@@ -83,11 +83,8 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
 - `bosh-create_release.sh`
   - Script to create a release for upload onto Bosh
 
-- bosh-display\_vms.sh
+- `bosh-display\_vms.sh`
   - Wraps `bosh vms` to provide a continually updated list of instances
-    - Parameters: `DEPLOYMENT_NAME [--failing|failing|f|--vitals|vitals|v] [INTERVAL] [OUTPUT_TYPE]`
-    - Environmental Variables: `DEPLOYMENT_NAME OPTION INTERVAL OUTPUT_TYPE BOSH_OPTS`
-    - Defaults: `OPTION='vitals' INTERVAL=5 OUTPUT_TYPE='tty'`
 
 - `bosh-ssh.sh`
   - Helper script to call the Bosh CLI with the correct options to allow SSH'ing onto a given host

@@ -1,6 +1,20 @@
 #!/bin/sh
 #
 #
+# Parameters:
+#	[Deployment Name]
+#	[vitals|failing|v|f]
+#	[update interval]
+#	[tty|json]
+#
+# Variables:
+#	DEPLOYMENT_NAME=[Deployment name]
+#	OPTIONS=[vitals|faialing|v|f]
+#	INTERVAL=[update interval]
+#	OUTPUT_TYPE=[tty|json]
+#
+# Requires:
+#	common.sh
 
 set -e
 
