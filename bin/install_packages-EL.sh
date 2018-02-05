@@ -68,4 +68,8 @@ YUM_CLEAN=yes
 # Install packages for bosh
 install_packages gcc gcc-c++ make patch openssl openssl-devel "ruby$RUBY_VERSION" "ruby$RUBY_VERSION-devel" zlib-devel
 
+# Required for AWS
 install_packages python34 python34-setuptools python34-pip python34-devel libyaml-devel bzip2 readline-devel
+
+# Required to install Bosh S3 CLI
+install_packages golang
