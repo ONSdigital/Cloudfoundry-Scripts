@@ -45,15 +45,6 @@ BOSH_CLI_URL="https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-$BOSH_CLI_VER
 CF_CLI_URL="https://cli.run.pivotal.io/stable?release=$CF_CLI_RELEASE_TYPE&version=$CF_CLI_VERSION&source=github"
 CF_CLI_ARCHIVE="cf-$CF_CLI_VERSION-$CF_CLI_RELEASE_TYPE.tar.gz"
 
-if [ x"$USER" != x"root" ]; then
-	# We are not root
-	# Can we run sudo?
-	if ! sudo -Sn whoami </dev/null >/dev/null 2>&1; then
-		# We cannot sudo without a password
-		NO_SUDO=1
-	fi
-fi
-
 # Create dirs
 [ -d "$BIN_DIR" ] || mkdir -p "$BIN_DIR"
 [ -d "$TMP_DIR" ] || mkdir -p "$TMP_DIR"
