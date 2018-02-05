@@ -41,7 +41,7 @@ install_packages(){
 
 # EPEL repo is required for python2-pip and others
 # If we are on RHEL we need to enable the optional RPM repo to pull in devel packages
-if grep -qE '^Red Hat Enterprise Linux Server' /etc/redhat-release; then
+if [ -f /etc/redhat-release ] && grep -qE '^Red Hat Enterprise Linux Server' /etc/redhat-release; then
 	INFO Enabling Redhat optional repository
 	if $SUDO subscription-manager repos | awk '{if(/^Repo ID:.*rhel-'$REDHAT_VERSION'-server-optional-rpms/){ repo=1 } else if(/^Repo ID:/){ repo=0 }; if(repo && /^Enabled:/){ if($2 == 0) exit 0; if($2 == 1) exit 1}}'; then
 		$SUDO subscription-manager repos --enable "rhel-$REDHAT_VERSION-server-optional-rpms"
