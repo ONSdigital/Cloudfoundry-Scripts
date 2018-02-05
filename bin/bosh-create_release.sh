@@ -23,14 +23,13 @@ BASE_DIR="`dirname \"$0\"`"
 
 RELEASE_NAME="${1:-$RELEASE_NAME}"
 RELEASE_DIR="${2:-${RELEASE_DIR:-$RELEASE_NAME}}"
-BLOBS_DIR="${3:-$BLOBS_DIR}"
 
 RELEASE_BLOB_SOURCE="${RELEASE_BLOB_SOURCE:-blobs}"
 RELEASE_BLOB_DESTINATION="${RELEASE_BLOB_DESTINATION:-blobs}"
 
 . "$BASE_DIR/common.sh"
 
-findpath BLOBS_DIR "$BLOBS_DIR"
+findpath BLOBS_DIR blobs
 
 [ -z "$RELEASE_NAME" ] && FATAL 'No release name provided'
 [ -d "$RELEASE_DIR" ] || FATAL "Bosh release directory does not exist: $RELEASE_NAME"
