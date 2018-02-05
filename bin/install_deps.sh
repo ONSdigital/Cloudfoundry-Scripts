@@ -21,6 +21,7 @@ CF_CLI_RELEASE_TYPE='linux64-binary'
 # Only used if we don't have the awscli/azure-cli installed, don't have pip installed and are not running as root
 GET_PIP_URL='https://bootstrap.pypa.io/get-pip.py'
 
+INFO 'Determining Bosh & CF versions'
 for i in BOSH CF; do
 	eval version="\$${i}_CLI_VERSION"
 	eval github_url="\$${i}_GITHUB_RELEASE_URL"
@@ -32,6 +33,7 @@ for i in BOSH CF; do
 
 		[ -z "$version" ] && FATAL "Unable to determine $i CLI version from '$github_url'"
 
+		INFO "Setting $i version as $version"
 		eval "${i}_CLI_VERSION"="$version"
 	fi
 
@@ -58,6 +60,7 @@ fi
 
 # If running via Jenkins we install cf-uaac via rbenv
 if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
+	INFO 'Installing UAA client'
 	which gem >/dev/null 2>&1 || FATAL "No Ruby 'gem' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or rbenv from within Jenkins?"
 	gem install cf-uaac
 
@@ -66,6 +69,7 @@ fi
 
 # If running via Jenkins we can install awscli via pyenv
 if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && ! which aws >/dev/null 2>&1; then
+	INFO 'Installing AWS CLI'
 	which pip${PIP_VERSION_SUFFIX:-3} >/dev/null 2>&1 || FATAL "No 'pip' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or pyenv from within Jenkins?"
 
 	pip${PIP_VERSION_SUFFIX:-3} install "awscli" --user
@@ -105,6 +109,7 @@ if [ ! -f "$CF_CLI-$CF_CLI_VERSION" ]; then
 	mv "$TMP_DIR/cf" "$CF_CLI-$CF_CLI_VERSION"
 fi
 
+INFO 'Creating Bosh & CF CLI links'
 for i in BOSH_CLI CF_CLI; do
 	eval file="\$$i"
 	eval version="\$${i}_VERSION"
