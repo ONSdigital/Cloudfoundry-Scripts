@@ -10,9 +10,9 @@ BASE_DIR="`dirname \"$0\"`"
 # Run common AWS Cloudformation parts
 . "$BASE_DIR/common-aws.sh"
 
-if [ -d "$STACK_OUTPUTS_DIR" ] && [ -z "$SKIP_STACK_OUTPUTS_DIR" -o x"$SKIP_STACK_OUTPUTS_DIR" = "false" ] && [ x"$SKIP_EXISTING" != x"true" ]; then
-	 FATAL "Existing stack outputs directory: '$STACK_OUTPUTS_DIR', do you need to run\n\t$BASE_DIR/update_aws_cloudformation.sh instead?"
-fi
+#if [ -d "$STACK_OUTPUTS_DIR" ] && [ -z "$SKIP_STACK_OUTPUTS_DIR" -o x"$SKIP_STACK_OUTPUTS_DIR" = "false" ] && [ x"$SKIP_EXISTING" != x"true" ]; then
+#	 FATAL "Existing stack outputs directory: '$STACK_OUTPUTS_DIR', do you need to run\n\t$BASE_DIR/update_aws_cloudformation.sh instead?"
+#fi
 
 PREAMBLE_STACK="$DEPLOYMENT_NAME-preamble"
 

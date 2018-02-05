@@ -55,7 +55,7 @@ if [ -z "$AWS_DEFAULT_REGION" ]; then
 	[ -f ~/.aws/config ] && CONFIGURED_AWS_REGION="`"$AWS_CLI" configure get region`"
 
 	# Provide a default - these should come from a configuration/defaults file
-	DEFAULT_AWS_REGION="${DEFAULT_AWS_REGION:-${CONFIGURED_AWS_REGION:-eu-central-1}}"
+	AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-${CONFIGURED_AWS_REGION:-eu-central-1}}"
 fi
 
 # Do we need to update credentials?
