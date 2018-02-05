@@ -1,10 +1,17 @@
 #!/bin/sh
 #
-# Backup/restore a deployment branch to/from the given S3 bucket
-#
+# Backup/restore metadata (CF users, spaces, orgs, services, etc) from a given S3 bucket. Use cf-mgnt to generate/import the metadata
 #
 # WIP... untested
 #
+# Variables:
+#	DEPLOYMENT_NAME=[Deployment Name]
+# Parameters:
+#	[Deployment Name]
+#	[backup|restore]
+#
+# Requires:
+#	common-aws.sh
 
 set -e
 

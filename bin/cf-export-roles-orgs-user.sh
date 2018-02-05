@@ -1,9 +1,10 @@
 #!/bin/sh
 #
-# Export:
-#	services			'cf service-brokers'
-#	service provided services
+# Simple script that
 #
+# Parameters: none
+# Variables: none
+# Requires: nothing
 
 set -e
 

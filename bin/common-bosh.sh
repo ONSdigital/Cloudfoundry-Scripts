@@ -17,6 +17,9 @@ CPI_TYPE="${2:-${CPI_TYPE:-AWS}}"
 
 [ -n "$DEPLOYMENT_NAME" ] || FATAL 'No Bosh deployment name provided'
 
+# Check for required config
+[ -d "$STACK_OUTPUTS_DIR" ] || FATAL "Cloud outputs directory '$STACK_OUTPUTS_DIR' does not exist"
+
 INFO 'Loading AWS outputs'
 load_outputs "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
 
@@ -35,7 +38,6 @@ eval availability="\$${ENV_PREFIX}availability"
 MANIFESTS_DIR_RELATIVE="Bosh-Manifests"
 # Expand manifests dir to full path
 findpath MANIFESTS_DIR "$MANIFESTS_DIR_RELATIVE"
-
 
 # Private, per deployment, ops files, eq for installation specific operartions
 # Publically available ops files, eg adjustments for VMware
@@ -113,10 +115,6 @@ BOSH_FULL_INSTANCES_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$CPI_TYPE/
 #
 # BOSH_FULL_VARIABLES_STORE -> relocated to common.sh for use by setup-cf_admin.sh
 
-# This needs simplifying
-# Check for required config
-[ -d "$MANIFESTS_DIR" ] || FATAL "$MANIFESTS_DIR directory does not exist"
-[ -d "$STACK_OUTPUTS_DIR" ] || FATAL "Cloud outputs directory '$STACK_OUTPUTS_DIR' does not exist"
 
 for _f in BOSH_COMMON_VARIABLES_MANIFEST \
 	BOSH_LITE_MANIFEST_FILE BOSH_LITE_STATIC_IPS_FILE BOSH_LITE_VARIABLES_OPS_FILE BOSH_LITE_CPI_SPECIFIC_OPS_FILE \

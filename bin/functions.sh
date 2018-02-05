@@ -8,23 +8,43 @@ _date(){
 FATAL(){
 	# RHEL echo allows -e (interpret escape sequences).
 	# Debian/Ubuntu/et al doesn't as it uses 'dash' as its default shell
-	"$ECHO" -e "`_date` ${FATAL_COLOUR}FATAL $@$NORMAL_COLOUR" >&2
+	printf "%s" `_date` >&2
+	printf "%b" "$FATAL_COLOUR" >&2
+	cat >&2 <<EOF
+FATAL $@
+EOF
+	printf "%b" "$NORMAL_COLOUR" >&2
 
 	exit 1
 }
 
 WARN(){
-	"$ECHO" -e "`_date` ${WARN_COLOUR}WARN $@$NORMAL_COLOUR" >&2
+	printf "%s" `_date` >&2
+	printf "%b" "$WARN_COLOUR" >&2
+	cat >&2 <<EOF
+WARN $@
+EOF
+	printf "%b" "$NORMAL_COLOUR" >&2
 }
 
 INFO(){
-	"$ECHO" -e "`_date` ${INFO_COLOUR}INFO $@$NORMAL_COLOUR" >&2
+	printf "%s" `_date` >&2
+	printf "%b" "$INFO_COLOUR" >&2
+	cat >&2 <<EOF
+INFO $@
+EOF
+	printf "%b" "$NORMAL_COLOUR" >&2
 }
 
 DEBUG(){
 	[ -z "$DEBUG" -o x"$DEBUG" = x"false" ] && return 0
 
-	"$ECHO" -e "`_date` ${DEBUG_COLOUR}DEBUG $@$NORMAL_COLOUR" >&2
+	printf "%s" `_date` >&2
+	printf "%b" "$DEBUG_COLOUR" >&2
+	cat >&2 <<EOF
+DEBUG $@
+EOF
+	printf "%b" "$NORMAL_COLOUR" >&2
 }
 
 post_deploy_scripts(){
@@ -80,7 +100,7 @@ calculate_dns(){
 	local vpc_decimal_dns_address="`ip_to_decimal "$vpc_base_address"`"
 	local vpc_dns_ip="`decimal_to_ip "$vpc_decimal_dns_address" 2`"
 
-	"$ECHO" "dns_ip='$vpc_dns_ip'"
+	printf "dns_ip='%s'\n" "$vpc_dns_ip"
 }
 
 ip_to_decimal(){
@@ -509,12 +529,10 @@ load_outputs(){
 # Hopefully we can run on Linux and Darwin (OSX)
 case `uname -s` in
 	Darwin)
-		ECHO='echo'
 		SED_EXTENDED='-E'
 		;;
 	Linux)
 		# Debian & Ubuntu use 'dash' as their shell, which is less than feature complete compared to other shells
-		ECHO='/bin/echo'
 		SED_EXTENDED='-r'
 		;;
 esac

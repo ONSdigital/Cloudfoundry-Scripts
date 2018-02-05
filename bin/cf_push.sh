@@ -4,6 +4,24 @@
 # This is here so we can bootstrap/test enough of CF to make sure things work
 #
 # To be called from another script
+#
+# Variables:
+#	DEPLOYMENT_NAME=[Deployment name]
+#	CF_APP=[Cloudfoundry application]
+#	CF_ORGANISATION=[Cloudfoundry organisation]
+#	CF_SPACE=[Cloudfoundry space]
+#	DIRECTORY=[Directory containing application]
+#
+# Parameters:
+#	[Deployment name]
+#	[Cloudfoundry application]
+#	[Cloudfoundry organisation]
+#	[Cloudfoundry space]
+#	[Directory containing application]
+#
+# Requires:
+#	common.sh
+#	bosh-env.sh
 
 set -e
 

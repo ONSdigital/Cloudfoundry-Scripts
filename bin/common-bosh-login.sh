@@ -1,4 +1,6 @@
 #
+# Called from other scripts. Logs into Bosh/Director
+#
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'Deployment name not provided'
 [ -d "$DEPLOYMENT_DIR" ] || FATAL "Deployment does not exist '$DEPLOYMENT_DIR'"

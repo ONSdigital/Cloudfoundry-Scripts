@@ -2,6 +2,21 @@
 #
 # Call 'bosh ssh' with the correct options to bounce onto the given host
 #
+# Variables:
+#	DEPLOYMENT_NAME=[Deployment name]
+#	SSH_HOST=[SSH host]
+#	GATEWAY_USER=[Gateway SSH user]
+#	GATEWAY_HOST=[Gateway SSH host]
+#
+# Parameters:
+#	[Deployment name]
+#	[SSH host]
+#	[Gateway SSH user]
+#	[Gateway SSH host]
+#
+# Requires:
+#	common.sh
+#	common-bosh-login.sh
 
 set -e
 

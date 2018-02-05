@@ -22,7 +22,8 @@
 #	[AWS secret access key]
 #	[table|text|json] - AWS CLI default output type
 #
-# Requires common.sh
+# Requires:
+#	 common.sh
 
 DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 [ -n "$1" ] && shift

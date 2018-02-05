@@ -2,6 +2,18 @@
 #
 # Backup/restore a deployment branch to/from the given S3 bucket
 #
+# Variables:
+#	DEPLOYMENT_NAME=[Deployment name]
+#	S3_BUCKET_LOCATION=[S3 Bucket location]
+#
+# Parameters:
+#	[Deployment name]
+#	[restore|backup]
+#	[S3 Bucket location]
+#
+# Requires:
+#	 common-aws.sh
+#
 
 set -e
 
@@ -11,7 +23,7 @@ export NON_AWS_DEPLOY=true
 
 DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 ACTION="${2:-backup}"
-S3_BUCKET_LOCATION="$3"
+S3_BUCKET_LOCATION="${3:-$S3_BUCKET_LOCATION}"
 
 for i in 1 2 3; do
 	[ -n "$1" ] && shift 1
