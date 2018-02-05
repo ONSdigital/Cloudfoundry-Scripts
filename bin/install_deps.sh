@@ -21,6 +21,8 @@ CF_CLI_RELEASE_TYPE='linux64-binary'
 # Only used if we don't have the awscli/azure-cli installed, don't have pip installed and are not running as root
 GET_PIP_URL='https://bootstrap.pypa.io/get-pip.py'
 
+RUBY_VERSION="${RUBY_VERSION:-2.1}"
+
 INFO 'Determining Bosh & CF versions'
 for i in BOSH CF; do
 	eval version="\$${i}_CLI_VERSION"
@@ -51,9 +53,11 @@ CF_CLI_ARCHIVE="cf-$CF_CLI_VERSION-$CF_CLI_RELEASE_TYPE.tar.gz"
 
 # If running via Jenkins we install cf-uaac via rbenv
 if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
+	which ruby$RUBY_VERSION >/dev/null 2>&1 || FATAL "Ruby version $RUBY_VERSION is not installed"
+
 	INFO 'Installing UAA client'
-	which gem >/dev/null 2>&1 || FATAL "No Ruby 'gem' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or rbenv from within Jenkins?"
-	gem install cf-uaac
+	which "gem$RUBY_VERSION" >/dev/null 2>&1 || FATAL "No Ruby 'gem' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or rbenv from within Jenkins?"
+	"gem$RUBY_VERSION" install cf-uaac
 
 	CHANGES=1
 fi
