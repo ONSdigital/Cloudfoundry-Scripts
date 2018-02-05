@@ -17,6 +17,9 @@ REDHAT_VERSION="`rpm --eval %rhel`"
 EPEL_RELEASE_RPM_NAME="epel-release-latest-$REDHAT_VERSION.noarch.rpm"
 EPEL_RELEASE_RPM_FILE="$TMP_DIR/$EPEL_RELEASE_RPM_NAME"
 
+WARN 'This script no longer works with Redhat/CentOS 7. This is due to requiring a Ruby version greater than 2.0'
+RUBY_VERSION='21'
+
 install_packages(){
 	[ -z "$1" ] && return 0
 
@@ -63,6 +66,6 @@ fi
 YUM_CLEAN=yes
 
 # Install packages for bosh
-install_packages gcc gcc-c++ make patch openssl openssl-devel ruby ruby-devel zlib-devel
+install_packages gcc gcc-c++ make patch openssl openssl-devel "ruby$RUBY_VERSION" "ruby$RUBY_VERSION-devel" zlib-devel
 
 install_packages python34 python34-setuptools python34-pip python34-devel libyaml-devel bzip2 readline-devel
