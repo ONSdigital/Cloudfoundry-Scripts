@@ -8,7 +8,7 @@ _date(){
 FATAL(){
 	# RHEL echo allows -e (interpret escape sequences).
 	# Debian/Ubuntu/et al doesn't as it uses 'dash' as its default shell
-	printf "%s" `_date` >&2
+	printf "%s " `_date` >&2
 	printf "%b" "$FATAL_COLOUR" >&2
 	cat >&2 <<EOF
 FATAL $@
@@ -19,7 +19,7 @@ EOF
 }
 
 WARN(){
-	printf "%s" `_date` >&2
+	printf "%s " `_date` >&2
 	printf "%b" "$WARN_COLOUR" >&2
 	cat >&2 <<EOF
 WARN $@
@@ -28,7 +28,7 @@ EOF
 }
 
 INFO(){
-	printf "%s" `_date` >&2
+	printf "%s " `_date` >&2
 	printf "%b" "$INFO_COLOUR" >&2
 	cat >&2 <<EOF
 INFO $@
@@ -39,7 +39,7 @@ EOF
 DEBUG(){
 	[ -z "$DEBUG" -o x"$DEBUG" = x"false" ] && return 0
 
-	printf "%s" `_date` >&2
+	printf "%s " `_date` >&2
 	printf "%b" "$DEBUG_COLOUR" >&2
 	cat >&2 <<EOF
 DEBUG $@
