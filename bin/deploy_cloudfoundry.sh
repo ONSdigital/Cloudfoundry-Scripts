@@ -45,6 +45,10 @@ export_file_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"
 INFO 'Loading Bosh network configuration'
 export_file_vars "$NETWORK_CONFIG_FILE" "$ENV_PREFIX"
 
+# Add some build metadata
+export "${ENV_PREFIX}build_date"="`date +%c`"
+export "${ENV_PREFIX}build_hash"="`git rev-parse HEAD`"
+
 if [ -n "$BOSH_LITE_PRIVATE_IP" ]; then
 
 	grep -Eq "^director_az[1-9]_reserved_ip[0-9]+='$BOSH_LITE_PRIVATE_IP'$" "$NETWORK_CONFIG_FILE" || \
