@@ -13,7 +13,7 @@ FATAL(){
 	cat >&2 <<EOF
 FATAL $@
 EOF
-	printf "%b" "$NORMAL_COLOUR" >&2
+	printf "%b\n" "$NORMAL_COLOUR" >&2
 
 	exit 1
 }
@@ -24,7 +24,7 @@ WARN(){
 	cat >&2 <<EOF
 WARN $@
 EOF
-	printf "%b" "$NORMAL_COLOUR" >&2
+	printf "%b\n" "$NORMAL_COLOUR" >&2
 }
 
 INFO(){
@@ -33,7 +33,7 @@ INFO(){
 	cat >&2 <<EOF
 INFO $@
 EOF
-	printf "%b" "$NORMAL_COLOUR" >&2
+	printf "%b\n" "$NORMAL_COLOUR" >&2
 }
 
 DEBUG(){
@@ -44,7 +44,7 @@ DEBUG(){
 	cat >&2 <<EOF
 DEBUG $@
 EOF
-	printf "%b" "$NORMAL_COLOUR" >&2
+	printf "%b\n" "$NORMAL_COLOUR" >&2
 }
 
 post_deploy_scripts(){
