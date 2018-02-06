@@ -9,10 +9,10 @@ if [ 0$COLOURS -ge 8 ]; then
 	INFO_COLOUR="`tput setaf 2`"
 	WARN_COLOUR="`tput setaf 3`"
 	DEBUG_COLOR="`tput setaf 4`"
-	# Jenkins/ansi-color adds '(B' when highlighting
+	# Jenkins/ansi-color adds '(B' when highlighting - this may now be fixed
 	# https://issues.jenkins-ci.org/browse/JENKINS-24387
-	#NORMAL_COLOUR="`tput sgr0`"
-	NORMAL_COLOUR="\e[0m"
+	#NORMAL_COLOUR="\e[0m"
+	NORMAL_COLOUR="`tput sgr0`"
 fi
 
 [ -z "$BASE_DIR" ] && FATAL 'BASE_DIR has not been set'
