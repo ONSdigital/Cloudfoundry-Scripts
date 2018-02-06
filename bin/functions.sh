@@ -6,45 +6,37 @@ _date(){
 }
 
 FATAL(){
-	# RHEL echo allows -e (interpret escape sequences).
-	# Debian/Ubuntu/et al doesn't as it uses 'dash' as its default shell
-	#printf "%s " `_date` >&2
-	printf "%s %b" `_data` "$FATAL_COLOUR" >&2
+	# Printf is slightly more cross platform than using 'echo'.  Some echos expand escape sequences by default,
+	# some require -e to do so whereas others ignore the option and just print -e
+	printf "%s" `_date` >&2
 	cat >&2 <<EOF
-FATAL $@
+${FATAL_COLOR}FATAL $@${NORMAL_COLOUR}
 EOF
-	printf "%b\n" "$NORMAL_COLOUR" >&2
 
 	exit 1
 }
 
 WARN(){
-#	printf "%s " `_date` >&2
-	printf "%s %b" `_date` "$WARN_COLOUR" >&2
+	printf "%s" `_date` >&2
 	cat >&2 <<EOF
-WARN $@
+${WARN_COLOUR}WARN $@${NORMAL_COLOUR}
 EOF
-	printf "%b\n" "$NORMAL_COLOUR" >&2
 }
 
 INFO(){
-	#printf "%s " `_date` >&2
-	printf "%s %b" `_date` "$INFO_COLOUR" >&2
+	printf "%s" `_date` >&2
 	cat >&2 <<EOF
-INFO $@
+${INFO_COLOUR}INFO $@${NORMAL_COLOUR}
 EOF
-	printf "%b\n" "$NORMAL_COLOUR" >&2
 }
 
 DEBUG(){
 	[ -z "$DEBUG" -o x"$DEBUG" = x"false" ] && return 0
 
-	# printf "%s " `_date` >&2
-	printf "%s %b" `_date` "$DEBUG_COLOUR" >&2
+	printf "%s" `_date` >&2
 	cat >&2 <<EOF
-DEBUG $@
+${DEBUG_COLOUR}DEBUG $@${NORMAL_COLOUR}
 EOF
-	printf "%b\n" "$NORMAL_COLOUR" >&2
 }
 
 post_deploy_scripts(){

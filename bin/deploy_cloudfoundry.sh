@@ -283,11 +283,25 @@ done
 
 # Unfortunately, there is no way currently (2017/10/19) for Bosh/Director to automatically upload a stemcell in the same way it does for releases
 if [ x"$UPLOAD_STEMCELL" = x'true' ]; then
-	[ -z "$STEMCELL_URL" ] && FATAL 'No STEMCELL_URL provided, unable to upload a stemcell'
+	if [ -z "$STEMCELL_URL" ]; then
+		WARN 'No STEMCELL_URL provided, finding stemcell details from Bosh Lite deployment'
 
-	[ -n "$BOSH_STEMCELL_VERSION" ] && URL_EXTENSION="?v=$BOSH_STEMCELL_VERSION"
+		STEMCELL_URL="`"$BOSH_CLI" interpolate --no-color --path '/resource_pools/name=bosh_vm/stemcell/url' "$BOSH_LITE_INTERPOLATED_MANIFEST"`"
 
-	UPLOAD_URL="$STEMCELL_URL$URL_EXTENSION"
+		[ -z "$STEMCELL_URL" ] && FATAL "Unable to determine Stemcell URL from '$BOSH_LITE_INTERPOLATED_MANIFEST' path '/resource_pools/name=*/stemcell'"
+	fi
+
+	if [ -n "$BOSH_STEMCELL_VERSION" ] && echo "$STEMCELL_URL" | grep -Eq '\?v(ersion)?=[0-9]'; then
+		WARN 'Stemcell URL already includes version data, so not overriding'
+
+	elif [ -n "$BOSH_STEMCELL_VERSION" ]; then
+		URL_EXTENSION="?v=$BOSH_STEMCELL_VERSION"
+
+		UPLOAD_URL="$STEMCELL_URL$URL_EXTENSION"
+	else
+		UPLOAD_URL="$STEMCELL_URL"
+
+	fi
 
 	INFO "Uploading $UPLOAD_URL to Bosh"
 	"$BOSH_CLI" upload-stemcell --tty "$UPLOAD_URL"
