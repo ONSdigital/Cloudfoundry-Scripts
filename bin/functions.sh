@@ -8,7 +8,7 @@ _date(){
 FATAL(){
 	# Printf is slightly more cross platform than using 'echo'.  Some echos expand escape sequences by default,
 	# some require -e to do so whereas others ignore the option and just print -e
-	printf "%s" `_date` >&2
+	printf "%s " `_date` >&2
 	cat >&2 <<EOF
 ${FATAL_COLOR}FATAL $@${NORMAL_COLOUR}
 EOF
@@ -17,14 +17,14 @@ EOF
 }
 
 WARN(){
-	printf "%s" `_date` >&2
+	printf "%s " `_date` >&2
 	cat >&2 <<EOF
 ${WARN_COLOUR}WARN $@${NORMAL_COLOUR}
 EOF
 }
 
 INFO(){
-	printf "%s" `_date` >&2
+	printf "%s " `_date` >&2
 	cat >&2 <<EOF
 ${INFO_COLOUR}INFO $@${NORMAL_COLOUR}
 EOF
@@ -33,7 +33,7 @@ EOF
 DEBUG(){
 	[ -z "$DEBUG" -o x"$DEBUG" = x"false" ] && return 0
 
-	printf "%s" `_date` >&2
+	printf "%s " `_date` >&2
 	cat >&2 <<EOF
 ${DEBUG_COLOUR}DEBUG $@${NORMAL_COLOUR}
 EOF
