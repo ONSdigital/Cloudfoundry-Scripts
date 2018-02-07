@@ -124,14 +124,11 @@ cf service-brokers | awk '!/^ *(name.*|Getting .*|OK|No .*|)?$/{ print $1 }' | s
 [ -d asg ] || mkdir -p asg
 echo '. finding security groups'
 for i in `cf security-groups | awk '!/^ *(Name .*|Getting .*|OK|No .*)?$/{ print $2 }'`; do
+for i in `cf security-groups | awk '!/^ *(name .*|Name .*|Getting .*|OK|No .*)?$/{ gsub("^(#[0-9]+)?\\s+","") gsub(" .*$","") g[$0]++ }END{ for(i in g) print i }'`; do
 	echo ".. inspecting security group $i"
-	cf security-groups | awk '!/^ *(name .*|Name .*|Getting .*|OK|No .*)?$/{
-		gsub("^(#[0-9]+)?\\s+","")
-		gsub(" .*$","")
-		g[$0]++
-	}END{
-		for(i in g)
-			print i
+	cf security-group $i | awk '!/^ *(Rules|Name .*|Getting .*|OK|No .*)?$/{
+		gsub("^\t","")
+		print $0
 	}' >"asg/$i.yml"
 
 	echo "cf create-security-group $i asg/$i.yml" >>09_security_groups.sh
