@@ -131,8 +131,8 @@ done
 
 cat <<EOF
 Initial setup complete:
-	$BOSH
-	$CF
+	$BOSH_CLI-$BOSH_CLI_VERSION
+	$CF_CLI-$CF_CLI_VERSION
 EOF
 
 OLDIFS="$IFS"
