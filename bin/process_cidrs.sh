@@ -53,7 +53,7 @@ ip_sequence(){
 	done
 }
 
-NETWORK_NAME="${NETWORK_NAME:-1}"
+NETWORK_NAME="${1:-$NETWORK_NAME}"
 CIDR="${2:-$CIDR}"
 
 [ -z "$NETWORK_NAME" ] && FATAL 'No network name provided'
