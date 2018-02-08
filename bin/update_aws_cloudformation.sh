@@ -2,6 +2,15 @@
 #
 # See common-aws.sh for inputs
 #
+# Parameters:
+# 	See common-aws.sh for inputs
+#
+# Variables:
+#	SKIP_MISSING=[true|false]
+#	SKIP_STACK_PREAMBLE_OUTPUTS_CHECK=[true|false]
+#
+# Requires:
+#	common-aws.sh
 
 set -e
 

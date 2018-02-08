@@ -38,29 +38,14 @@ These are non-user facing scripts and are pulled in by the 'Scripts'
 
 ### AWS related scripts
 
-- create\_aws\_cloudformation.sh
+- `create_aws_cloudformation.sh`
   - Creates an AWS infrastructure using various Cloudformation Templates
-    - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
-    - Environmental variables: `DEPLOYMENT_NAME AWS_CONFIG_PREFIX HOSTED_ZONE AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
-                                AWS_DEBUG=true|false AWS_PROFILE CLOUDFORMATION_DIR IGNORE_MISSING_CONFIG=true|false
-                                SKIP_STACK_OUTPUTS_DIR=true|false SKIP_EXISTING=true|false REGENERATE_SSH_KEY=true|false
-                                DELETE_AWS_SSH_KEY=true|false`
-    - Defaults: `AWS_CONFIG_PREFIX='AWS-Bosh' AWS_REGION='eu-central-1' AWS_DEBUG=false AWS_PROFILE='default'
-                 CLOUDFORMATION_DIR='Cloudformation' IGNORE_MISSING=true SKIP_EXISTING=true REGENERATE_SSH_KEY=false
-                 DELETE_AWS_SSH_KEY=false AWS_DEBUG=false`
 
-- delete\_aws\_cloudformation.sh
+- `delete_aws_cloudformation.sh`
   - Delete a group of AWS Cloudformation stacks
-    - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
-    - Environmental Variables: `AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEBUG=true|false AWS_PROFILE
-                                CLOUDFORMATION_DIR BOSH_SSH_CONFIG KEEP_SSH_KEY`
-    - Defaults: `AWS_REGION='eu-central-1' AWS_DEBUG=false KEEP_SSH_KEY=false AWS_CONFIG_PREFIX='AWS-Bosh' AWS_PROFILE='default'`
 
-- simple-delete\_aws\_stack.sh
+- `simple-delete_aws_stack.sh`
   - Very simple/stupid script that deletes any AWS Cloudformation stacks that match a given prefix
-    - Parameters: `STACK_PREFIX`
-    - Environmental Variables: `AWS_PROFILE`
-    - Defaults: `AWS_PROFILE='default'`
 
 - update\_aws\_cloudformation.sh
   - Update an existing set of AWS Cloudformation templates

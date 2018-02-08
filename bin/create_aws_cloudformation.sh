@@ -1,7 +1,14 @@
 #!/bin/sh
 #
-# See common-aws.sh for inputs
 #
+# Parameters:
+# 	See common-aws.sh for inputs
+#
+# Variables:
+#	SKIP_EXISTING=[true|false]
+#
+# Requires:
+#	common-aws.sh
 
 set -e
 

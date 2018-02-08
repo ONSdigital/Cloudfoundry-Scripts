@@ -2,6 +2,14 @@
 #
 # See common-aws.sh for inputs
 #
+# Parameters:
+# 	See common-aws.sh for inputs
+#
+# Variables:
+#	DELETE_AWS_SSH_KEY=[true|false]
+#
+# Requires:
+#	common-aws.sh
 
 set -e
 

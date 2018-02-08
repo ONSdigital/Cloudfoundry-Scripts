@@ -1,8 +1,18 @@
 #!/bin/sh
 #
 # Simple, stupid AWS stack deletion
+#
+# Parameters:
+#	[Stack Prefix]
+#
+# Variables:
+#	[STACK_PREFIX]
+#	[AWS_CLI]
+#
 
-STACK_PREFIX="$1"
+set -e
+
+STACK_PREFIX="${1:-$STACK_PREFIX}"
 
 if [ -n "$AWS_CLI" ]; then
 	echo "Using $AWS cli"
