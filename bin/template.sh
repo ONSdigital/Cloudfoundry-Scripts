@@ -1,6 +1,12 @@
 #!/bin/sh
 #
 #
+# Parameters:
+#
+# Variables:
+#
+# Requires:
+#
 
 set -e
 

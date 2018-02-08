@@ -4,13 +4,23 @@
 # https://bosh.io/docs/addons-common.html#misc-users
 #
 # Set specific stemcell & release versions and match manifest & upload_releases_stemcells.sh
+#
+# Parameters:
+#	[Deployment Name]
+#	[CPI Type]
+#
+# Variables:
+#	[DEPLOYMENT_NAME]
+#	[CPI_TYPE]
+#
+# Requires:
+#	common.sh
 
 set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-
-DEPLOYMENT_NAME="$1"
+DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 CPI_TYPE="${2:-${CPI_TYPE:-AWS}}"
 
 . "$BASE_DIR/common.sh"
@@ -23,7 +33,7 @@ CPI_TYPE="${2:-${CPI_TYPE:-AWS}}"
 INFO 'Loading AWS outputs'
 load_outputs "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
 
-# Tweak Bosh settings
+# Tweak Bosh settings - is this still required?
 export BOSH_NON_INTERACTIVE='true'
 
 INFO 'Setting additional variables'

@@ -4,6 +4,25 @@
 #
 # https://bosh.io/docs/addons-common.html#misc-users
 #
+# Parameters:
+#
+# Variables:
+#	DELETE_BOSH_ENV=[true|false]
+#	[BOSH_LITE_PRIVATE_IP]
+#	USE_EXISTING_VERSIONS=[true|false]
+#	REINTERPOLATE_LITE_STATIC_IPS=[true|false]
+#	NO_CREATE_RELEASES=[true|false]
+#	REGENERATE_BOSH_CONFIG=[true|false]
+#	REUPLOAD_STEMCELL=[true|false]
+#	DEBUG=[true|false]
+#	RUN_DRY_RUN=[true|false]
+#	SKIP_POST_DEPLOY_ERRANDS=[true|false]
+#	[POST_DEPLOY_ERRANDS]
+#
+# Requires:
+#	common-bosh.sh
+#
+
 set -e
 
 BASE_DIR="`dirname \"$0\"`"
@@ -286,7 +305,7 @@ for _s in `"$BOSH_CLI" interpolate --no-color --var-errs --path /stemcells "$BOS
 done
 
 # Unfortunately, there is no way currently (2017/10/19) for Bosh/Director to automatically upload a stemcell in the same way it does for releases
-if [ x"$UPLOAD_STEMCELL" = x'true' ]; then
+if [ x"$UPLOAD_STEMCELL" = x'true' -o x"$REUPLOAD_STEMCELL" = x'true' ]; then
 	if [ -z "$STEMCELL_URL" ]; then
 		WARN 'No STEMCELL_URL provided, finding stemcell details from Bosh Lite deployment'
 

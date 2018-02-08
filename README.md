@@ -8,11 +8,11 @@ Generally, the way to get a full deployment of Cloudfoundry is to run the follow
 - `create_aws_cloudformation.sh`
 - `deploy_cloudfoundry.sh`
 
-# CURRENTLY BEING UPDATED - script details without extra details and in `backslashes` have been updated
+# CURRENTLY BEING UPDATED - script details without extra details and in `backticks` have been updated
 
 ## Template(s)
 
-- template.sh
+- `template.sh`
   - Base template
 
 ## Sourced scripts
@@ -28,8 +28,11 @@ These are non-user facing scripts and are pulled in by the 'Scripts'
 - `common-aws.sh`
   - Common parts for the various AWS scripts
 
-- common-bosh.sh
+- `common-bosh.sh`
   - Common parts for the various Bosh scripts
+
+- `common-bosh-login.sh`
+  - Common parts to login to Bosh
 
 - functions.sh
   - General functions used by the various scripts
@@ -47,15 +50,8 @@ These are non-user facing scripts and are pulled in by the 'Scripts'
 - `simple-delete_aws_stack.sh`
   - Very simple/stupid script that deletes any AWS Cloudformation stacks that match a given prefix
 
-- update\_aws\_cloudformation.sh
+- `update_aws_cloudformation.sh`
   - Update an existing set of AWS Cloudformation templates
-    - Parameters: `DEPLOYMENT_NAME [AWS_CONFIG_PREFIX] [HOSTED_ZONE] [AWS_REGION] [AWS_ACCESS_KEY_ID] [AWS_SECRET_ACCESS_KEY]`
-    - Environmental Variables: `HOSTED_ZONE AWS_REGION AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEBUG=true|false AWS_PROFILE
-                                CLOUDFORMATION_DIR IGNORE_MISSING_CONFIG=true|false SKIP_STACK_OUTPUTS_DIR SKIP_MISSING
-                                SKIP_STACK_PREAMBLE_OUTPUTS_CHECK SKIP_STACK_PREAMBLE_OUTPUTS_CHECK`
-    - Defaults: `AWS_CONFIG_PREFIX='AWS-Bosh' AWS_REGION='eu-central-1' AWS_DEBUG=false AWS_PROFILE='default'
-                 CLOUDFORMATION_DIR='Cloudformation' SKIP_MISSING='false' SKIP_STACK_PREAMBLE_OUTPUTS_CHECK='false'`
-
 
 ### Bosh CLI helper scripts
 
@@ -68,7 +64,7 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
 - `bosh-create_release.sh`
   - Script to create a release for upload onto Bosh
 
-- `bosh-display\_vms.sh`
+- `bosh-display_vms.sh`
   - Wraps `bosh vms` to provide a continually updated list of instances
 
 - `bosh-ssh.sh`
@@ -104,32 +100,12 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
 
 ### Cloudfoundry deployment scripts
 
-- delete\_cloudfoundry.sh
+- `delete_cloudfoundry.sh`
   - Delete a Bosh deployment and delete the Bosh initial environment
-    - Parameters: `DEPLOYMENT_NAME [BOSH_FULL_MANIFEST_PREFIX] [BOSH_CLOUD_MANIFEST_PREFIX] [BOSH_LITE_MANIFEST_NAME]
-                  [BOSH_PREAMBLE_MANIFEST_NAME] [BOSH_STATIC_IPS_PREFIX] [INTERNAL_DOMAIN]`
-    - Environmental Variables: `BOSH_LITE_OPS_FILE_NAME BOSH_FULL_OPS_FILE_NAME INTERACTIVE NO_FORCE_TTY`
-    - Defaults: `INTERACTIVE=false NO_FORCE_TTY=false BOSH_FULL_MANIFEST_PREFIX='Bosh-Template'
-                 BOSH_CLOUD_MANIFEST_PREFIX='$BOSH_FULL_MANIFEST_PREFIX-AWS-CloudConfig' BOSH_LITE_MANIFEST_NAME='Bosh-Template'
-                 BOSH_PREAMBLE_MANIFEST_NAME='Bosh-Template-preamble' BOSH_STATIC_IPS_PREFIX='Bosh-static-ips'
-                 MANIFESTS_DIR='Bosh-Manifests' INTERNAL_DOMAIN='cf.internal'`
 
-- deploy\_cloudfoundry.sh
+- `deploy_cloudfoundry.sh`
   - Deploys Cloudfoundry - this actually deploys any Bosh manifests, but has so far been soley used to deploy various
     parts of Cloudfoundry
-    - Parameters: `DEPLOYMENT_NAME [BOSH_FULL_MANIFEST_PREFIX] [BOSH_CLOUD_MANIFEST_PREFIX] [BOSH_LITE_MANIFEST_NAME]
-                  [BOSH_PREAMBLE_MANIFEST_NAME] [BOSH_STATIC_IPS_PREFIX] [INTERNAL_DOMAIN]`
-    - Environmental Variables: `BOSH_LITE_OPS_FILE_NAME BOSH_FULL_OPS_FILE_NAME INTERACTIVE NO_FORCE_TTY DELETE_BOSH_ENV
-                                DELETE_BOSH_STATE REGENERATE_PASSWORDS REGENERATE_NETWORKS_CONFIG REGENERATE_SSL
-                                DELETE_SSL_CA REGENERATE_BOSH_CONFIG REINTERPOLATE_LITE_STATIC_IPS REINTERPOLATE_FULL_STATIC_IPS
-                                REUPLOAD_COMPONENTS NORUN_PREDEPLOY NORUN_BOSH_PREAMBLE SKIP_POST_DEPLOY_ERRANDS`
-    - Defaults: `INTERACTIVE=false NO_FORCE_TTY=false BOSH_FULL_MANIFEST_PREFIX='Bosh-Template'
-                BOSH_CLOUD_MANIFEST_PREFIX='$BOSH_FULL_MANIFEST_PREFIX-AWS-CloudConfig' BOSH_LITE_MANIFEST_NAME='Bosh-Template'
-                BOSH_PREAMBLE_MANIFEST_NAME='Bosh-Template-preamble' BOSH_STATIC_IPS_PREFIX='Bosh-static-ips'
-                MANIFESTS_DIR='Bosh-Manifests' INTERNAL_DOMAIN='cf.internal' DELETE_BOSH_ENV=false REGENERATE_PASSWORDS=false
-                REGENERATE_NETWORKS_CONFIG=false REGENERATE_BOSH_CONFIG=false REINTERPOLATE_LITE_STATIC_IPS=false
-                DELETE_BOSH_ENV=false REGENERATE_BOSH_ENV=false REINTERPOLATE_FULL_STATIC_IPS=false REUPLOAD_COMPONENTS=false
-                NORUN_PREDEPLOY=false NORUN_BOSH_PREAMBLE=false SKIP_POST_DEPLOY_ERRANDS=false`
 
 ### Cloudfoundry setup scripts
 

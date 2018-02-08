@@ -1,5 +1,14 @@
 #!/bin/sh
 #
+# Deletes a Cloudfoundry deployment
+#
+# Parameters:
+#
+# Variables:
+#
+# Requires:
+#	common-bosh.sh
+#	common-bosh-login.sh
 
 set -e
 
