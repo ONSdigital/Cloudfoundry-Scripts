@@ -148,5 +148,5 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
 - `vendor_update.sh`
   - Interactive script to make the handling vendor'd Git repositories a little simplier
 
-- `protected\_branch.sh`
+- `protected_branch.sh`
   - Checks if the current branch contains a file `protection_state` containing 'protected' or not
