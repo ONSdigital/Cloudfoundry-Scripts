@@ -99,7 +99,7 @@ fi
 
 # Bosh doesn't seem to be able to handle templating (eg ((variable))) and variables files at the same time, so we need to expand the variables and then use
 # the output when we do a bosh create-env/deploy
-if [ ! -f "$BOSH_LITE_INTERPOLATED_STATIC_IPS" -o "$REINTERPOLATE_LITE_STATIC_IPS" = x'true' ]; then
+if [ ! -f "$BOSH_LITE_INTERPOLATED_STATIC_IPS" -o x"$REINTERPOLATE_LITE_STATIC_IPS" = x'true' -o x"$REGENERATE_NETWORKS_CONFIG" = x"true" ]; then
 	INFO 'Generating Bosh Lite static IPs'
 	"$BOSH_CLI" interpolate \
 		--var-errs \
