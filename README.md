@@ -8,8 +8,6 @@ Generally, the way to get a full deployment of Cloudfoundry is to run the follow
 - `create_aws_cloudformation.sh`
 - `deploy_cloudfoundry.sh`
 
-# CURRENTLY BEING UPDATED - script details without extra details and in `backticks` have been updated
-
 ## Template(s)
 
 - `template.sh`
@@ -34,7 +32,7 @@ These are non-user facing scripts and are pulled in by the 'Scripts'
 - `common-bosh-login.sh`
   - Common parts to login to Bosh
 
-- functions.sh
+- `functions.sh`
   - General functions used by the various scripts
 
 ## Scripts

@@ -524,7 +524,6 @@ case `uname -s` in
 		SED_EXTENDED='-E'
 		;;
 	Linux)
-		# Debian & Ubuntu use 'dash' as their shell, which is less than feature complete compared to other shells
 		SED_EXTENDED='-r'
 		;;
 esac
