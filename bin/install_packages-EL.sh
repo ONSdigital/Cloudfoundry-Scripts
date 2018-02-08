@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#
+# Installs packages on a Redhat/RPM based system
 #
 # https://bosh.io/docs/cli-v2.html
 

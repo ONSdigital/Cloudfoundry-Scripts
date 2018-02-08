@@ -1,6 +1,13 @@
 #!/bin/sh
 #
 #
+# Attempts to find an external IP
+#
+# Variables:
+#	VCAP_APPLICATION
+#
+# Requires:
+#	common.sh
 
 set -e
 

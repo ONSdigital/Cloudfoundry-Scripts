@@ -1,7 +1,20 @@
 #!/bin/sh
 #
+# Creates an Organisation and space
 #
-
+# Parameters:
+#	[Deployment Name]
+#	[Organisation]
+#	[Space Name]
+#
+# Variables:
+#	[DEPLOYMENT_NAME]
+#	[organisation_name]
+#
+# Requires:
+#	common.sh
+#	bosh-env.sh
+#
 set -e
 
 BASE_DIR="`dirname \"$0\"`"

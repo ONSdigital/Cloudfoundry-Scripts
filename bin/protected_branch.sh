@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# Checks for a file named protection_state to determine if the current branch is protected
+#
 
 if [ ! -d .git -o ! -f .git/config ]; then
 	echo Not a Git repository

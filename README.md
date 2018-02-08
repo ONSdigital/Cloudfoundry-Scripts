@@ -115,59 +115,38 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
 - `setup_cf-admin.sh`
   - Create a basic Cloudfoundry admin user
 
-- setup\_cf-elasticache-broker.sh
+- `setup_cf-elasticache-broker.sh`
   - Upload the Cloudfoundry ElastiCache brokerA
-    - Parameters: `DEPLOYMENT_NAME BROKER_NAME`
-    - Defaults: `BROKER_NAME='elasticache'`
 
-- setup\_cf-orgspace.sh
+- `setup_cf-orgspace.sh`
   - Create a Cloudfoundry organisation and space
-    - Parameters: `DEPLOYMENT_NAME [ORG_NAME] [SPACE_NAME]`
-    - Defaults: `ORG_NAME="$organisation" SPACE_NAME='Test'`
 
-- setup\_cf-rds-broker.sh
+- `setup_cf-rds-broker.sh`
   - Upload the Cloudfoundry RDS broker
-    - Parameters: `DEPLOYMENT_NAME RDS_BROKER_DB_NAME RDS_BROKER_NAME CF_ORG`
-    - Environmental Variables: `DEPLOYMENT_NAME RDS_BROKER_DB_NAME RDS_BROKER_NAME DEFAULT_RDS_BROKER_DB_NAME DEFAULT_RDS_BROKER_NAME IGNORE_EXISTING
-                                SERVICES_SPACE`
-    - Defaults: `RDS_BROKER_DB_NAME='rds_broker' RDS_BROKER_NAME='rds_broker' SERVICES_SPACE='Services'`
 
-- setup\_cf-service-broker.sh
+- `setup_cf-service-broker.sh`
   - Generic script to setup a Cloudfoundry service broker
-    - Parameters: `DEPLOYMENT_NAME [SERVICE_NAME] [SERVICE_USERNAME] [SERVICE_PASSWORD] [SERVICE_URL]`
-    - Environmental Variables: `DEPLOYMENT_NAME SERVICE_NAME SERVICE_USERNAME SERVICE_PASSWORD SERVICE_URL DONT_SKIP_SSL_VALIDATION IGNORE_EXISTING`
-
 
 ### Misc scripts
 
-- find\_external\_ip.sh
+- `find_external_ip.sh`
   - Simple script to find a hosts external IP
 
 ### Pre-install scripts
 
-- install\_deps.sh
+- `install_deps.sh`
   - Script to install various dependencies (eg awscli, cf-uaac)
-    - Parameters: `[INSTALL_AWS]`
-    - Environmental Variables: `BOSH_CLI_VERSION BOSH_GITHUB_RELEASE_URL BOSH_CLI_RELEASE_TYPE CF_CLI_VERSION CF_GITHUB_RELEASE_URL
-                                CF_CLI_RELEASE_TYPE NO_AWS PIP_VERSION_SUFFIX`
-    - Defaults: `INSTALL_AWS=true`
 
-- install\_packages-EL.sh
+- `install_packages-EL.sh`
   - Script to install various packages on Redhat/CentOS that then allow install\_deps.sh to run
 
-- process\_cidrs.sh
+- `process_cidrs.sh`
   - Script to generate various network related config, eg CIDR sizes, static/reserved IP ranges
-    - Parameters: `NETWORK_NAME CIDR`
-    - Environmental Variables: `DEFAULT_DEFAULT_ROUTE_OFFEST DEFAULT_RESERVED_START_OFFSET DEFAULT_RESERVED_SIZE
-                                ${NETWORK_NAME}_DEFAULT_ROUTE_OFFSET ${NETWORK_NAME}_RESERVED_START_OFSET
-                                ${NETWORK_NAME}_RESERVED_SIZE ${NETWORK_NAME}_STATIC_START_OFFSET
-                                ${NETWORK_NAME}_STATIC_SIZE`
-    - Defaults: `DEFAULT_DEFAULT_ROUTE_OFFEST=1 DEFAULT_RESERVED_START_OFFSET=1 DEFAULT_RESERVED_SIZE=10`
 
 ### Repository related scripts
 
-- vendor\_update.sh
+- `vendor_update.sh`
   - Interactive script to make the handling vendor'd Git repositories a little simplier
-    Parameters: `[Vendored_Repo1..Vendored_RepoN]`
 
-- protected\_branch.sh
+- `protected\_branch.sh`
+  - Checks if the current branch contains a file `protection_state` containing 'protected' or not

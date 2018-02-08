@@ -95,10 +95,12 @@ fi
 if [ -d "config/security_groups" ]; then
 	INFO 'Setting up Security Groups'
 
-	for _s in `ls config/security_groups`; do
-		group_name="`echo $security_group | sed $SED_EXTENDED -e 's/\.json$//g'`"
-		INFO "... $group_name"
-
-		"$CF_CLI" create-security-group "$group_name" "config/security_groups/$_s"
+	for _g in common "$DEPLOYMENT_NAME"; do
+		for _s in `ls "config/security_groups/$_g"`; do
+			group_name="`echo $security_group | sed $SED_EXTENDED -e 's/\.json$//g'`"
+			INFO "... $group_name"
+	
+			"$CF_CLI" create-security-group "$group_name" "config/security_groups/$_g/$_s"
+		done
 	done
 fi

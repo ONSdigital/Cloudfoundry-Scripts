@@ -1,5 +1,15 @@
 #!/bin/sh
 #
+# Parameters:
+#	Deployment Name
+#	[Broker Name]
+#
+# Variables:
+#	IGNORE_EXISTING=[true|false]
+#
+# Requires:
+#	common.sh
+#	bosh-env.sh
 #
 
 set -e

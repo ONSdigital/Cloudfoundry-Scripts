@@ -1,6 +1,25 @@
 #!/bin/sh
 #
+# Sets up the RDS Broker
 #
+# Parameters:
+#	[Deployment Name]
+#	[RDS Broker DB Name]
+#	[RD Broker Name]
+#	[Organisation]
+#
+# Variables:
+#	[DEPLOYMENT_NAME]
+#	[RDS_BROKER_DB_NAME]
+#	[RDS_BROKER_NAME]
+#	[SERVICES_SPACE]
+#	[organisation]
+#	[RDS_BROKER_PASSWORD]
+#	IGNORE_EXISTING=[true|false]
+#
+# Requires:
+#	common.sh
+#	bosh-env.sh
 
 set -e
 

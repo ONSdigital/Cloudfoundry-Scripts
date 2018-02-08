@@ -9,6 +9,13 @@
 #	Password
 #	Secret
 #	[Dont Skip SSL Validation]
+#
+# Variables:
+#	[UAA_ADMIN_USERNAME]
+#
+# Requires:
+#	common.sh
+#	bosh-env.sh
 
 set -e
 

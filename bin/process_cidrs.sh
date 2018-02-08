@@ -1,5 +1,33 @@
 #!/bin/sh
 #
+# Generates network configuration for the provided network
+#
+# Parameters:
+#	Network Name
+#	CIDR
+#
+# Variables:
+#	[NETWORK_NAME]
+#	[CIDR]
+#	[DEFAULT_DEFAULT_ROUTE_OFFEST]
+#	[DEFAULT_RESERVED_START_OFFSET]
+#	[DEFAULT_RESERVED_SIZE]
+#	[DEFAULT_STATIC_SIZE]
+#	[SMALL_RESERVED_SIZE]
+#	[SMALL_STATIC_SIZE]
+#	[MEDIUM_RESERVED_SIZE]
+#	[MEDIUM_STATIC_SIZE]
+#	[LARGE_RESERVED_SIZE]
+#	[LARGE_STATIC_SIZE]
+#	[upper_case(NETWORK_NAME)_DEFAULT_ROUTE_OFFSET]
+#	[upper_case(NETWORK_NAME)_RESERVED_START_OFSET]
+#	[upper_case(NETWORK_NAME)_RESERVED_SIZE]
+#	[upper_case(NETWORK_NAME)_STATIC_SIZE]
+#	[upper_case(NETWORK_NAME)_RESERVED_SCALE]
+#	[upper_case(NETWORK_NAME)_STATIC_SCALE]
+#
+# Requires:
+#	common.sh
 #
 
 set -e
@@ -25,8 +53,8 @@ ip_sequence(){
 	done
 }
 
-NETWORK_NAME="$1"
-CIDR=$2
+NETWORK_NAME="${NETWORK_NAME:-1}"
+CIDR="${2:-$CIDR}"
 
 [ -z "$NETWORK_NAME" ] && FATAL 'No network name provided'
 [ -z "$CIDR" ] && FATAL 'No CIDR provided'
@@ -47,12 +75,12 @@ DEFAULT_RESERVED_SIZE="${DEFAULT_RESERVED_SIZE:-10}"
 DEFAULT_STATIC_SIZE="${DEFAULT_STATIC_SIZE:-10}"
 
 # Provide medium size reserved and static allocation sizes:
-SMALL_RESERVED_SIZE="${LARGE_RESERVED_SIZE:-5}"
-SMALL_STATIC_SIZE="${LARGE_STATIC_SIZE:-5}"
+SMALL_RESERVED_SIZE="${SMALL_RESERVED_SIZE:-5}"
+SMALL_STATIC_SIZE="${SMALL_STATIC_SIZE:-5}"
 
 # Provide medium size reserved and static allocation sizes:
-MEDIUM_RESERVED_SIZE="${LARGE_RESERVED_SIZE:-40}"
-MEDIUM_STATIC_SIZE="${LARGE_STATIC_SIZE:-40}"
+MEDIUM_RESERVED_SIZE="${MEDIUM_RESERVED_SIZE:-40}"
+MEDIUM_STATIC_SIZE="${MEDIUM_STATIC_SIZE:-40}"
 
 # Provide large size reserved and static allocation sizes:
 LARGE_RESERVED_SIZE="${LARGE_RESERVED_SIZE:-75}"

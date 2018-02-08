@@ -1,11 +1,32 @@
 #!/bin/sh
 #
-# Work-in-progress
+# Configures the Cloudfoundry side of a service broker
 #
 # If things really break you can purge and then delete:
 #
 # cf purge-service-offering $SERVICE_NAME
 # cf delete-service-broker $SERVICE_NAME
+#
+# Parameters:
+#	[Deployment Name]
+#	[Service Name]
+#	[Service Username]
+#	[Service Password]
+#	[Service URL]
+#
+# Variables:
+#	[DEPLOYMENT_NAME]
+#	[SERVICE_NAME]
+#	[SERVICE_USERNAME]
+#	[SERVICE_PASSWORD]
+#	[SERVICE_URL]
+#	IGNORE_EXISTING=[true|false]
+#	[DONT_SKIP_SSL_VALIDATION]
+#	[NO_LOGIN]
+#
+# Requires:
+#	common.sh
+#	bosh-env.sh
 
 set -e
 

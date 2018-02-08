@@ -1,4 +1,10 @@
 #!/bin/sh
+#
+# Updates top level dirs from their vendored versions
+#
+# Parameters:
+#	[vendor-folder1 ... vendor-folderN]
+#
 
 set -e
 
