@@ -109,16 +109,11 @@ These scripts setup the environment for the Bosh CLI to save having to setup the
 
 ### Cloudfoundry setup scripts
 
-- setup\_cf.sh
+- `setup_cf.sh`
   - Script that calls the variopus setup\_cf-\* scripts to configure a deployed Cloudfoundry instance
-    - Parameters: `DEPLOYMENT_NAME [EMAIL_ADDRESS] [ORG_NAME] [TEST_SPACE] [DONT_SKIP_SSL_VALIDATION]`
-    - Environmental Variables: `SKIP_TESTS`
-    - Defaults: `EMAIL_ADDRESS='NONE' ORG_NAME="$organisation" TEST_SPACE='Test'`
 
-- setup\_cf-admin.sh
+- `setup_cf-admin.sh`
   - Create a basic Cloudfoundry admin user
-    - Parameters: `DEPLOYMENT_NAME USERNAME EMAIL PASSWORD DONT_SKIP_SSL_VALIDATION`
-    - Defaults: `EMAIL_ADDRESS=NONE ORG_NAME="$organisation" TEST_SPACE='Test' DONT_SKIP_SSL_VALIDATION=false`
 
 - setup\_cf-elasticache-broker.sh
   - Upload the Cloudfoundry ElastiCache brokerA

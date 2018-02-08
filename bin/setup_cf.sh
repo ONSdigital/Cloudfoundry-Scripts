@@ -1,16 +1,27 @@
 #!/bin/sh
 #
+# Setup Cloudfoundry after deployment.  This script is meant to be called with the various parameters already set
 #
+# Parameters:
+#
+# Variables:
+#	[DEPLOYMENT_NAME]
+#	[DONT_SKIP_SSL_VALIDATION]
+#	SKIP_TESTS=[true|false]
+#
+# Requires:
+#	common.sh
+#	bosh-env.sh
 
 set -e
 
 BASE_DIR="`dirname \"$0\"`"
 
-DEPLOYMENT_NAME="$1"
+DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
 EMAIL_ADDRESS="${2:-NONE}"
 ORG_NAME="${3:-$organisation}"
 TEST_SPACE="${4:-Test}"
-DONT_SKIP_SSL_VALIDATION="$5"
+DONT_SKIP_SSL_VALIDATION="${5:-$DONT_SKIP_SSL_VALIDATION}"
 
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"

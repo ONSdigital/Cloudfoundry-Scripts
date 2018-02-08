@@ -1,6 +1,14 @@
 #!/bin/sh
 #
+# Creates an additional Cloudfoundry admin user, or updates an already added one
 #
+# Parameters:
+#	Deployment Name
+#	Username
+#	Email
+#	Password
+#	Secret
+#	[Dont Skip SSL Validation]
 
 set -e
 
