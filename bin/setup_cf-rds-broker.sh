@@ -126,7 +126,7 @@ EOF
 if [ ! -f "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh" ]; then
 	mv "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh.new" "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh"
 
-elif diff -q "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh" "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh.new"; then
+elif diff -q "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh" "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh.new" >/dev/null 2>&1; then
 	rm -f "$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh"
 
 	INFO "Updating '$DEPLOYMENT_DIR/cf-broker-rds-credentials.sh'"

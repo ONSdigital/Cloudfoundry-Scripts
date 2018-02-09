@@ -332,10 +332,10 @@ EOF
 		unset var var_name
 	done | awk '{ gsub(/, *$/,""); params[++i]=$0 }END{ printf("[\n"); for(j=1; j<=i; j++){ printf("%s%s\n",params[j],i==j ? "" : ",") } printf("]\n")}' >"$updated_parameters"
 
-	if diff -q "$updated_parameters" "$parameters_file"; then
+	if diff -q "$updated_parameters" "$parameters_file" >/dev/null 2>&1; then
 		INFO 'No update required'
 	else
-		INFO 'Updating'
+		INFO 'Updating parameters file'
 		mv -f "$updated_parameters" "$parameters_file"
 	fi
 

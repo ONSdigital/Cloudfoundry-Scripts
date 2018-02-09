@@ -139,7 +139,7 @@ for i in BOSH_CLI CF_CLI; do
 	[ -z "$version" ] && FATAL "Unable to determine $i version"
 
 	if [ -h "$file" -o -f "$file" ]; then
-		diff -q "$file" "$file-$version" || rm -f "$file"
+		diff -q "$file" "$file-$version" >/dev/null 2>&1 || rm -f "$file"
 	fi
 
 	if [ ! -h "$file" -a ! -f "$file" ]; then
