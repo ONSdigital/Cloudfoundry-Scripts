@@ -70,10 +70,11 @@ for i in Lite Full; do
 
 				eval existing="\$${j}_BOSH_${upper}_OPS_FILE_OPTIONS"
 
+				INFO "Adding ops-file: $filename"
 				if [ -n "$existing" ]; then
-					eval "${j}_BOSH_${upper}_OPS_FILE_OPTIONS"="$existing --ops-file='$filename'"
+					eval "BOSH_${upper}_${j}_OPS_FILE_OPTIONS"="$existing --ops-file='$filename'"
 				else
-					eval "${j}_BOSH_${upper}_OPS_FILE_OPTIONS"="--ops-file='$filename'"
+					eval "BOSH_${upper}_${j}_OPS_FILE_OPTIONS"="--ops-file='$filename'"
 				fi
 			fi
 		done
