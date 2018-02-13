@@ -33,7 +33,7 @@ BROKER_GIT_URL='https://github.com/cloudfoundry-community/elasticache-broker'
 BROKER_USERNAME='elasticache-broker'
 BROKER_PASSWORD="`generate_password`"
 
-GOLANG_VERSION='1.6.3'
+GOLANG_VERSION='1.6.4'
 
 [ -d "$TMP_DIR" ] || mkdir -p "$TMP_DIR"
 [ -d "$BROKER_DIR" ] && rm -rf "$BROKER_DIR"
