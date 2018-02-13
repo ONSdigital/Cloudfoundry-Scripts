@@ -43,7 +43,7 @@ if [ ! -d "$STACK_OUTPUTS_DIR" ]; then
 	INFO "Creating directory to hold stack outputs"
 	mkdir -p "$STACK_OUTPUTS_DIR"
 elif [ x"$IGNORE_EXISTING_AWS_CONFIG" != x"true" ]; then
-	INFO 'Loading AWS outputs'
+	INFO 'Loading previous AWS outputs'
 	load_outputs "$STACK_OUTPUTS_DIR"
 fi
 
