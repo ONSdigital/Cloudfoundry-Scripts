@@ -10,7 +10,7 @@ FATAL(){
 	# some require -e to do so whereas others ignore the option and just print -e
 	printf "%s " `_date` >&2
 	cat >&2 <<EOF
-${FATAL_COLOR}FATAL $@${NORMAL_COLOUR}
+${FATAL_COLOR}FATAL $@$NORMAL_COLOUR
 EOF
 
 	exit 1
@@ -19,14 +19,14 @@ EOF
 WARN(){
 	printf "%s " `_date` >&2
 	cat >&2 <<EOF
-${WARN_COLOUR}WARN $@${NORMAL_COLOUR}
+${WARN_COLOUR}WARN $@$NORMAL_COLOUR
 EOF
 }
 
 INFO(){
 	printf "%s " `_date` >&2
 	cat >&2 <<EOF
-${INFO_COLOUR}INFO $@${NORMAL_COLOUR}
+${INFO_COLOUR}INFO $@$NORMAL_COLOUR
 EOF
 }
 
@@ -35,7 +35,7 @@ DEBUG(){
 
 	printf "%s " `_date` >&2
 	cat >&2 <<EOF
-${DEBUG_COLOUR}DEBUG $@${NORMAL_COLOUR}
+${DEBUG_COLOUR}DEBUG $@$NORMAL_COLOUR
 EOF
 }
 
