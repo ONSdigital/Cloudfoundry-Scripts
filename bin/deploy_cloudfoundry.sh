@@ -407,6 +407,9 @@ done
 # Any post deploy script to run? These are under $POST_DEPLOY_SCRIPTS_DIR/cf
 post_deploy_scripts cf
 
+INFO 'Cleaning up any unused releases or stemcells'
+"$BOSH_CLI" clean-up --tty --all
+
 INFO 'Bosh VMs'
 "$BOSH_CLI" vms
 

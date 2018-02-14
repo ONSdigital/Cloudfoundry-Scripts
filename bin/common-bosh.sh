@@ -33,7 +33,7 @@ CPI_TYPE="${2:-${CPI_TYPE:-AWS}}"
 INFO 'Loading AWS outputs'
 load_outputs "$STACK_OUTPUTS_DIR" "$ENV_PREFIX"
 
-# Tweak Bosh settings - is this still required?
+# Force Bosh to be non-interactive
 export BOSH_NON_INTERACTIVE='true'
 
 INFO 'Setting additional variables'
