@@ -77,7 +77,7 @@ CF_CLI_ARCHIVE="${CF_CLI_ARCHIVE:-cf-$CF_CLI_VERSION-$CF_CLI_RELEASE_TYPE.tar.gz
 
 # If running via Jenkins we install cf-uaac via rbenv
 if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
-	which ruby$RUBY_VERSION >/dev/null 2>&1 || FATAL "Ruby version $RUBY_VERSION is not installed"
+	which ruby$RUBY_VERSION >/dev/null 2>&1 || FATAL "Ruby version $RUBY_VERSION is not installed, either install Ruby or run with NO_UAAC=1"
 
 	INFO 'Installing UAA client'
 	which "gem$RUBY_VERSION" >/dev/null 2>&1 || FATAL "No Ruby 'gem' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or rbenv from within Jenkins?"
