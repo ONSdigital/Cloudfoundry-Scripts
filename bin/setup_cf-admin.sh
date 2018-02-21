@@ -39,6 +39,26 @@ UAA_ADMIN_USERNAME="${UAA_ADMIN_USERNAME:-admin}"
 [ -z "$EMAIL" ] && FATAL 'No email address supplied'
 [ -z "$CF_CREDENTIALS" ] && FATAL 'Unknown CF credentials filename'
 
+INFO 'Finding UAAC cli'
+if [ -n "$UAAC_CLI" ]; then
+	INFO "Using UAAC cli from $UAAC_CLI"
+elif which uaac >/dev/null 2>&1; then
+	UAAC_CLI=uaac
+
+else
+	WARN 'UAAC cli is not in $PATH. Attempting to find it'
+
+	which gem >/dev/null 2>&1 && FATAL 'Ruby GEM cli is not installed, is Ruby installed?'
+
+	RUBY_DIR="`ruby -e 'puts Gem.user_dir'`"
+
+	[ -e "$RUBY_DIR/bin/uaac" ] || FATAL 'Is UAAC cli installed?  Did you rub install_deps.sh?'
+
+	UAAC="$RUBY_PATH/bin/uaac"
+
+	INFO "Using UAAC cli: $UAAC_CLI"
+fi
+
 INFO "$STORE_ACTION CF Admin Password"
 UAA_ADMIN_CLIENT_SECRET="`"$BOSH_CLI" interpolate --no-color --var-errs --path='/uaa_admin_client_secret' "$BOSH_FULL_VARIABLES_STORE"`"
 
@@ -74,13 +94,13 @@ fi
 [ -n "$DONT_SKIP_SSL_VALIDATION" ] || UAA_EXTRA_OPTS='--skip-ssl-validation'
 
 INFO "Targetting UAA: $uaa_dns"
-uaac target "$uaa_dns" "$UAA_EXTRA_OPTS"
+"$UAAC_CLI" target "$uaa_dns" "$UAA_EXTRA_OPTS"
 
 INFO "Obtaining initial $UAA_ADMIN_USERNAME user token"
-uaac token client get "$UAA_ADMIN_USERNAME" -s "$UAA_ADMIN_CLIENT_SECRET"
+"$UAAC_CLI" token client get "$UAA_ADMIN_USERNAME" -s "$UAA_ADMIN_CLIENT_SECRET"
 
 # Hmmm... there is a better way
-if uaac user get "$CF_ADMIN_USERNAME" >/dev/null || uaac client get "$CF_ADMIN_USERNAME" >/dev/null ; then
+if "$UAAC_CLI" user get "$CF_ADMIN_USERNAME" >/dev/null || "$UAAC_CLI" client get "$CF_ADMIN_USERNAME" >/dev/null ; then
 	if [ -z "$NEW_CREDENTIALS" ]; then
 		WARN 'No changes to perform'
 
@@ -88,23 +108,23 @@ if uaac user get "$CF_ADMIN_USERNAME" >/dev/null || uaac client get "$CF_ADMIN_U
 	fi
 
 	INFO "Deleting existing '$CF_ADMIN_USERNAME' user"
-	uaac user delete "$CF_ADMIN_USERNAME"
+	"$UAAC_CLI" user delete "$CF_ADMIN_USERNAME"
 
 	INFO "Deleting existing '$CF_ADMIN_USERNAME' client"
-	uaac client delete "$CF_ADMIN_USERNAME"
+	"$UAAC_CLI" client delete "$CF_ADMIN_USERNAME"
 fi
 
 INFO "Adding '$CF_ADMIN_USERNAME' user with '$CF_ADMIN_EMAIL' email"
-uaac user add "$CF_ADMIN_USERNAME" --password "$CF_ADMIN_PASSWORD" --emails "$CF_ADMIN_EMAIL"
+"$UAAC_CLI" user add "$CF_ADMIN_USERNAME" --password "$CF_ADMIN_PASSWORD" --emails "$CF_ADMIN_EMAIL"
 
 INFO "Adding required persmissions to '$CF_ADMIN_USERNAME' user"
-uaac member add cloud_controller.admin "$CF_ADMIN_USERNAME"
-uaac member add uaa.admin "$CF_ADMIN_USERNAME"
-uaac member add scim.read "$CF_ADMIN_USERNAME"
-uaac member add scim.write "$CF_ADMIN_USERNAME"
+"$UAAC_CLI" member add cloud_controller.admin "$CF_ADMIN_USERNAME"
+"$UAAC_CLI" member add uaa.admin "$CF_ADMIN_USERNAME"
+"$UAAC_CLI" member add scim.read "$CF_ADMIN_USERNAME"
+"$UAAC_CLI" member add scim.write "$CF_ADMIN_USERNAME"
 
 # Is this correct?
 INFO "Adding '$CF_ADMIN_USERNAME' client"
-uaac client add "$CF_ADMIN_USERNAME" --secret "$CF_ADMIN_CLIENT_SECRET" \
+"$UAAC_CLI" client add "$CF_ADMIN_USERNAME" --secret "$CF_ADMIN_CLIENT_SECRET" \
 	--authorized_grant_types client_credentials,refresh_token \
 	--authorities cloud_controller.admin,uaa.admin,scim.read,scim.write
