@@ -77,7 +77,7 @@ CF_CLI_ARCHIVE="${CF_CLI_ARCHIVE:-cf-$CF_CLI_VERSION-$CF_CLI_RELEASE_TYPE.tar.gz
 [ -d "$TMP_DIR" ] || mkdir -p "$TMP_DIR"
 
 # If running via Jenkins we install cf-uaac via rbenv
-if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
+if [ -z "$NO_UAAC" ] && [ -z "$UAAC_CLI" -o ! -x "$UAAC_CLI" ] && ! which uaac >/dev/null 2>&1; then
 	which ruby >/dev/null 2>&1 || FATAL 'Ruby is not installed'
 
 	INFO 'Checking Ruby version'
@@ -96,7 +96,7 @@ if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
 fi
 
 # If running via Jenkins we can install awscli via pyenv
-if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && ! which aws >/dev/null 2>&1; then
+if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && [ -z "$AWS_CLI" -o ! -x "$AWS_CLI" ] && ! which aws >/dev/null 2>&1; then
 	INFO 'Installing AWS CLI'
 	which pip$PYTHON_VERSION_SUFFIX >/dev/null 2>&1 || FATAL "No 'pip' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or pyenv from within Jenkins?"
 
@@ -115,7 +115,7 @@ if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && ! which aws >/dev/null 2>&1
 	CHANGES=1
 fi
 
-if [ ! -e "$BOSH_CLI-$BOSH_CLI_VERSION" ]; then
+if [ ! -x "$BOSH_CLI-$BOSH_CLI_VERSION" ]; then
 	INFO "Downloading Bosh $BOSH_CLI_VERSION"
 	curl -SLo "$BOSH_CLI-$BOSH_CLI_VERSION" "$BOSH_CLI_URL"
 
