@@ -86,10 +86,11 @@ if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
 		FATAL 'Unable to install UAAC, either install a more recent of Ruby or set NO_UAAC=1 to not install UAAC'
 	fi
 
-	INFO 'Installing UAA client'
+	INFO 'Checking we have Ruby gem installed'
 	which gem >/dev/null 2>&1 || FATAL 'No Ruby "gem" command installed'
 
-	gem install cf-uaac
+	INFO 'Installing UAA client'
+	gem install --user-install cf-uaac
 
 	CHANGES=1
 fi
