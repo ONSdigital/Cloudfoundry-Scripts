@@ -111,8 +111,9 @@ if [ ! -e "$BOSH_CLI-$BOSH_CLI_VERSION" ]; then
 	curl -SLo "$BOSH_CLI-$BOSH_CLI_VERSION" "$BOSH_CLI_URL"
 
 	chmod +x "$BOSH_CLI-$BOSH_CLI_VERSION"
-fi
 
+	BOSH_LINK='BOSH_CLI'
+fi
 
 if [ ! -f "$CF_CLI-$CF_CLI_VERSION" ]; then
 	if [ ! -f "$TMP_DIR/$CF_CLI_ARCHIVE" ]; then
@@ -126,32 +127,37 @@ if [ ! -f "$CF_CLI-$CF_CLI_VERSION" ]; then
 	tar -zxf "$TMP_DIR/$CF_CLI_ARCHIVE" -C "$TMP_DIR" cf || FATAL "Unable to extract $TMP_DIR/$CF_CLI_ARCHIVE"
 
 	mv "$TMP_DIR/cf" "$CF_CLI-$CF_CLI_VERSION"
+
+	CF_LINK='CF_CLI'
 fi
 
-INFO 'Creating Bosh & CF CLI links'
-for i in BOSH_CLI CF_CLI; do
-	eval file="\$$i"
-	eval version="\$${i}_VERSION"
+if [ -n "$BOSH_LINK" -o -n "$CF_LINK" ]; then
+	for i in $BOSH_LINK $CF_LINK; do
+		eval file="\$$i"
+		eval version="\$${i}_VERSION"
 
-	file_name="`basename \"$file\"`"
+		file_name="`basename \"$file\"`"
 
-	# Should never fail
-	[ -z "$version" ] && FATAL "Unable to determine $i version"
+		INFO "Creating $file_name link"
 
-	if [ -h "$file" -o -f "$file" ]; then
-		diff -q "$file" "$file-$version" >/dev/null 2>&1 || rm -f "$file"
-	fi
+		# Should never fail
+		[ -z "$version" ] && FATAL "Unable to determine $i version"
 
-	if [ ! -h "$file" -a ! -f "$file" ]; then
-		cd "$BIN_DIR"
+		if [ -h "$file" -o -f "$file" ]; then
+			diff -q "$file" "$file-$version" >/dev/null 2>&1 || rm -f "$file"
+		fi
 
-		ln -s "$file_name-$version" "$file_name"
+		if [ ! -h "$file" -a ! -f "$file" ]; then
+			cd "$BIN_DIR"
 
-		CHANGES=1
-	fi
+			ln -s "$file_name-$version" "$file_name"
 
-	unset file file_name version
-done
+			CHANGES=1
+		fi
+
+		unset file file_name version
+	done
+fi
 
 cat <<EOF
 Initial setup complete:
