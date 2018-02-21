@@ -39,7 +39,8 @@ BOSH_GITHUB_RELEASE_URL="https://github.com/cloudfoundry/bosh-cli/releases/lates
 BOSH_CLI_RELEASE_TYPE='linux-amd64'
 CF_CLI_RELEASE_TYPE='linux64-binary'
 
-RUBY_VERSION="${RUBY_VERSION:-2.1}"
+MIN_RUBY_MAJOR_VERSION='2'
+MIN_RUBY_MINOR_VERSION='1'
 PYTHON_VERSION_SUFFIX="${PYTHON_VERSION_SUFFIX:-3}"
 
 if [ x"$DISCOVER_VERSIONS" = x'true' ]; then
@@ -77,11 +78,16 @@ CF_CLI_ARCHIVE="${CF_CLI_ARCHIVE:-cf-$CF_CLI_VERSION-$CF_CLI_RELEASE_TYPE.tar.gz
 
 # If running via Jenkins we install cf-uaac via rbenv
 if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
-	which ruby$RUBY_VERSION >/dev/null 2>&1 || FATAL "Ruby version $RUBY_VERSION is not installed, either install Ruby or run with NO_UAAC=1"
+	which ruby >/dev/null 2>&1 || FATAL 'Ruby is not installed'
+
+	INFO 'Checking Ruby version'
+	if ! ruby -v | awk -v major=$MIN_RUBY_MAJOR_VERSION -v minor=$MIN_RUBY_MINOR_VERSION '/^ruby/{split($2,a,"."); if(a[1] >= major && a[2] >= minor) exit 0; exit 1 }'; then
+		WARN "The minimum supported Ruby version is $RUBY_MIN_MAJOR_VERSION.$MIN_RUBY_MINOR_VERSION.x"
+		FATAL 'Unable to install UAAC, either install a more recent of Ruby or set NO_UAAC=1 to not install UAAC'
+	fi
 
 	INFO 'Installing UAA client'
-	which "gem$RUBY_VERSION" >/dev/null 2>&1 || FATAL "No Ruby 'gem' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or rbenv from within Jenkins?"
-	"gem$RUBY_VERSION" install cf-uaac
+	which gem >/dev/null 2>&1 || FATAL 'No Ruby "gem" command installed'
 
 	CHANGES=1
 fi
