@@ -89,6 +89,8 @@ if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
 	INFO 'Installing UAA client'
 	which gem >/dev/null 2>&1 || FATAL 'No Ruby "gem" command installed'
 
+	gem install cf-uaac
+
 	CHANGES=1
 fi
 
