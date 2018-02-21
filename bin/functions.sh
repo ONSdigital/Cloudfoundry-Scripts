@@ -137,7 +137,10 @@ delete_aws_key(){
 }
 
 find_aws(){
-	if which aws >/dev/null 2>&1; then
+	if [ -n "$AWS_CLI" ]; then
+		INFO "Using AWS CLI configured in \$AWS_CLI: $AWS_CLI"
+
+	elif which aws >/dev/null 2>&1; then
 		AWS_CLI="`which aws`"
 
 	elif [ -f "$BIN_DIR/aws" ]; then
