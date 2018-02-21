@@ -98,7 +98,7 @@ fi
 # If running via Jenkins we can install awscli via pyenv
 if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && [ -z "$AWS_CLI" -o ! -x "$AWS_CLI" ] && ! which aws >/dev/null 2>&1; then
 	INFO 'Installing AWS CLI'
-	which pip$PYTHON_VERSION_SUFFIX >/dev/null 2>&1 || FATAL "No 'pip' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or pyenv from within Jenkins?"
+	which pip$PYTHON_VERSION_SUFFIX >/dev/null 2>&1 || FATAL "No 'pip' installed, unable to install awscli - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or pyenv from within Jenkins?"
 
 	pip$PYTHON_VERSION_SUFFIX install "awscli" --user
 
