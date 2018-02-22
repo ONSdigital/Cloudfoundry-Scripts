@@ -20,8 +20,11 @@ BASE_DIR="`dirname \"$0\"`"
 # Java packager
 
 BUILDPACK_NAME="$1"
+BUILDPACK_DIR="$2"
 
 [ -z "$BUILDPACK_NAME" ] && FATAL 'No buildpack name provided'
+
+[ -n "$BUILDPACK_DIR" ] && cd "$BUILDPACK_DIR"
 
 mkdir -p buildpack
 
