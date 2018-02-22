@@ -5,6 +5,10 @@
 # 	See common-aws.sh for inputs
 #
 # Variables:
+#	IGNORE_EXISTING_AWS_CONFIG=[true|false]
+#	IGNORE_EXISTING_PASSWORDS=[true|false]
+#	IGNORE_EXISTING_PARAMETERS=[true|false]
+#	IGNORE_EXISTING_AVAILABILITY_CONFIG=[true|false]
 #
 # Requires:
 #	common-aws.sh
