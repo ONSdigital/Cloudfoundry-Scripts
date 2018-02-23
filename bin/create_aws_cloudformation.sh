@@ -124,7 +124,7 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 done
 
 for full_stack_filename in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
-	echo $stack_name | grep 'Template/' stack_file="$full_stack_filename" || stack_file="`basename $full_stack_filename`"
+	echo $stack_name | grep 'Template/' && stack_file="$full_stack_filename" || stack_file="`basename $full_stack_filename`"
 
 	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
 	STACK_URL="$templates_bucket_http_url/$stack_file"
