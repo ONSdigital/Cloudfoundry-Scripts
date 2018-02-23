@@ -125,6 +125,10 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 done
 
 for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
+	if ! echo $stack_name | grep 'Template/'; then
+		stack_file="`basename $stack_file`"
+	fi
+
 	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
 	STACK_URL="$templates_bucket_http_url/$stack_file"
 	STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
