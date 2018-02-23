@@ -117,7 +117,7 @@ for stack_full_filename in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_F
 done
 
 for stack_full_filename in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
-	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$STACK_FILENAME"`"
+	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_full_filename"`"
 	STACK_FILENAME="`basename $stack_full_filename`"
 	STACK_URL="$templates_bucket_http_url/$STACK_FILENAME"
 	STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"

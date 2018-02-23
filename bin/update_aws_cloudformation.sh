@@ -157,8 +157,8 @@ fi
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
 for _action in validate update; do
-	for stack_full_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
-		STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_full_file"`"
+	for stack_full_filename in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
+		STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_full_filename"`"
 		STACK_FILENAME="`basename $stack_full_filename`"
 		STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 		STACK_URL="$templates_bucket_http_url/$STACK_FILENAME"
@@ -166,14 +166,14 @@ for _action in validate update; do
 
 		if [ x"$_action" = x"update" ]; then
 			INFO "Checking any existing parameters for $STACK_NAME"
-			check_existing_parameters "$stack_full_file"
+			check_existing_parameters "$stack_full_filename"
 
 			if [ -f "$STACK_PARAMETERS" ]; then
 				INFO "Checking if we need to update $STACK_NAME parameters"
-				update_parameters_file "$stack_full_file" "$STACK_PARAMETERS"
+				update_parameters_file "$stack_full_filename" "$STACK_PARAMETERS"
 			else
                 		INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
-				generate_parameters_file "$stack_full_file" >"$STACK_PARAMETERS"
+				generate_parameters_file "$stack_full_filename" >"$STACK_PARAMETERS"
 			fi
 		fi
 
