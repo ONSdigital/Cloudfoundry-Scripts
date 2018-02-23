@@ -87,7 +87,7 @@ INFO 'Copying templates to S3'
 
 if [ -d "$LOCAL_CLOUDFORMATION_DIR" ]; then
 	INFO 'Copying local Cloudformation templates'
-	"$AWS_CLI" s3 cp "$LOCAL_CLOUDFORMATION_DIR/*.json" "s3://$templates_bucket_name"
+	"$AWS_CLI" s3 sync $LOCAL_CLOUDFORMATION_DIR/ "s3://$templates_bucket_name/$LOCAL_CLOUDFORMATION_DIR/" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --delete
 fi
 
 for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do

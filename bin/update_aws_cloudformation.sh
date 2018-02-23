@@ -148,7 +148,12 @@ INFO 'Parsing preamble outputs'
 . "$STACK_PREAMBLE_OUTPUTS"
 
 INFO 'Copying templates to S3'
-"$AWS_CLI" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
+"$AWS_CLI" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json' --delete
+
+if [ -d "$LOCAL_CLOUDFORMATION_DIR" ]; then
+	INFO 'Copying local Cloudformation templates'
+	"$AWS_CLI" s3 sync $LOCAL_CLOUDFORMATION_DIR/ "s3://$templates_bucket_name/$LOCAL_CLOUDFORMATION_DIR/" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --delete
+fi
 
 # Now we can set the main stack URL
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
