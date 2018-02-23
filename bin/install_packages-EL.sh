@@ -18,7 +18,6 @@ EPEL_RELEASE_RPM_NAME="epel-release-latest-$REDHAT_VERSION.noarch.rpm"
 EPEL_RELEASE_RPM_FILE="$TMP_DIR/$EPEL_RELEASE_RPM_NAME"
 
 WARN 'This script no longer works with Redhat/CentOS 7. This is due to requiring a Ruby version greater than 2.0'
-RUBY_VERSION='21'
 
 install_packages(){
 	[ -z "$1" ] && return 0
@@ -58,6 +57,8 @@ if [ -f /etc/redhat-release ] && grep -qE '^Red Hat Enterprise Linux Server' /et
 	fi
 
 	REAL_RHEL=1
+elif uname -r | grep amzn; then
+	INFO Running on Amazon, not install EPEL repo
 else
 	install_packages epel-release
 fi
@@ -66,10 +67,10 @@ fi
 YUM_CLEAN=yes
 
 # Install packages for bosh
-install_packages gcc gcc-c++ make patch openssl openssl-devel "ruby$RUBY_VERSION" "ruby$RUBY_VERSION-devel" zlib-devel
+install_packages gcc gcc-c++ make patch openssl openssl-devel ruby ruby-devel zlib-devel
 
 # Required for AWS
-install_packages python34 python34-setuptools python34-pip python34-devel libyaml-devel bzip2 readline-devel
+install_packages python python-setuptools python-pip python-devel libyaml-devel bzip2 readline-devel
 
 # Required to install Bosh S3 CLI
 install_packages golang
