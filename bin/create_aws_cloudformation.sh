@@ -85,14 +85,21 @@ INFO "Loading: $STACK_PREAMBLE_OUTPUTS"
 INFO 'Copying templates to S3'
 "$AWS_CLI" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
 
-if [ -d "$LOCAL_CLOUDFORMATION_DIR" ]; then
+if [ -n "$STACK_LOCAL_FILES_COMMON" -o -n "$STACK_LOCAL_FILES_DEPLOYMENT" ]; then
 	INFO 'Copying local Cloudformation templates'
-	"$AWS_CLI" s3 sync $LOCAL_CLOUDFORMATION_DIR/ "s3://$templates_bucket_name/$LOCAL_CLOUDFORMATION_DIR/" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --delete
+	for _f in $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
+		"$AWS_CLI" s3 cp $_f "s3://$templates_bucket_name/$LOCAL_CLOUDFORMATION_DIR/"
+	done
 fi
 
 for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
+	if ! echo $stack_name | grep 'Template/'; then
+		stack_file="`basename $stack_file`"
+	fi
+
 	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
 	STACK_URL="$templates_bucket_http_url/$stack_file"
+
 
 	INFO "Validating Cloudformation template: '$stack_file'"
 	if ! "$AWS_CLI" cloudformation validate-template --template-url "$STACK_URL"; then

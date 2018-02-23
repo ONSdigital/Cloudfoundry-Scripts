@@ -150,9 +150,11 @@ INFO 'Parsing preamble outputs'
 INFO 'Copying templates to S3'
 "$AWS_CLI" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json' --delete
 
-if [ -d "$LOCAL_CLOUDFORMATION_DIR" ]; then
+if [ -n "$STACK_LOCAL_FILES_COMMON" -o -n "$STACK_LOCAL_FILES_DEPLOYMENT" ]; then
 	INFO 'Copying local Cloudformation templates'
-	"$AWS_CLI" s3 sync $LOCAL_CLOUDFORMATION_DIR/ "s3://$templates_bucket_name/$LOCAL_CLOUDFORMATION_DIR/" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --delete
+	for _f in $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
+		"$AWS_CLI" s3 cp $_f "s3://$templates_bucket_name/"
+	done
 fi
 
 # Now we can set the main stack URL
@@ -160,6 +162,10 @@ STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
 for _action in validate update; do
 	for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
+		if ! echo $stack_name | grep 'Template/'; then
+			stack_file="`basename $stack_file`"
+		fi 	
+
 		STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
 		STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
 		STACK_URL="$templates_bucket_http_url/$stack_file"
