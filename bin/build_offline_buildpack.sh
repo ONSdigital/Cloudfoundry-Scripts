@@ -29,10 +29,6 @@ BUILDPACK_DIR="$2"
 
 mkdir -p buildpack
 
-ls
-pwd
-find .
-
 if [ -f src/buildpack/cf.Gemfile ]; then
 	# Ruby buildpack packager
 	which ruby >/dev/null || FATAL 'Ruby is not installed, or is not in the $PATH'
