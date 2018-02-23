@@ -521,6 +521,7 @@ load_outputs(){
 	done
 }
 
+
 # Hopefully we can run on Linux and Darwin (OSX)
 case `uname -s` in
 	Darwin)

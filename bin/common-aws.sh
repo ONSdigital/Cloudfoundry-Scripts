@@ -41,7 +41,7 @@ export AWS_SECRET_ACCESS_KEY="${3:-$AWS_SECRET_ACCESS_KEY}"
 export AWS_DEFAULT_OUTPUT="${AWS_DEFAULT_OUTPUT:-table}"
 
 # Prefix for all AWS manifest files
-AWS_CONFIG_PREFIX="${AWS_CONFIG_PREFIX:-AWS-Bosh}"
+AWS_CONFIG_PREFIX='AWS-Bosh'
 
 [ -n "$AWS_PROFILE" ] && export AWS_PROFILE
 
@@ -69,11 +69,12 @@ if [ -z "$AWS_ACCESS_KEY_ID" -o -z "$AWS_SECRET_ACCESS_KEY" ]; then
 	[ -z "$AWS_SECRET_ACCESS_KEY" ] && FATAL 'No AWS_SECRET_ACCESS_KEY'
 fi
 
-# Local/non-public Cloudformation additions
-LOCAL_CLOUDFORMATION_DIR="$TOP_LEVEL_DIR/config/aws-cloudformation"
-
-# CLOUDFORMATION_DIR may be given as a relative directory
-findpath CLOUDFORMATION_DIR "${CLOUDFORMATION_DIR:-AWS-Cloudformation}"
+# Public Cloudformation
+CLOUDFORMATION_DIR='AWS-Cloudformation'
+# Private Cloudformation
+LOCAL_CLOUDFORMATION_DIR='local/aws-cloudformation'
+LOCAL_COMMON_CLOUDFORMATION_DIR="$LOCAL_CLOUDFORMATION_DIR/common"
+LOCAL_DEPLOYMENT_CLOUDFORMATION_DIR="$LOCAL_CLOUDFORMATION_DIR/$DEPLOYMENT_NAME"
 
 [ -z "$DEPLOYMENT_NAME" ] && FATAL 'No deployment name provided'
 
@@ -100,5 +101,13 @@ STACK_PARAMETERS_SUFFIX='json'
 STACK_PREAMBLE_URL="file://$STACK_PREAMBLE_FILE"
 STACK_PREAMBLE_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-preamble.sh"
 
+if [ -z "$NON_AWS_DEPLOY" ]; then
+	# We use older options in find due to possible lack of -printf and/or -regex options
+	STACK_FILES="`find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
+	STACK_TEMPLATES_FILES="`find "$CLOUDFORMATION_DIR/Templates" -mindepth 1 -maxdepth 1 -name "*.json" | awk -F/ '{printf("%s/%s\n",$(NF-1),$NF)}' | sort`"
+
+	[ -d "$LOCAL_COMMON_CLOUDFORMATION_DIR" ] && STACK_LOCAL_FILES_COMMON="`find "$LOCAL_COMMON_CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "*.json" | sort`"
+	[ -d "$LOCAL_DEPLOYMENT_CLOUDFORMATION_DIR" ] && STACK_LOCAL_FILES_DEPLOYMENT="`find "$LOCAL_DEPLOYMENT_CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "*.json" | sort`"
+fi
 
 
