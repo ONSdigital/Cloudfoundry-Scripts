@@ -102,7 +102,6 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
 	STACK_URL="$templates_bucket_http_url/$stack_file"
 
-
 	INFO "Validating Cloudformation template: '$stack_file'"
 	if ! "$AWS_CLI" cloudformation validate-template --template-url "$STACK_URL"; then
 		if [ -z "$PREAMBLE_EXISTS" ]; then
@@ -124,10 +123,8 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 	fi
 done
 
-for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
-	if ! echo $stack_name | grep 'Template/'; then
-		stack_file="`basename $stack_file`"
-	fi
+for full_stack_filename in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
+	echo $stack_name | grep 'Template/' stack_file="$full_stack_filename" || stack_file="`basename $full_stack_filename`"
 
 	STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
 	STACK_URL="$templates_bucket_http_url/$stack_file"
@@ -147,10 +144,10 @@ for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPL
 
 	if [ -f "$STACK_PARAMETERS" ]; then
 		INFO "Checking if we need to update $STACK_NAME parameters"
-		update_parameters_file "$CLOUDFORMATION_DIR/$stack_file" "$STACK_PARAMETERS"
+		update_parameters_file "$full_stack_filename" "$STACK_PARAMETERS"
 	else
 		INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
-		generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
+		generate_parameters_file "$full_stack_filename" >"$STACK_PARAMETERS"
 	fi
 
 	if [ -z "$STACK_EXISTS" ]; then
