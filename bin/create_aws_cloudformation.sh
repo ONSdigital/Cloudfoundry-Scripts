@@ -39,6 +39,8 @@ if [ ! -d "$STACK_OUTPUTS_DIR" ]; then
 elif [ x"$IGNORE_EXISTING_AWS_CONFIG" != x"true" ]; then
 	INFO 'Loading previous AWS outputs'
 	load_outputs "$STACK_OUTPUTS_DIR"
+
+	[ -n "$aws_region" ] && AWS_DEFAULT_REGION="$aws_region"
 fi
 
 if [ ! -d "$STACK_PARAMETERS_DIR" ]; then

@@ -122,7 +122,7 @@ fi
 
 cd "$CLOUDFORMATION_DIR"
 validate_json_files $STACK_PREAMBLE_FILENAME $STACK_FILES $STACK_TEMPLATES_FILES
-cd - >/dev/null 2>&1 
+cd - >/dev/null 2>&1
 
 validate_json_files $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT
 
@@ -164,7 +164,7 @@ for _action in validate update; do
 	for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
 		if ! echo $stack_name | grep 'Template/'; then
 			stack_file="`basename $stack_file`"
-		fi 	
+		fi
 
 		STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
 		STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
