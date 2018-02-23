@@ -103,8 +103,8 @@ STACK_PREAMBLE_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-preamble.sh"
 
 if [ -z "$NON_AWS_DEPLOY" ]; then
 	# We use older options in find due to possible lack of -printf and/or -regex options
-	STACK_FILES="`find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
-	STACK_TEMPLATES_FILES="`find "$CLOUDFORMATION_DIR/Templates" -mindepth 1 -maxdepth 1 -name "*.json" | awk -F/ '{printf("%s/%s\n",$(NF-1),$NF)}' | sort`"
+	STACK_FILES="`find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | sort`"
+	STACK_TEMPLATES_FILES="`find "$CLOUDFORMATION_DIR/Templates" -mindepth 1 -maxdepth 1 -name "*.json" | sort`"
 
 	[ -d "$LOCAL_COMMON_CLOUDFORMATION_DIR" ] &&  STACK_LOCAL_FILES_COMMON="`find "$LOCAL_COMMON_CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "*.json" | sort`"
 	[ -d "$LOCAL_DEPLOYMENT_CLOUDFORMATION_DIR" ] && STACK_LOCAL_FILES_DEPLOYMENT="`find "$LOCAL_DEPLOYMENT_CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "*.json" | sort`"
