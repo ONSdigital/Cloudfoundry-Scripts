@@ -88,7 +88,7 @@ INFO 'Copying templates to S3'
 if [ -n "$STACK_LOCAL_FILES_COMMON" -o -n "$STACK_LOCAL_FILES_DEPLOYMENT" ]; then
 	INFO 'Copying local Cloudformation templates'
 	for _f in $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
-		"$AWS_CLI" s3 cp $_f "s3://$templates_bucket_name/$LOCAL_CLOUDFORMATION_DIR/"
+		"$AWS_CLI" s3 cp $_f "s3://$templates_bucket_name/"
 	done
 fi
 
