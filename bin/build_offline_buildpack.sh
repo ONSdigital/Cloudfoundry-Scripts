@@ -64,18 +64,17 @@ else
 
 	INFO 'Setting required Go variables'
 	export GOPATH="$PWD"
+	export GOBIN="$PWD/bin"
+
+	mkdir -p "$GOBIN" "$GOPATH"
 
 	if [ -d "src/buildpack/src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager" ]; then
 		# Some Go buildpacks have a vendored buildpack-packager
-		PACKAGER_DIR="src/buildpack/src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack"
+		PACKAGER_DIR="src/buildpack/src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager"
 		PACKAGER_TYPE='vendored'
-
-		cd "$PACKAGER_DIR"
 
 		INFO 'Building vendored Go buildpack packager'
 		go install
-
-		cd -
 
 	elif [ -d src/libbuildpack ]; then
 		# Some Go buildpacks rely on a pre-installed buildpack-packager
@@ -90,17 +89,15 @@ else
 	if [ x"$TYPE" = x'external' ]; then
 		INFO 'Installing Go buildpack dependencies'
 		go get ./...
+
+		INFO 'Building Go buildpack packager'
+		go install
 	fi
-
-	INFO 'Building Go buildpack packager'
-	go install
-
-	cp bin/buildpack-packager "$GOBIN"
 
 	INFO 'Fixing script permissions'
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}"
 
-	"$GOBIN/buildpack-packager" --cached
+	"$GOBIN/buildpack-packager" --cached build
 fi
 
 INFO 'Copying built buildpack to output folder'
