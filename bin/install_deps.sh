@@ -92,7 +92,7 @@ if [ -z "$NO_UAAC" ] && [ -z "$UAAC_CLI" -o ! -x "$UAAC_CLI" ] && ! which uaac >
 		WARN 'will be fixed - no details yet as to an alternative'
 
 		WARN 'Installing public_suffix < 3.0'
-		gem install public_suffix -v '<3.0'
+		gem install --user-install public_suffix -v '<3.0'
 	fi
 
 	INFO 'Installing UAA client'
