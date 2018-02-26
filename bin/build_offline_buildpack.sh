@@ -21,9 +21,17 @@ BUILDPACK_NAME="$1"
 BUILDPACK_DIR="$2"
 
 [ -z "$BUILDPACK_NAME" ] && FATAL 'No buildpack name provided'
+[ -z "$BUILDPACK_DIR" ] && FATAL 'No buildpack directory provided'
+[ -d "$BUILDPACK_DIR" ] || FATAL "Buildpack directory does not exist: $BUILDPACK_DIR"
 
-#
-[ -n "$BUILDPACK_DIR" -a -d "$BUILDPACK_DIR" ] && cd "$BUILDPACK_DIR"
+cd "$BUILDPACK_DIR"
+
+# Some of the buildpacks use an older buildpack-packager, that doesn't have a 'build' option
+if [ -n "$3" ]; then
+	CUSTOM_BUILD_OPTIONS=1
+
+	shift 2
+fi
 
 mkdir -p buildpack
 
@@ -96,6 +104,9 @@ else
 	INFO 'Fixing script permissions'
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}" \;
 
-	# The Staticfile buildpack generate ignores all options after build
-	"$GOBIN/buildpack-packager" build --cached
+	if [ -n "$CUSTOM_BUILD_OPTIONS" ]; then
+		"$GOBIN/buildpack-packager" $@
+	else
+		"$GOBIN/buildpack-packager" build --cached
+	fi
 fi
