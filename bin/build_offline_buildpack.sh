@@ -103,10 +103,11 @@ else
 
 	INFO 'Fixing script permissions'
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}" \;
-
+set -x
 	if [ -n "$CUSTOM_BUILD_OPTIONS" ]; then
 		"$GOBIN/buildpack-packager" $@
 	else
 		"$GOBIN/buildpack-packager" build --cached
 	fi
+set +x
 fi
