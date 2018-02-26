@@ -78,8 +78,6 @@ else
 		FATAL 'No checkout or vendored version of libbuildpack'
 	fi
 
-	cd "$PACKAGER_DIR"
-
 	if [ x"$TYPE" = x'external' ]; then
 		INFO 'Installing Go buildpack dependencies'
 		go get ./...
@@ -90,6 +88,8 @@ else
 	cd "$PACKAGER_DIR"
 
 	go install
+
+	cd -
 
 	INFO 'Fixing script permissions'
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}"
