@@ -27,7 +27,6 @@ set -e
 BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common.sh"
-set -x
 
 INSTALL_AWS="${1:-true}"
 DISCOVER_VERSIONS="${2:-true}"
