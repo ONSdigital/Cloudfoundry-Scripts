@@ -7,7 +7,7 @@
 COLOURS="`tput colors -T ${TERM:-dumb} | grep -E '^[0-9]+$' || :`"
 
 # Colours may be negative
-if [ -n "$COLOURS" -a $COLOURS -ge 8 ]; then
+if [ -n "$COLOURS" ] && [ $COLOURS -ge 8 ]; then
 	FATAL_COLOUR="`tput setaf 1`"
 	INFO_COLOUR="`tput setaf 2`"
 	WARN_COLOUR="`tput setaf 3`"
