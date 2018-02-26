@@ -98,4 +98,4 @@ else
 fi
 
 INFO 'Copying built buildpack to output folder'
-find . "(" -name "${BUILDPACK}_buildpack-cached"-\*.zip -or -name "$BUILDPACK-buildpack-offline"-\*.zip ")" -exec cp "{}" buildpack/ \;
+find . "(" -name "${BUILDPACK}_buildpack-cached-*.zip" -or -name "$BUILDPACK-buildpack-offline-*.zip" ")" -exec cp "{}" buildpack/ \;
