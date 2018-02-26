@@ -89,7 +89,7 @@ else
 
 	go install
 
-	cd -
+	cd - >/dev/null 2>&1
 
 	INFO 'Fixing script permissions'
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}" \;
