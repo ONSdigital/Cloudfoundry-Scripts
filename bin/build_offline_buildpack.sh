@@ -94,7 +94,7 @@ else
 	INFO 'Fixing script permissions'
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}" \;
 
-	"$GOBIN/buildpack-packager" --cached build
+	"$GOBIN/buildpack-packager" build --cached
 fi
 
 INFO 'Copying built buildpack to output folder'
