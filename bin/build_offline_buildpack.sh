@@ -2,10 +2,8 @@
 #
 # Script to build the various buildpack types
 #
-# Script assumes buildpack repository has been checked out to src/buildpack
 #
 # If we are building using the Go method, sometimes we have a vendor'd libbuildpack and other times we don't
-# If we don't we assume libbuildpack is checked out to src/libbuildpack
 
 set -e
 
@@ -29,12 +27,11 @@ BUILDPACK_DIR="$2"
 
 mkdir -p buildpack
 
-if [ -f src/buildpack/cf.Gemfile ]; then
+if [ -f cf.Gemfile ]; then
 	# Ruby buildpack packager
 	which ruby >/dev/null || FATAL 'Ruby is not installed, or is not in the $PATH'
 
 	INFO 'Using Ruby buildpack packager'
-	cd src/buildpack
 
 	# CF uses a different Gemfile name
 	INFO 'Ensuring all of the Ruby dependencies are installed'
@@ -44,11 +41,9 @@ if [ -f src/buildpack/cf.Gemfile ]; then
 	BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --cache
 
 
-elif [ -f src/buildpack/java-buildpack.iml ]; then
+elif [ -f java-buildpack.iml ]; then
 	# Java buildpack packager - as always Java people like to do things differently:
 	which ruby >/dev/null || FATAL 'Ruby is not installed, or is not in the $PATH'
-
-	cd src/buildpack
 
 	INFO 'Ensuring all of the Ruby dependencies are installed'
 	bundle  install
@@ -68,9 +63,9 @@ else
 
 	mkdir -p "$GOBIN" "$GOPATH"
 
-	if [ -d "src/buildpack/src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager" ]; then
+	if [ -d "src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager" ]; then
 		# Some Go buildpacks have a vendored buildpack-packager
-		PACKAGER_DIR="src/buildpack/src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager"
+		PACKAGER_DIR="src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager"
 		PACKAGER_TYPE='vendored'
 
 		INFO 'Building vendored Go buildpack packager'
