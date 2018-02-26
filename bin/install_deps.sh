@@ -40,8 +40,8 @@ BOSH_GITHUB_RELEASE_URL="https://github.com/cloudfoundry/bosh-cli/releases/lates
 BOSH_CLI_RELEASE_TYPE='linux-amd64'
 CF_CLI_RELEASE_TYPE='linux64-binary'
 
-MIN_RUBY_MAJOR_VERSION='2'
-MIN_RUBY_MINOR_VERSION='1'
+#MIN_RUBY_MAJOR_VERSION='2'
+#MIN_RUBY_MINOR_VERSION='1'
 PYTHON_VERSION_SUFFIX="${PYTHON_VERSION_SUFFIX:-3}"
 
 if [ x"$DISCOVER_VERSIONS" = x'true' ]; then
@@ -77,39 +77,39 @@ CF_CLI_ARCHIVE="${CF_CLI_ARCHIVE:-cf-$CF_CLI_VERSION-$CF_CLI_RELEASE_TYPE.tar.gz
 [ -d "$BIN_DIR" ] || mkdir -p "$BIN_DIR"
 [ -d "$TMP_DIR" ] || mkdir -p "$TMP_DIR"
 
-# If running via Jenkins we install cf-uaac via rbenv
-if [ -z "$NO_UAAC" ] && [ -z "$UAAC_CLI" -o ! -x "$UAAC_CLI" ] && ! which uaac >/dev/null 2>&1; then
-	which ruby >/dev/null 2>&1 || FATAL 'Ruby is not installed'
-
-	INFO 'Checking we have Ruby gem installed'
-	which gem >/dev/null 2>&1 || FATAL 'No Ruby "gem" command installed'
-
-	INFO 'Checking Ruby version'
-	if ! ruby -v | awk -v major=$MIN_RUBY_MAJOR_VERSION -v minor=$MIN_RUBY_MINOR_VERSION '/^ruby/{split($2,a,"."); if(a[1] >= major && a[2] >= minor) exit 0; exit 1 }'; then
-		WARN "The minimum supported Ruby version is $RUBY_MIN_MAJOR_VERSION.$MIN_RUBY_MINOR_VERSION.x"
-
-		WARN 'To work around this an old version of public_suffix will be installed - this is likely to break things at some point'
-		WARN 'According to https://github.com/cloudfoundry/cf-uaac/issues/44 UAAC is in mainentance mode and only critical bugs'
-		WARN 'will be fixed - no details yet as to an alternative'
-(
-	env
-	set
-) | sort
-		WARN 'Checking if we need to install public_suffix < 3.0'
-		if ! gem list | grep public_suffix; then
-			WARN 'Installing public_suffix < 3.0'
-			gem install public_suffix -v '<3.0'
-		fi
-	fi
-
-	WARN 'Checking if we need to install cf-uaac'
-	if ! gem list | grep cf-uaac; then
-		INFO 'Installing UAA client'
-		gem install cf-uaac
-
-		CHANGES=1
-	fi
-fi
+## If running via Jenkins we install cf-uaac via rbenv
+#if [ -z "$NO_UAAC" ] && [ -z "$UAAC_CLI" -o ! -x "$UAAC_CLI" ] && ! which uaac >/dev/null 2>&1; then
+#	which ruby >/dev/null 2>&1 || FATAL 'Ruby is not installed'
+#
+#	INFO 'Checking we have Ruby gem installed'
+#	which gem >/dev/null 2>&1 || FATAL 'No Ruby "gem" command installed'
+#
+#	INFO 'Checking Ruby version'
+#	if ! ruby -v | awk -v major=$MIN_RUBY_MAJOR_VERSION -v minor=$MIN_RUBY_MINOR_VERSION '/^ruby/{split($2,a,"."); if(a[1] >= major && a[2] >= minor) exit 0; exit 1 }'; then
+#		WARN "The minimum supported Ruby version is $RUBY_MIN_MAJOR_VERSION.$MIN_RUBY_MINOR_VERSION.x"
+#
+#		WARN 'To work around this an old version of public_suffix will be installed - this is likely to break things at some point'
+#		WARN 'According to https://github.com/cloudfoundry/cf-uaac/issues/44 UAAC is in mainentance mode and only critical bugs'
+#		WARN 'will be fixed - no details yet as to an alternative'
+#(
+#	env
+#	set
+#) | sort
+#		WARN 'Checking if we need to install public_suffix < 3.0'
+#		if ! gem list | grep public_suffix; then
+#			WARN 'Installing public_suffix < 3.0'
+#			gem install public_suffix -v '<3.0'
+#		fi
+#	fi
+#
+#	WARN 'Checking if we need to install cf-uaac'
+#	if ! gem list | grep cf-uaac; then
+#		INFO 'Installing UAA client'
+#		gem install cf-uaac
+#
+#		CHANGES=1
+#	fi
+#fi
 
 # If running via Jenkins we can install awscli via pyenv
 if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && [ -z "$AWS_CLI" -o ! -x "$AWS_CLI" ] && ! which aws >/dev/null 2>&1; then
