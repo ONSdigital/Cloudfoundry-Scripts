@@ -4,7 +4,7 @@
 # Check if we support colours
 # When running under Jenkins TERM gets set as dumb, but tput complains with:
 # tput: No value for $TERM and no -T specified
-COLOURS="`tput colors -T ${TERM:-dumb} | grep -E '^[0-9]+$' || :`"
+COLOURS="`tput colors -T ${TERM:-dumb} 2>/dev/null | grep -E '^[0-9]+$' || :`"
 
 # Colours may be negative
 if [ -n "$COLOURS" ] && [ $COLOURS -ge 8 ]; then
