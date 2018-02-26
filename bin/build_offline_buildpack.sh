@@ -26,13 +26,6 @@ BUILDPACK_DIR="$2"
 
 cd "$BUILDPACK_DIR"
 
-# Some of the buildpacks use an older buildpack-packager, that doesn't have a 'build' option
-if [ -n "$3" ]; then
-	CUSTOM_BUILD_OPTIONS=1
-
-	shift 2
-fi
-
 mkdir -p buildpack
 
 INFO "Building $BUILDPACK_NAME offline/cached buildpack"
@@ -103,11 +96,11 @@ else
 
 	INFO 'Fixing script permissions'
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}" \;
-set -x
+
 	if [ -n "$CUSTOM_BUILD_OPTIONS" ]; then
-		"$GOBIN/buildpack-packager" $@
+		WARN "Using custom buildpack-package optiopns: $@"
+		"$GOBIN/buildpack-packager" --cached
 	else
 		"$GOBIN/buildpack-packager" build --cached
 	fi
-set +x
 fi
