@@ -61,7 +61,7 @@ else
 	export GOPATH="$PWD"
 	export GOBIN="$PWD/bin"
 
-	mkdir -p "$GOBIN" "$GOPATH"
+	mkdir -p "$GOBIN"
 
 	if [ -d "src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager" ]; then
 		# Some Go buildpacks have a vendored buildpack-packager
