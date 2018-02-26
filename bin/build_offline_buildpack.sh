@@ -69,7 +69,7 @@ else
 		# Some Go buildpacks have a vendored buildpack-packager
 		PACKAGER_DIR="src/buildpack/src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack"
 		PACKAGER_TYPE='vendored'
-
+pwd
 		cd "$PACKAGE_DIR"
 
 		INFO 'Building vendored Go buildpack packager'
