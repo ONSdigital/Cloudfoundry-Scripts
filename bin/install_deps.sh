@@ -85,20 +85,26 @@ if [ -z "$NO_UAAC" ] && [ -z "$UAAC_CLI" -o ! -x "$UAAC_CLI" ] && ! which uaac >
 
 	INFO 'Checking Ruby version'
 	if ! ruby -v | awk -v major=$MIN_RUBY_MAJOR_VERSION -v minor=$MIN_RUBY_MINOR_VERSION '/^ruby/{split($2,a,"."); if(a[1] >= major && a[2] >= minor) exit 0; exit 1 }'; then
-		WARN "The minimum supported Ruby version is $RUBY_MIN_MAJOR_VERSION.$MIN_RUBY_MINOR_VERSION.x"A
+		WARN "The minimum supported Ruby version is $RUBY_MIN_MAJOR_VERSION.$MIN_RUBY_MINOR_VERSION.x"
 
 		WARN 'To work around this an old version of public_suffix will be installed - this is likely to break things at some point'
 		WARN 'According to https://github.com/cloudfoundry/cf-uaac/issues/44 UAAC is in mainentance mode and only critical bugs'
 		WARN 'will be fixed - no details yet as to an alternative'
 
-		WARN 'Installing public_suffix < 3.0'
-		gem install --user-install public_suffix -v '<3.0'
+		WARN 'Checking if we need to install public_suffix < 3.0'
+		if ! gem list | grep public_suffix; then
+			WARN 'Installing public_suffix < 3.0'
+			gem install public_suffix -v '<3.0'
+		fi
 	fi
 
-	INFO 'Installing UAA client'
-	gem install --user-install cf-uaac
+	WARN 'Checking if we need to install cf-uaac'
+	if ! gem list | grep cf-uaac; then
+		INFO 'Installing UAA client'
+		gem install cf-uaac
 
-	CHANGES=1
+		CHANGES=1
+	fi
 fi
 
 # If running via Jenkins we can install awscli via pyenv
