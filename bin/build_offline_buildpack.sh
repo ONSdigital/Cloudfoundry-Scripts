@@ -74,7 +74,6 @@ else
 		PACKAGER_TYPE='vendored'
 
 		INFO 'Building vendored Go buildpack packager'
-		go install
 
 	elif [ -d src/libbuildpack ]; then
 		# Some Go buildpacks rely on a pre-installed buildpack-packager
@@ -91,8 +90,11 @@ else
 		go get ./...
 
 		INFO 'Building Go buildpack packager'
-		go install
 	fi
+
+	cd "$PACKAGER_DIR"
+
+	go install
 
 	INFO 'Fixing script permissions'
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}"
