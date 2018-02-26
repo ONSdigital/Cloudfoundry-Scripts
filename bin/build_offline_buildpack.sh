@@ -75,7 +75,7 @@ else
 		PACKAGER_DIR='src/libbuildpack'
 		TYPE='external'
 	else
-		FATAL 'No checkout or vendored version of src/libbuildpack':
+		FATAL 'No checkout or vendored version of libbuildpack'
 	fi
 
 	cd "$PACKAGER_DIR"
