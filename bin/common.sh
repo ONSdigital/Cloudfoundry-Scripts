@@ -1,6 +1,6 @@
 
 . "$BASE_DIR/functions.sh"
-set -x
+
 # Check if we support colours
 # When running under Jenkins TERM gets set as dumb, but tput complains with:
 # tput: No value for $TERM and no -T specified
@@ -17,7 +17,6 @@ if [ -n "$COLOURS" ] && [ $COLOURS -ge 8 ]; then
 	#NORMAL_COLOUR="\e[0m"
 	NORMAL_COLOUR="`tput sgr0`"
 fi
-set +x
 
 [ -z "$BASE_DIR" ] && FATAL 'BASE_DIR has not been set'
 [ -d "$BASE_DIR" ] || FATAL "$BASE_DIR does not exist"
