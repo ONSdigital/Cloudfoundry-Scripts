@@ -80,14 +80,20 @@ CF_CLI_ARCHIVE="${CF_CLI_ARCHIVE:-cf-$CF_CLI_VERSION-$CF_CLI_RELEASE_TYPE.tar.gz
 if [ -z "$NO_UAAC" ] && [ -z "$UAAC_CLI" -o ! -x "$UAAC_CLI" ] && ! which uaac >/dev/null 2>&1; then
 	which ruby >/dev/null 2>&1 || FATAL 'Ruby is not installed'
 
-	INFO 'Checking Ruby version'
-	if ! ruby -v | awk -v major=$MIN_RUBY_MAJOR_VERSION -v minor=$MIN_RUBY_MINOR_VERSION '/^ruby/{split($2,a,"."); if(a[1] >= major && a[2] >= minor) exit 0; exit 1 }'; then
-		WARN "The minimum supported Ruby version is $RUBY_MIN_MAJOR_VERSION.$MIN_RUBY_MINOR_VERSION.x"
-		FATAL 'Unable to install UAAC, either install a more recent of Ruby or set NO_UAAC=1 to not install UAAC'
-	fi
-
 	INFO 'Checking we have Ruby gem installed'
 	which gem >/dev/null 2>&1 || FATAL 'No Ruby "gem" command installed'
+
+	INFO 'Checking Ruby version'
+	if ! ruby -v | awk -v major=$MIN_RUBY_MAJOR_VERSION -v minor=$MIN_RUBY_MINOR_VERSION '/^ruby/{split($2,a,"."); if(a[1] >= major && a[2] >= minor) exit 0; exit 1 }'; then
+		WARN "The minimum supported Ruby version is $RUBY_MIN_MAJOR_VERSION.$MIN_RUBY_MINOR_VERSION.x"A
+
+		WARN 'To work around this an old version of public_suffix will be installed - this is likely to break things at some point'
+		WARN 'According to https://github.com/cloudfoundry/cf-uaac/issues/44 UAAC is in mainentance mode and only critical bugs'
+		WARN 'will be fixed - no details yet as to an alternative'
+
+		WARN 'Installing public_suffix < 3.0'
+		gem install public_suffix -v '<3.0'
+	fi
 
 	INFO 'Installing UAA client'
 	gem install --user-install cf-uaac

@@ -29,8 +29,10 @@ install_packages(){
 				$SUDO yum --quiet clean all && YUM_CLEAN=1
 			fi
 
-			INFO Installing $_i
-			$SUDO yum --quiet install -y "$_i"
+			INFO "Installing $_i"
+			$SUDO yum --quiet install -y "$_i" || :
+		else
+			INFO "$_i already installed"
 		fi
 	done
 }
