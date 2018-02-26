@@ -28,6 +28,8 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common.sh"
 
+set -x
+
 INSTALL_AWS="${1:-true}"
 DISCOVER_VERSIONS="${2:-true}"
 
@@ -89,7 +91,10 @@ if [ -z "$NO_UAAC" ] && [ -z "$UAAC_CLI" -o ! -x "$UAAC_CLI" ] && ! which uaac >
 		WARN 'To work around this an old version of public_suffix will be installed - this is likely to break things at some point'
 		WARN 'According to https://github.com/cloudfoundry/cf-uaac/issues/44 UAAC is in mainentance mode and only critical bugs'
 		WARN 'will be fixed - no details yet as to an alternative'
-
+(
+	env
+	set
+) | sort
 		WARN 'Checking if we need to install public_suffix < 3.0'
 		if ! gem list | grep public_suffix; then
 			WARN 'Installing public_suffix < 3.0'
