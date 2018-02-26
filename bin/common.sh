@@ -2,9 +2,12 @@
 . "$BASE_DIR/functions.sh"
 
 # Check if we support colours
-[ -n "$TERM" ] && COLOURS="`tput colors`"
+# When running under Jenkins TERM gets set as dumb, but tput complains with:
+# tput: No value for $TERM and no -T specified
+COLOURS="`tput colors -T ${TERM:-dumb}`"
 
-if [ 0$COLOURS -ge 8 ]; then
+# Colours may be negative
+if [ -n "$COLOURS" -a $COLOURS -ge 8 ]; then
 	FATAL_COLOUR="`tput setaf 1`"
 	INFO_COLOUR="`tput setaf 2`"
 	WARN_COLOUR="`tput setaf 3`"
