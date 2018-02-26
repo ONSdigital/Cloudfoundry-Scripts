@@ -98,4 +98,6 @@ else
 fi
 
 INFO 'Copying built buildpack to output folder'
-find . "(" -name "${BUILDPACK_NAME}_buildpack-cached-*.zip" -or -name "$BUILDPACK_NAME-buildpack-offline-*.zip" ")" -exec cp "{}" buildpack/ \;
+# Java generates a cached buildpack, most of the others generate an offline buildpack but the staticfile buildpack just generates a buildpack - one assumes as its only serving static files
+# being online/offline/cached doesn't matter...
+find . "(" -name "${BUILDPACK_NAME}_buildpack-cached-*.zip" -or -name "$BUILDPACK_NAME-buildpack-offline-*.zip" -or -name "$BUILDPACK_NAME-buildpack-*.zip" ")" -exec cp "{}" buildpack/ \;
