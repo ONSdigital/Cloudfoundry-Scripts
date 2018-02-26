@@ -106,8 +106,8 @@ if [ -z "$NON_AWS_DEPLOY" ]; then
 	STACK_FILES="`find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 "(" -name "$AWS_CONFIG_PREFIX-*.json" -and -not -name "$AWS_CONFIG_PREFIX-preamble.json" ")" | sort`"
 	STACK_TEMPLATES_FILES="`find "$CLOUDFORMATION_DIR/Templates" -mindepth 1 -maxdepth 1 -name "*.json" | sort`"
 
-	[ -d "$LOCAL_COMMON_CLOUDFORMATION_DIR" ] &&  STACK_LOCAL_FILES_COMMON="`find "$LOCAL_COMMON_CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "*.json" | sort`"
-	[ -d "$LOCAL_DEPLOYMENT_CLOUDFORMATION_DIR" ] && STACK_LOCAL_FILES_DEPLOYMENT="`find "$LOCAL_DEPLOYMENT_CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "*.json" | sort`"
+	[ -d "$LOCAL_COMMON_CLOUDFORMATION_DIR" ] &&  STACK_LOCAL_FILES_COMMON="`find "$LOCAL_COMMON_CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "*.json" | sort`" || :
+	[ -d "$LOCAL_DEPLOYMENT_CLOUDFORMATION_DIR" ] && STACK_LOCAL_FILES_DEPLOYMENT="`find "$LOCAL_DEPLOYMENT_CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "*.json" | sort`" || :
 fi
 
 
