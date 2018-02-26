@@ -24,12 +24,16 @@ BASE_DIR="`dirname \"$0\"`"
 DEPLOYMENT_NAME="$1"
 USERNAME="$2"
 EMAIL="$3"
+
 PASSWORD="$4"
 SECRET="$5"
 DONT_SKIP_SSL_VALIDATION="$6"
 
 . "$BASE_DIR/common.sh"
 . "$BASE_DIR/bosh-env.sh"
+
+echo 'unused?'
+exit 1
 
 [ -f "$CF_CREDENTIALS" ] && . "$CF_CREDENTIALS"
 

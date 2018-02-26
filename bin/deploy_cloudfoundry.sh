@@ -367,6 +367,17 @@ if [ x"$RUN_DRY_RUN" = x'true' -o x"$DEBUG" = x'true' ]; then
 	"$BOSH_CLI" deploy --tty --dry-run "$BOSH_FULL_INTERPOLATED_MANIFEST"
 fi
 
+INFO 'Setting up CF admin credentials'
+SECRET="`"$BOSH_CLI" interpolate --no-color --path '/jobs/name=uaa/properties/uaa/cf_admin/client_secret' "$BOSH_FULL_INTERPOLATED_MANIFEST"`"
+PASSWORD="`"$BOSH_CLI" interpolate --no-color --path '/properties/uaa/scim/users/name=cf_admin/password' "$BOSH_FULL_INTERPOLATED_MANIFEST"`"
+
+        cat >"$CF_CREDENTIALS" <<EOF
+# Cloudfoundry credentials
+CF_ADMIN_USERNAME='cf_admin'
+CF_ADMIN_PASSWORD='$PASSWORD'
+CF_ADMIN_CLIENT_SECRET='$SECRET'
+EOF
+
 # ... finally we get around to running the Bosh/CF deployment
 INFO 'Deploying Bosh'
 "$BOSH_CLI" deploy --tty "$BOSH_FULL_INTERPOLATED_MANIFEST"
@@ -403,6 +414,8 @@ for i in stemcell release; do
 		}
 	}' >"$OUTPUT_FILE"
 done
+
+
 
 # Any post deploy script to run? These are under $POST_DEPLOY_SCRIPTS_DIR/cf
 post_deploy_scripts cf
