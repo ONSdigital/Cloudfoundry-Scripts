@@ -71,6 +71,9 @@ YUM_CLEAN=yes
 # Install packages for bosh
 install_packages gcc gcc-c++ make patch openssl openssl-devel ruby ruby-devel zlib-devel
 
+# To build Java buildpacks
+install_packages rubygem-bundler
+
 # Required for AWS
 install_packages python python-setuptools python-pip python-devel libyaml-devel bzip2 readline-devel
 
