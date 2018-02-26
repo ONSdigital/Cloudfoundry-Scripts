@@ -105,10 +105,8 @@ else
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}" \;
 
 	if [ -n "$CUSTOM_BUILD_OPTIONS" ]; then
-set -x
 		"$GOBIN/buildpack-packager" $@
 	else
 		"$GOBIN/buildpack-packager" build --cached
 	fi
-set +x
 fi
