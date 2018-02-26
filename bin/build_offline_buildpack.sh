@@ -67,11 +67,15 @@ else
 
 	if [ -d "src/buildpack/src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager" ]; then
 		# Some Go buildpacks have a vendored buildpack-packager
-		PACKAGER_DIR="src/buildpack/src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager"
+		PACKAGER_DIR="src/buildpack/src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack"
 		PACKAGER_TYPE='vendored'
+
+		cd "$PACKAGE_DIR"
 
 		INFO 'Building vendored Go buildpack packager'
 		go install
+
+		cd -
 
 	elif [ -d src/libbuildpack ]; then
 		# Some Go buildpacks rely on a pre-installed buildpack-packager
