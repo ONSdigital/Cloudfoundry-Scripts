@@ -243,7 +243,7 @@ check_existing_parameters(){
 		fi
 
 		# Only update if we have a value
-		[ -n "$updated_value" ] && eval "$upper_varname"="$updated_value"
+		[ -n "$updated_value" ] && eval "$upper_varname='$updated_value'"
 
 		unset password redacted updated_value
 	done
