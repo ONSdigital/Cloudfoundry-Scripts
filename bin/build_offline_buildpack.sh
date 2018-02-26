@@ -92,10 +92,10 @@ else
 	cd -
 
 	INFO 'Fixing script permissions'
-	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}"
+	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}" \;
 
 	"$GOBIN/buildpack-packager" --cached build
 fi
 
 INFO 'Copying built buildpack to output folder'
-find . "(" -name "${BUILDPACK}_buildpack-cached"-\*.zip -or -name "$BUILDPACK-buildpack-offline"-\*.zip ")" -exec cp "{}" buildpack/
+find . "(" -name "${BUILDPACK}_buildpack-cached"-\*.zip -or -name "$BUILDPACK-buildpack-offline"-\*.zip ")" -exec cp "{}" buildpack/ \;
