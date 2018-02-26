@@ -82,25 +82,25 @@ if [ -z "$SKIP_TESTS" ]; then
 fi
 
 
-if [ x"$deploy_apps_rds_instance" != x"false" ]; then
+if [ -n "$deploy_apps_rds_instance" -a x"$deploy_apps_rds_instance" != x"false" ]; then
 	INFO 'Setting up RDS broker'
 	IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-rds-broker.sh" "$DEPLOYMENT_NAME"
 fi
 
-if [ x"$create_elasti_cache_infrastructure" != x"false" ]; then
+if [ -n "$create_elasti_cache_infrastructure" -a x"$create_elasti_cache_infrastructure" != x"false" ]; then
 	INFO 'Setting up ElastiCache broker'
 	IGNORE_EXISTING=1 "$BASE_DIR/setup_cf-elasticache-broker.sh" "$DEPLOYMENT_NAME" elasticache-broker
 fi
 
-if [ -d "config/security_groups" ]; then
+if [ -d "local/security_groups" ]; then
 	INFO 'Setting up Security Groups'
 
 	for _g in common "$DEPLOYMENT_NAME"; do
-		for _s in `ls "config/security_groups/$_g"`; do
+		for _s in `ls "local/security_groups/$_g"`; do
 			group_name="`echo $security_group | sed $SED_EXTENDED -e 's/\.json$//g'`"
 			INFO "... $group_name"
 	
-			"$CF_CLI" create-security-group "$group_name" "config/security_groups/$_g/$_s"
+			"$CF_CLI" create-security-group "$group_name" "local/security_groups/$_g/$_s"
 		done
 	done
 fi

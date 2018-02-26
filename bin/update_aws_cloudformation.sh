@@ -120,16 +120,7 @@ if [ -f "$STACK_PREAMBLE_OUTPUTS" ] && [ -z "$SKIP_STACK_PREAMBLE_OUTPUTS_CHECK"
 	[ -f "$STACK_PREAMBLE_OUTPUTS" ] || FATAL "Existing stack preamble outputs do exist: '$STACK_PREAMBLE_OUTPUTS'"
 fi
 
-# We use older options in find due to possible lack of -printf and/or -regex options
-STACK_FILES="`find "$CLOUDFORMATION_DIR" -mindepth 1 -maxdepth 1 -name "$AWS_CONFIG_PREFIX-*.json" | awk -F/ '!/preamble/{print $NF}' | sort`"
-STACK_TEMPLATES_FILES="`find "$CLOUDFORMATION_DIR/Templates" -mindepth 1 -maxdepth 1 -name "*.json" | awk -F/ '{printf("%s/%s\n",$(NF-1),$NF)}' | sort`"
-
-[ -d "$LOCAL_CLOUDFORMATION_DIR/common" ] && STACK_LOCAL_FILES_COMMON="`find "$LOCAL_CLOUDFORMATION_DIR/common" -mindepth 1 -maxdepth 1 -name "*.json" | awk -F/ '{printf("%s/%s\n",$(NF-1),$NF)}' | sort`"
-[ -d "$LOCAL_CLOUDFORMATION_DIR/$DEPLOYMENT_NAME" ] && STACK_LOCAL_FILES_DEPLOYMENT="`find "$LOCAL_CLOUDFORMATION_DIR/$DEPLOYMENT_NAME" -mindepth 1 -maxdepth 1 -name "*.json" | awk -F/ '{printf("%s/%s\n",$(NF-1),$NF)}' | sort`"
-
-cd "$CLOUDFORMATION_DIR" >/dev/null
-validate_json_files "$STACK_PREAMBLE_FILENAME" $STACK_FILES $STACK_TEMPLATES_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT
-cd - >/dev/null
+validate_json_files $STACK_PREAMBLE_FILE $STACK_FILES $STACK_TEMPLATES_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT
 
 INFO 'Loading AWS outputs'
 load_outputs "$STACK_OUTPUTS_DIR"
@@ -153,28 +144,36 @@ INFO 'Parsing preamble outputs'
 . "$STACK_PREAMBLE_OUTPUTS"
 
 INFO 'Copying templates to S3'
-"$AWS_CLI" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json'
+"$AWS_CLI" s3 sync "$CLOUDFORMATION_DIR/" "s3://$templates_bucket_name" --exclude '*' --include "$AWS_CONFIG_PREFIX-*.json" --include 'Templates/*.json' --delete
+
+if [ -n "$STACK_LOCAL_FILES_COMMON" -o -n "$STACK_LOCAL_FILES_DEPLOYMENT" ]; then
+	INFO 'Copying local Cloudformation templates'
+	for _f in $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
+		"$AWS_CLI" s3 cp $_f "s3://$templates_bucket_name/"
+	done
+fi
 
 # Now we can set the main stack URL
 STACK_MAIN_URL="$templates_bucket_http_url/$STACK_MAIN_FILENAME"
 
 for _action in validate update; do
-	for stack_file in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
-		STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$stack_file"`"
+	for stack_full_filename in $STACK_FILES $STACK_LOCAL_FILES_COMMON $STACK_LOCAL_FILES_DEPLOYMENT; do
+		STACK_FILENAME="`basename $stack_full_filename`"
+		STACK_NAME="`stack_file_name "$DEPLOYMENT_NAME" "$STACK_FILENAME"`"
 		STACK_PARAMETERS="$STACK_PARAMETERS_DIR/parameters-$STACK_NAME.$STACK_PARAMETERS_SUFFIX"
-		STACK_URL="$templates_bucket_http_url/$stack_file"
+		STACK_URL="$templates_bucket_http_url/$STACK_FILENAME"
 		STACK_OUTPUTS="$STACK_OUTPUTS_DIR/outputs-$STACK_NAME.$STACK_OUTPUTS_SUFFIX"
 
 		if [ x"$_action" = x"update" ]; then
 			INFO "Checking any existing parameters for $STACK_NAME"
-			check_existing_parameters "$CLOUDFORMATION_DIR/$stack_file"
+			check_existing_parameters "$stack_full_filename"
 
 			if [ -f "$STACK_PARAMETERS" ]; then
 				INFO "Checking if we need to update $STACK_NAME parameters"
-				update_parameters_file "$CLOUDFORMATION_DIR/$stack_file" "$STACK_PARAMETERS"
+				update_parameters_file "$stack_full_filename" "$STACK_PARAMETERS"
 			else
                 		INFO "Generating Cloudformation parameters JSON file for '$STACK_NAME': $STACK_PARAMETERS"
-				generate_parameters_file "$CLOUDFORMATION_DIR/$stack_file" >"$STACK_PARAMETERS"
+				generate_parameters_file "$stack_full_filename" >"$STACK_PARAMETERS"
 			fi
 		fi
 

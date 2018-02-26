@@ -39,7 +39,8 @@ BOSH_GITHUB_RELEASE_URL="https://github.com/cloudfoundry/bosh-cli/releases/lates
 BOSH_CLI_RELEASE_TYPE='linux-amd64'
 CF_CLI_RELEASE_TYPE='linux64-binary'
 
-RUBY_VERSION="${RUBY_VERSION:-2.1}"
+MIN_RUBY_MAJOR_VERSION='2'
+MIN_RUBY_MINOR_VERSION='1'
 PYTHON_VERSION_SUFFIX="${PYTHON_VERSION_SUFFIX:-3}"
 
 if [ x"$DISCOVER_VERSIONS" = x'true' ]; then
@@ -76,20 +77,34 @@ CF_CLI_ARCHIVE="${CF_CLI_ARCHIVE:-cf-$CF_CLI_VERSION-$CF_CLI_RELEASE_TYPE.tar.gz
 [ -d "$TMP_DIR" ] || mkdir -p "$TMP_DIR"
 
 # If running via Jenkins we install cf-uaac via rbenv
-if [ -z "$NO_UAAC" ] && ! which uaac >/dev/null 2>&1; then
-	which ruby$RUBY_VERSION >/dev/null 2>&1 || FATAL "Ruby version $RUBY_VERSION is not installed, either install Ruby or run with NO_UAAC=1"
+if [ -z "$NO_UAAC" ] && [ -z "$UAAC_CLI" -o ! -x "$UAAC_CLI" ] && ! which uaac >/dev/null 2>&1; then
+	which ruby >/dev/null 2>&1 || FATAL 'Ruby is not installed'
+
+	INFO 'Checking we have Ruby gem installed'
+	which gem >/dev/null 2>&1 || FATAL 'No Ruby "gem" command installed'
+
+	INFO 'Checking Ruby version'
+	if ! ruby -v | awk -v major=$MIN_RUBY_MAJOR_VERSION -v minor=$MIN_RUBY_MINOR_VERSION '/^ruby/{split($2,a,"."); if(a[1] >= major && a[2] >= minor) exit 0; exit 1 }'; then
+		WARN "The minimum supported Ruby version is $RUBY_MIN_MAJOR_VERSION.$MIN_RUBY_MINOR_VERSION.x"A
+
+		WARN 'To work around this an old version of public_suffix will be installed - this is likely to break things at some point'
+		WARN 'According to https://github.com/cloudfoundry/cf-uaac/issues/44 UAAC is in mainentance mode and only critical bugs'
+		WARN 'will be fixed - no details yet as to an alternative'
+
+		WARN 'Installing public_suffix < 3.0'
+		gem install public_suffix -v '<3.0'
+	fi
 
 	INFO 'Installing UAA client'
-	which "gem$RUBY_VERSION" >/dev/null 2>&1 || FATAL "No Ruby 'gem' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or rbenv from within Jenkins?"
-	"gem$RUBY_VERSION" install cf-uaac
+	gem install --user-install cf-uaac
 
 	CHANGES=1
 fi
 
 # If running via Jenkins we can install awscli via pyenv
-if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && ! which aws >/dev/null 2>&1; then
+if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && [ -z "$AWS_CLI" -o ! -x "$AWS_CLI" ] && ! which aws >/dev/null 2>&1; then
 	INFO 'Installing AWS CLI'
-	which pip$PYTHON_VERSION_SUFFIX >/dev/null 2>&1 || FATAL "No 'pip' command installed - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or pyenv from within Jenkins?"
+	which pip$PYTHON_VERSION_SUFFIX >/dev/null 2>&1 || FATAL "No 'pip' installed, unable to install awscli - do you need to run '$BASE_DIR/install_packages-EL.sh'? Or pyenv from within Jenkins?"
 
 	pip$PYTHON_VERSION_SUFFIX install "awscli" --user
 
@@ -106,13 +121,14 @@ if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && ! which aws >/dev/null 2>&1
 	CHANGES=1
 fi
 
-if [ ! -e "$BOSH_CLI-$BOSH_CLI_VERSION" ]; then
+if [ ! -x "$BOSH_CLI-$BOSH_CLI_VERSION" ]; then
 	INFO "Downloading Bosh $BOSH_CLI_VERSION"
 	curl -SLo "$BOSH_CLI-$BOSH_CLI_VERSION" "$BOSH_CLI_URL"
 
 	chmod +x "$BOSH_CLI-$BOSH_CLI_VERSION"
-fi
 
+	BOSH_LINK='BOSH_CLI'
+fi
 
 if [ ! -f "$CF_CLI-$CF_CLI_VERSION" ]; then
 	if [ ! -f "$TMP_DIR/$CF_CLI_ARCHIVE" ]; then
@@ -126,32 +142,37 @@ if [ ! -f "$CF_CLI-$CF_CLI_VERSION" ]; then
 	tar -zxf "$TMP_DIR/$CF_CLI_ARCHIVE" -C "$TMP_DIR" cf || FATAL "Unable to extract $TMP_DIR/$CF_CLI_ARCHIVE"
 
 	mv "$TMP_DIR/cf" "$CF_CLI-$CF_CLI_VERSION"
+
+	CF_LINK='CF_CLI'
 fi
 
-INFO 'Creating Bosh & CF CLI links'
-for i in BOSH_CLI CF_CLI; do
-	eval file="\$$i"
-	eval version="\$${i}_VERSION"
+if [ -n "$BOSH_LINK" -o -n "$CF_LINK" ]; then
+	for i in $BOSH_LINK $CF_LINK; do
+		eval file="\$$i"
+		eval version="\$${i}_VERSION"
 
-	file_name="`basename \"$file\"`"
+		file_name="`basename \"$file\"`"
 
-	# Should never fail
-	[ -z "$version" ] && FATAL "Unable to determine $i version"
+		INFO "Creating $file_name link"
 
-	if [ -h "$file" -o -f "$file" ]; then
-		diff -q "$file" "$file-$version" >/dev/null 2>&1 || rm -f "$file"
-	fi
+		# Should never fail
+		[ -z "$version" ] && FATAL "Unable to determine $i version"
 
-	if [ ! -h "$file" -a ! -f "$file" ]; then
-		cd "$BIN_DIR"
+		if [ -h "$file" -o -f "$file" ]; then
+			diff -q "$file" "$file-$version" >/dev/null 2>&1 || rm -f "$file"
+		fi
 
-		ln -s "$file_name-$version" "$file_name"
+		if [ ! -h "$file" -a ! -f "$file" ]; then
+			cd "$BIN_DIR"
 
-		CHANGES=1
-	fi
+			ln -s "$file_name-$version" "$file_name"
 
-	unset file file_name version
-done
+			CHANGES=1
+		fi
+
+		unset file file_name version
+	done
+fi
 
 cat <<EOF
 Initial setup complete:

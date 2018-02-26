@@ -137,7 +137,10 @@ delete_aws_key(){
 }
 
 find_aws(){
-	if which aws >/dev/null 2>&1; then
+	if [ -n "$AWS_CLI" ]; then
+		INFO "Using AWS CLI configured in \$AWS_CLI: $AWS_CLI"
+
+	elif which aws >/dev/null 2>&1; then
 		AWS_CLI="`which aws`"
 
 	elif [ -f "$BIN_DIR/aws" ]; then
@@ -517,6 +520,7 @@ load_outputs(){
 		export_file_vars "$outputs_dir/$_o" "$env_prefix"
 	done
 }
+
 
 # Hopefully we can run on Linux and Darwin (OSX)
 case `uname -s` in
