@@ -69,26 +69,28 @@ else
 	if [ -d "src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager" ]; then
 		# Some Go buildpacks have a vendored buildpack-packager
 		PACKAGER_DIR="src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager"
-		PACKAGER_TYPE='vendored'
 
 		INFO 'Building vendored Go buildpack packager'
 
 	elif [ -d src/libbuildpack ]; then
+
+		FATAL 'This is used!!'
 		# Some Go buildpacks rely on a pre-installed buildpack-packager
 		PACKAGER_DIR='src/libbuildpack'
-		TYPE='external'
+
+		INFO 'Building using external buildpack'
 	else
 		FATAL 'No checkout or vendored version of libbuildpack'
 	fi
 
-	if [ x"$TYPE" = x'external' ]; then
+	cd "$PACKAGER_DIR"
+
+	if [ x"$PACKAGER_DIR" = x'src/libbuildpack' ]; then
 		INFO 'Installing Go buildpack dependencies'
 		go get ./...
 
 		INFO 'Building Go buildpack packager'
 	fi
-
-	cd "$PACKAGER_DIR"
 
 	go install
 
@@ -98,7 +100,6 @@ else
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}" \;
 
 	if [ -n "$CUSTOM_BUILD_OPTIONS" ]; then
-		WARN "Using custom buildpack-package optiopns: $@"
 		"$GOBIN/buildpack-packager" --cached
 	else
 		"$GOBIN/buildpack-packager" build --cached
