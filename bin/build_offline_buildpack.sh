@@ -49,16 +49,20 @@ elif [ -f java-buildpack.iml ]; then
 	which ruby >/dev/null || FATAL 'Ruby is not installed, or is not in the $PATH'
 
 	INFO 'Ensuring all of the Ruby dependencies are installed'
-	bundle  install
+	bundle install
 
 	INFO 'Building Java buildpack'
 	bundle exec rake clean package OFFLINE=true PINNED=true
 
 else
-	# We make the blind assumption we are building using the Go buildpack packager
-	which go >/dev/null || FATAL 'Go is not installed, or is not in the $PATH'
+	PACKAGER_DIR="src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager"
 
-	INFO 'Using Go buildpack packager'
+	if [ ! -d "$PACKAGER_DIR" ]; then
+		# Previously some buildpacks used an external Go buildpack-packager, but they now all seem to use a vendored one
+		FATAL 'No vendored version of libbuildpack'
+	fi
+
+	which go >/dev/null || FATAL 'Go is not installed, or is not in the $PATH'
 
 	INFO 'Setting required Go variables'
 	export GOPATH="$PWD"
@@ -66,32 +70,9 @@ else
 
 	mkdir -p "$GOBIN"
 
-	if [ -d "src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager" ]; then
-		# Some Go buildpacks have a vendored buildpack-packager
-		PACKAGER_DIR="src/$BUILDPACK_NAME/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager"
-
-		INFO 'Building vendored Go buildpack packager'
-
-	elif [ -d src/libbuildpack ]; then
-
-		FATAL 'This is used!!'
-		# Some Go buildpacks rely on a pre-installed buildpack-packager
-		PACKAGER_DIR='src/libbuildpack'
-
-		INFO 'Building using external buildpack'
-	else
-		FATAL 'No checkout or vendored version of libbuildpack'
-	fi
-
 	cd "$PACKAGER_DIR"
 
-	if [ x"$PACKAGER_DIR" = x'src/libbuildpack' ]; then
-		INFO 'Installing Go buildpack dependencies'
-		go get ./...
-
-		INFO 'Building Go buildpack packager'
-	fi
-
+	INFO 'Building vendored Go buildpack packager'
 	go install
 
 	cd - >/dev/null 2>&1
@@ -99,6 +80,7 @@ else
 	INFO 'Fixing script permissions'
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}" \;
 
+	INFO 'Using Go buildpack packager'
 	if "$GOBIN/buildpack-packager" --help 2>&1 | grep -qE '^\s+-cached'; then
 		WARN 'Buildpack is using older buildpack-packager'
 		"$GOBIN/buildpack-packager" -cached
