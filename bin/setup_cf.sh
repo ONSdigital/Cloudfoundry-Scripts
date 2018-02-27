@@ -31,7 +31,7 @@ DONT_SKIP_SSL_VALIDATION="${4:-$DONT_SKIP_SSL_VALIDATION}"
 # We don't want any sub-scripts to login
 export NO_LOGIN=1
 
-[ -z "$EMAIL_ADDRESS" ] && FATAL 'No email address has been supplied'
+#[ -z "$EMAIL_ADDRESS" ] && FATAL 'No email address has been supplied'
 [ -n "$DONT_SKIP_SSL_VALIDATION" ] || CF_EXTRA_OPTS='--skip-ssl-validation'
 [ -z "$ORG_NAME" ] && FATAL 'No organisation has been set'
 
