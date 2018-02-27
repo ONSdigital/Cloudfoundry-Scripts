@@ -103,6 +103,7 @@ else
 		WARN 'Buildpack is using older buildpack-packager'
 		"$GOBIN/buildpack-packager" -cached
 	else
+		INFO 'Building offline/cached buildpack'
 		"$GOBIN/buildpack-packager" build --cached
 	fi
 fi
