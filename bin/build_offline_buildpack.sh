@@ -99,8 +99,9 @@ else
 	INFO 'Fixing script permissions'
 	find bin scripts -mindepth 1 -maxdepth 1 -name \*.sh -exec chmod +x "{}" \;
 
-	if [ -n "$CUSTOM_BUILD_OPTIONS" ]; then
-		"$GOBIN/buildpack-packager" --cached
+	if "$GOBIN/buildpack-packager" --help 2>&1 | grep -E '^\s+-cached'; then
+		WARN 'Buildpack is using older buildpack-packager'
+		"$GOBIN/buildpack-packager" -cached
 	else
 		"$GOBIN/buildpack-packager" build --cached
 	fi
