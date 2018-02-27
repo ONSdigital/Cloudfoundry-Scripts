@@ -30,6 +30,7 @@ BASE_DIR="`dirname \"$0\"`"
 
 INSTALL_AWS="${1:-true}"
 DISCOVER_VERSIONS="${2:-true}"
+SYMLINK_VERSIONS="${3:-false}"
 
 CF_GITHUB_RELEASE_URL="https://github.com/cloudfoundry/cli/releases/latest"
 BOSH_GITHUB_RELEASE_URL="https://github.com/cloudfoundry/bosh-cli/releases/latest"
@@ -129,63 +130,35 @@ if [ -z "$NO_AWS" -a "$INSTALL_AWS" != x"false" ] && [ -z "$AWS_CLI" -o ! -x "$A
 	CHANGES=1
 fi
 
-if [ ! -x "$BOSH_CLI-$BOSH_CLI_VERSION" ]; then
+if [ ! -f "$BOSH_CLI" ]; then
 	INFO "Downloading Bosh $BOSH_CLI_VERSION"
-	curl -SLo "$BOSH_CLI-$BOSH_CLI_VERSION" "$BOSH_CLI_URL"
+	curl -SLo "$BOSH_CLI" "$BOSH_CLI_URL"
 
-	chmod +x "$BOSH_CLI-$BOSH_CLI_VERSION"
+	chmod +x "$BOSH_CLI"
 
 	BOSH_LINK='BOSH_CLI'
 fi
 
-if [ ! -f "$CF_CLI-$CF_CLI_VERSION" ]; then
+if [ ! -f "$CF_CLI" ]; then
 	if [ ! -f "$TMP_DIR/$CF_CLI_ARCHIVE" ]; then
 		INFO "Downloading CF $CF_CLI_VERSION"
 		curl -SLo "$TMP_DIR/$CF_CLI_ARCHIVE" "$CF_CLI_URL"
 	fi
 
-	[ -f "$TMP_DIR/cf" ] && rm -f "$TMP_DIR/cf"
+	[ -f "$CF_CLI" ] && rm -f "$CF_CLI"
 
 	INFO 'Extracting CF CLI'
 	tar -zxf "$TMP_DIR/$CF_CLI_ARCHIVE" -C "$TMP_DIR" cf || FATAL "Unable to extract $TMP_DIR/$CF_CLI_ARCHIVE"
 
-	mv "$TMP_DIR/cf" "$CF_CLI-$CF_CLI_VERSION"
+	mv "$TMP_DIR/cf" "$CF_CLI"
 
-	CF_LINK='CF_CLI'
-fi
-
-if [ -n "$BOSH_LINK" -o -n "$CF_LINK" ]; then
-	for i in $BOSH_LINK $CF_LINK; do
-		eval file="\$$i"
-		eval version="\$${i}_VERSION"
-
-		file_name="`basename \"$file\"`"
-
-		INFO "Creating $file_name link"
-
-		# Should never fail
-		[ -z "$version" ] && FATAL "Unable to determine $i version"
-
-		if [ -h "$file" -o -f "$file" ]; then
-			diff -q "$file" "$file-$version" >/dev/null 2>&1 || rm -f "$file"
-		fi
-
-		if [ ! -h "$file" -a ! -f "$file" ]; then
-			cd "$BIN_DIR"
-
-			ln -s "$file_name-$version" "$file_name"
-
-			CHANGES=1
-		fi
-
-		unset file file_name version
-	done
+	chmod +x "$CF_CLI"
 fi
 
 cat <<EOF
 Initial setup complete:
-	$BOSH_CLI-$BOSH_CLI_VERSION
-	$CF_CLI-$CF_CLI_VERSION
+	$BOSH_CLI version $BOSH_CLI_VERSION
+	$CF_CLI version $CF_CLI_VERSION
 EOF
 
 OLDIFS="$IFS"
