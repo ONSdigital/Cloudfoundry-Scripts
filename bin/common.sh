@@ -53,9 +53,8 @@ BIN_DIR="$CACHE_DIR/bin"
 STACK_OUTPUTS_PREFIX="outputs-"
 STACK_OUTPUTS_SUFFIX='sh'
 
-BOSH_CLI="$BIN_DIR/bosh"
-CF_CLI="$BIN_DIR/cf"
-CA_TOOL="$BASE_DIR/ca-tool.sh"
+BOSH_CLI="${BOSH_CLI:-$BIN_DIR/bosh}"
+CF_CLI="${CF_CLI:-$BIN_DIR/cf}"
 
 SERVICES_SPACE="Services"
 
