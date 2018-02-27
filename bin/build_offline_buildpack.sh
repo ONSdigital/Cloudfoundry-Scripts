@@ -26,10 +26,7 @@ BUILDPACK_DIR="$2"
 
 cd "$BUILDPACK_DIR"
 
-mkdir -p buildpack
-
 INFO "Building $BUILDPACK_NAME offline/cached buildpack"
-
 if [ -f cf.Gemfile ]; then
 	# Ruby buildpack packager
 	which ruby >/dev/null || FATAL 'Ruby is not installed, or is not in the $PATH'
