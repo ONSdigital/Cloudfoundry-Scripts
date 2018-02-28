@@ -25,8 +25,7 @@ for i in ${@:-`ls vendor/`}; do
 	if echo "$i" | grep -Eq -- '-release'; then
 		subfolder='releases/'
 		diff_ignore_opt="-x version.txt"
-	else
-		subfolder=''
+		patch_level=2
 	fi
 
 	$ECHO -n "Git update: $i? (y/N)"
@@ -43,7 +42,7 @@ for i in ${@:-`ls vendor/`}; do
 		read view_diff
 
 		if [ x"$view_diff" = x"Y" -o x"$view_diff" = x"y" ]; then
-			if sh -c "diff -Ncrudx .git -x \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'"; then
+			if sh -c "diff -Nrudx .git -x \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'"; then
 				echo "No differences"
 
 				continue
@@ -56,7 +55,7 @@ for i in ${@:-`ls vendor/`}; do
 		if [ x"$edit_diff" = x"Y" -o x"$edit_diff" = x"y" ]; then
 			patch="`mktemp "$i.patch.XXXX"`"
 
-			sh -c "diff -Ncrudx .git \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'" >"$patch"
+			sh -c "diff -Nrudx .git \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'" >"$patch"
 
 			vim "$patch"
 		fi
@@ -66,9 +65,9 @@ for i in ${@:-`ls vendor/`}; do
 
 		if [ x"$apply_diff" = x"Y" -o x"$apply_diff" = x"y" ]; then
 			if [ -n "$patch" -a -f "$patch" ]; then
-				patch -p1 -d "$subfolder$i" -i "$patch" && rm -f "$patch"
+				patch -p${patch_level:-1} -d "$subfolder$i" -i "$patch" && rm -f "$patch"
 			else
-				sh -c "diff -Ncrudx .git -x \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'" | patch -p1 -d "$subfolder$i"
+				sh -c "diff -Nrudx .git -x \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'" | patch -p${patch_level:-1} -d "$subfolder$i"
 			fi
 
 			#
@@ -80,7 +79,7 @@ for i in ${@:-`ls vendor/`}; do
 		fi
 	fi
 
-	unset diff_ignore_opt
+	unset diff_ignore_opt subfolder
 done
 
 $ECHO "Git status"
