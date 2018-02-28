@@ -31,7 +31,7 @@ RELEASE_BLOB_DESTINATION="${RELEASE_BLOB_DESTINATION:-blobs}"
 # Export INFO() so we can run it under find, _date() is called by INFO()
 export -f INFO _date
 
-findpath BLOBS_DIR blobs
+[ -d blobs ] && findpath BLOBS_DIR blobs
 
 [ -z "$RELEASE_NAME" ] && FATAL 'No release name provided'
 [ -d "$RELEASE_DIR" ] || FATAL "Bosh release directory does not exist: $RELEASE_NAME"
@@ -48,8 +48,8 @@ version="`cat version.txt`"
 [ -d "config" ] || mkdir config
 [ -f config/blobs.yml ] || touch config/blobs.yml
 
-if [ -d blobs ]; then
-	cd blobs
+if [ -n "$BLOBS_DIR" -a -d "$BLOBS_DIR" ]; then
+	cd "$BLOBS_DIR"
 
 	INFO 'Adding blobs'
 	find . -type f -exec sh -xc "pwd;INFO '. adding {}'; '$BOSH_CLI' add-blob --dir "$RELEASE_DIR" --tty '{}' '$RELEASE_BLOB_DESTINATION/{}'" \;
