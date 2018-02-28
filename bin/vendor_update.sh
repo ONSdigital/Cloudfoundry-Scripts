@@ -43,7 +43,7 @@ for i in ${@:-`ls vendor/`}; do
 		read view_diff
 
 		if [ x"$view_diff" = x"Y" -o x"$view_diff" = x"y" ]; then
-			if sh -c "diff -Ncrdx .git -x \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'"; then
+			if sh -c "diff -Ncrudx .git -x \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'"; then
 				echo "No differences"
 
 				continue
@@ -56,7 +56,7 @@ for i in ${@:-`ls vendor/`}; do
 		if [ x"$edit_diff" = x"Y" -o x"$edit_diff" = x"y" ]; then
 			patch="`mktemp "$i.patch.XXXX"`"
 
-			sh -c "diff -Ncrdx .git \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'" >"$patch"
+			sh -c "diff -Ncrudx .git \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'" >"$patch"
 
 			vim "$patch"
 		fi
@@ -68,7 +68,7 @@ for i in ${@:-`ls vendor/`}; do
 			if [ -n "$patch" -a -f "$patch" ]; then
 				patch -p1 -d "$subfolder$i" -i "$patch" && rm -f "$patch"
 			else
-				sh -c "diff -Ncrdx .git -x \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'" | patch -p1 -d "$subfolder$i"
+				sh -c "diff -Ncrudx .git -x \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'" | patch -p1 -d "$subfolder$i"
 			fi
 
 			#
