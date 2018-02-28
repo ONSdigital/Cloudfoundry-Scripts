@@ -127,11 +127,10 @@ if [ x"$NO_CREATE_RELEASES" != x'true' -o ! -f "$BOSH_LITE_RELEASES" ]; then
 		release_version_varname="${release_varname}_version"
 
 		if [ ! -f "$release_filename" -o x"$RECREATE_RELEASES" = x'true' ]; then
-			INFO "Creating release $_r"
+			INFO ". creating release $_r"
 			"$BASE_DIR/bosh-create_release.sh" "$_r" "releases/$_r"
 
-			# We only use the file:// URL for the create-env Bosh. Once that is up, we upload the release - if we try to use a file:// URL Bosh
-			# complains if the version number isn't different and fails
+			# We only use the file:// URL for the create-env Bosh. Once that is up, we upload the release
 			update_yml_var "$BOSH_LITE_RELEASES" "$release_url_varname" "$release_url_value"
 
 			UPLOAD_RELEASES='true'

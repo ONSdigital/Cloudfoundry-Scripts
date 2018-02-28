@@ -28,6 +28,9 @@ RELEASE_BLOB_DESTINATION="${RELEASE_BLOB_DESTINATION:-blobs}"
 
 . "$BASE_DIR/common.sh"
 
+# Export INFO() so we can run it under find, _date() is called by INFO()
+export -f INFO _date
+
 findpath BLOBS_DIR blobs
 
 [ -z "$RELEASE_NAME" ] && FATAL 'No release name provided'
@@ -45,19 +48,12 @@ version="`cat version.txt`"
 [ -d "config" ] || mkdir config
 [ -f config/blobs.yml ] || touch config/blobs.yml
 
-if [ -d "$BLOBS_DIR" ]; then
-	# We blindy assume/hope that the files don't contain spaces
-	for _s in "$BLOBS_DIR/"*; do
-		[ -f "$_s" ] || continue
+if [ -d blobs ]; then
+	cd blobs
 
-		filename="`basename "$_s"`"
-
-		INFO "Adding Blob: $_s"
-		"$BOSH_CLI" add-blob --tty "$_s" "$RELEASE_BLOB_DESTINATION/$filename"
-	done
+	INFO 'Adding blobs'
+	find . -type f -exec sh -xc "pwd;INFO '. adding {}'; '$BOSH_CLI' add-blob --dir "$RELEASE_DIR" --tty '{}' '$RELEASE_BLOB_DESTINATION/{}'" \;
 fi
 
-
-
 INFO "Creating release: $RELEASE_NAME"
-"$BOSH_CLI" create-release --tty --force --version="$version" --tarball "$RELEASE_NAME.tgz"
+"$BOSH_CLI" create-release --tty --force --dir "$RELEASE_DIR" --version="$version" --tarball "$RELEASE_NAME.tgz"
