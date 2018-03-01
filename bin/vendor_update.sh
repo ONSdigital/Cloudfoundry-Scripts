@@ -55,7 +55,7 @@ for i in ${@:-`ls vendor/`}; do
 		if [ x"$edit_diff" = x"Y" -o x"$edit_diff" = x"y" ]; then
 			patch="`mktemp "$i.patch.XXXX"`"
 
-			sh -c "diff -Nrudx .git \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'" >"$patch"
+			sh -c "diff -Nrudx .git -x \*.swp $diff_ignore_opt '$subfolder$i' 'vendor/$i'" >"$patch"
 
 			vim "$patch"
 		fi
