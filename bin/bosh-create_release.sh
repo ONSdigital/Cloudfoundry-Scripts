@@ -28,12 +28,6 @@ RELEASE_BLOB_DESTINATION="$RELEASE_DIR/blobs"
 
 . "$BASE_DIR/common.sh"
 
-set -x
-pwd
-
-# Export INFO() so we can run it under find, _date() is called by INFO()
-export -f INFO _date
-
 [ -z "$RELEASE_NAME" ] && FATAL 'No release name provided'
 [ -d "$RELEASE_DIR" ] || FATAL "Bosh release directory does not exist: $RELEASE_NAME"
 [ -d "$RELEASE_BLOB_DESTINATION" ] || mkdir -p "$RELEASE_BLOB_DESTINATION"
@@ -56,7 +50,7 @@ version="`cat version.txt`"
 [ -f config/blobs.yml ] || touch config/blobs.yml
 
 if [ -n "$BLOBS_DIR" ]; then
-	find "$BLOBS_DIR" -type f -exec sh -xc "INFO '. adding {}'; '$BOSH_CLI' add-blob --tty '{}' '$RELEASE_BLOB_DESTINATION'" \;
+	find "$BLOBS_DIR" -type f -exec sh -xc "echo '. adding {}'; '$BOSH_CLI' add-blob --tty '{}' '$RELEASE_BLOB_DESTINATION'" \;
 fi
 
 INFO "Creating release: $RELEASE_NAME"
