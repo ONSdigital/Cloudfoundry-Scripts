@@ -34,7 +34,7 @@ RELEASE_BLOB_DESTINATION="$RELEASE_DIR/blobs"
 
 # Releases place their blobs under their own folder, so we can automatically add the right blobs
 # to the right releases
-[ -d "blobs/$RELEASE_DIR" ] && findpath BLOBS_DIR "blobs/$RELEASE_DIR"
+[ -d "blobs/$RELEASE_NAME" ] && findpath BLOBS_DIR "blobs/$RELEASE_NAME"
 
 # Find the fullpath
 findpath RELEASE_BLOB_DESTINATION "$RELEASE_BLOB_DESTINATION"
@@ -50,7 +50,10 @@ version="`cat version.txt`"
 [ -f config/blobs.yml ] || touch config/blobs.yml
 
 if [ -n "$BLOBS_DIR" ]; then
-	find "$BLOBS_DIR" -type f -exec sh -xc "echo '. adding {}'; '$BOSH_CLI' add-blob --tty '{}' '$RELEASE_BLOB_DESTINATION'" \;
+	for _b in `ls "$BLOBS_DIR"`; do
+		INFO ". adding $_b"
+		"$BOSH_CLI" add-blob --tty "$BLOBS_DIR/$_b" "blobs/$_b"
+	done
 fi
 
 INFO "Creating release: $RELEASE_NAME"
