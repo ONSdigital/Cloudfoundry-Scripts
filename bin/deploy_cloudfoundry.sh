@@ -9,7 +9,7 @@
 # Variables:
 #	DELETE_BOSH_ENV=[true|false]
 #	[BOSH_LITE_PRIVATE_IP]
-#	USE_EXISTING_VERSIONS=[true|false]
+#	UPGRADE_VERSIONS=[true|false]
 #	REINTERPOLATE_LITE_STATIC_IPS=[true|false]
 #	NO_CREATE_RELEASES=[true|false]
 #	REGENERATE_BOSH_CONFIG=[true|false]
@@ -75,7 +75,7 @@ fi
 
 # Do we want to use the existing versions of stemcells/releases?  Individual items can still be overridden if required
 # We default to using existing versions unless we have been told not to
-if [ x"$USE_EXISTING_VERSIONS" != x'false' ]; then
+if [ -z "$UPGRADE_VERSIONS" -o x"$UPGRADE_VERSIONS" = x'false' ]; then
 	if [ -f "$RELEASE_CONFIG_FILE" ]; then
 		INFO 'Loading Bosh release versions'
 		. "$RELEASE_CONFIG_FILE"
@@ -253,7 +253,7 @@ for component_version in `sh -c "'$BOSH_CLI' interpolate \
 		INFO "Overriding ${lower_value:-latest} version and using $upper_value for $component_version"
 		version="$upper_value"
 
-	elif [ x"$USE_EXISTING_VERSIONS" = x'true' -a -n "$lower_value" ]; then
+	elif [ -n "$lower_value" ] && [ -z "$UPGRADE_VERSIONS" -o x"$UPGRADE_VERSIONS" = x'false' ]; then
 		INFO "Using previous version of $lower_value for $component_version"
 		version="$lower_value"
 

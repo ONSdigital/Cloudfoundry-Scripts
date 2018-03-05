@@ -8,23 +8,23 @@ _date(){
 FATAL(){
 	# Printf is slightly more cross platform than using 'echo'.  Some echos expand escape sequences by default,
 	# some require -e to do so whereas others ignore the option and just print -e
-	printf '%b%s FATAL %s%b\n' "$FATAL_COLOUR" "`_date`" "$@" "$NORMAL_COLOUR"
+	printf '%b%s FATAL %s%b\n' "$FATAL_COLOUR" "`_date`" "$@" "$NORMAL_COLOUR" >&2
 
 	exit 1
 }
 
 WARN(){
-	printf '%b%s WARN %s%b\n' "$WARN_COLOUR" "`_date`" "$@" "$NORMAL_COLOUR"
+	printf '%b%s WARN %s%b\n' "$WARN_COLOUR" "`_date`" "$@" "$NORMAL_COLOUR" >&2
 }
 
 INFO(){
-	printf '%b%s INFO %s%b\n' "$INFO_COLOUR" "`_date`" "$@" "$NORMAL_COLOUR"
+	printf '%b%s INFO %s%b\n' "$INFO_COLOUR" "`_date`" "$@" "$NORMAL_COLOUR" >&2
 }
 
 DEBUG(){
 	[ -z "$DEBUG" -o x"$DEBUG" = x"false" ] && return 0
 
-	printf '%b%s DEBUG %s%b\n' "$DEBUG_COLOUR" "$@" "$NORMAL_COLOUR"
+	printf '%b%s DEBUG %s%b\n' "$DEBUG_COLOUR" "`_date`" "$@" "$NORMAL_COLOUR" >&2
 }
 
 post_deploy_scripts(){

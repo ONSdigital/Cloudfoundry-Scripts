@@ -5,14 +5,10 @@
 # Variables:
 #	RELEASE_NAME=[Release name]
 #	RELEASE_DIR=[Release directory]
-#	RELEASE_BLOB_SOURCE=[Release blob source]
-#	RELEASE_BLOB_DESTINATION=[Release blob destination]
 #
 # Parameters:
 #	[Release name]
 #	[Release directory]
-#	[Release blob source]
-#	[Release blob destination]
 #
 # Requires:
 #	common.sh
@@ -24,20 +20,14 @@ BASE_DIR="`dirname \"$0\"`"
 RELEASE_NAME="${1:-$RELEASE_NAME}"
 RELEASE_DIR="${2:-${RELEASE_DIR:-$RELEASE_NAME}}"
 
-RELEASE_BLOB_DESTINATION="$RELEASE_DIR/blobs"
-
 . "$BASE_DIR/common.sh"
-
+set -x
 [ -z "$RELEASE_NAME" ] && FATAL 'No release name provided'
 [ -d "$RELEASE_DIR" ] || FATAL "Bosh release directory does not exist: $RELEASE_NAME"
-[ -d "$RELEASE_BLOB_DESTINATION" ] || mkdir -p "$RELEASE_BLOB_DESTINATION"
 
 # Releases place their blobs under their own folder, so we can automatically add the right blobs
 # to the right releases
 [ -d "blobs/$RELEASE_NAME" ] && findpath BLOBS_DIR "blobs/$RELEASE_NAME"
-
-# Find the fullpath
-findpath RELEASE_BLOB_DESTINATION "$RELEASE_BLOB_DESTINATION"
 
 cd "$RELEASE_DIR"
 
@@ -50,6 +40,8 @@ version="`cat version.txt`"
 [ -f config/blobs.yml ] || touch config/blobs.yml
 
 if [ -n "$BLOBS_DIR" ]; then
+	[ -d blobs ] || mkdir -p blobs
+
 	for _b in `ls "$BLOBS_DIR"`; do
 		INFO ". adding $_b"
 		"$BOSH_CLI" add-blob --tty "$BLOBS_DIR/$_b" "blobs/$_b"
