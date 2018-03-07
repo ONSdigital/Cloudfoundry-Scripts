@@ -1,0 +1,8 @@
+applications:
+- name: helloworld-py2
+  instances: 1
+  memory: 64M
+  disk_quota: 512M
+  buildpack: python_buildpack
+  services:
+  - testing
