@@ -2,8 +2,10 @@
 
 import json
 import os
-import pika
+import ssl
 import sys
+
+import pika
 
 service = 'rabbitmq'
 
@@ -33,11 +35,24 @@ for binding in services[service]:
 	if not('credentials' in binding.keys()) or not('name' in binding.keys()):
 		continue
 
-	print binding['credentials']['protocols']['amqp+ssl']['uri']
+		#host=binding['credentials']['protocols']['amqp+ssl']['host'],
+	params = pika.ConnectionParameters(
+		host='10.0.51.45',
+		port=binding['credentials']['protocols']['amqp+ssl']['port'],
+		credentials=pika.PlainCredentials(binding['credentials']['protocols']['amqp+ssl']['username'],binding['credentials']['protocols']['amqp+ssl']['password']),
+		ssl=True,
+		ssl_options=dict(ssl_version=ssl.PROTOCOL_TLSv1_2)
+	)
 
-	params = pika.URLParameters(binding['credentials']['protocols']['amqp+ssl']['uri'])
+	try:
+		connection = pika.BlockingConnection(params)
+	except BaseException as e:
+		sys.stderr.write(str(e), e.__class__.__name)
 
-	connection = pika.BlockingConnection(params)
+	try:
+		sys.stderr.write('connection', connection)
+	except NameError as e:
+		sys.stderr.write(str(e), e.__class__.__name)
 
 	channel = connection.channel()
 
