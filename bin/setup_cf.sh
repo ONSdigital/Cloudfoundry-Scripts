@@ -18,7 +18,6 @@ set -e
 BASE_DIR="`dirname \"$0\"`"
 
 DEPLOYMENT_NAME="${1:-$DEPLOYMENT_NAME}"
-#EMAIL_ADDRESS="${2:-NONE}"
 ORG_NAME="${2:-$organisation}"
 TEST_SPACE="${3:-Test}"
 DONT_SKIP_SSL_VALIDATION="${4:-$DONT_SKIP_SSL_VALIDATION}"
@@ -31,7 +30,6 @@ DONT_SKIP_SSL_VALIDATION="${4:-$DONT_SKIP_SSL_VALIDATION}"
 # We don't want any sub-scripts to login
 export NO_LOGIN=1
 
-#[ -z "$EMAIL_ADDRESS" ] && FATAL 'No email address has been supplied'
 [ -n "$DONT_SKIP_SSL_VALIDATION" ] || CF_EXTRA_OPTS='--skip-ssl-validation'
 [ -z "$ORG_NAME" ] && FATAL 'No organisation has been set'
 
@@ -39,9 +37,6 @@ findpath TEST_APPS "$BASE_DIR/../test-apps"
 
 # Ensure we have CF available
 installed_bin cf
-
-# We may not always want to update the admin user
-#[ x"$EMAIL_ADDRESS" != x"NONE" ] && "$BASE_DIR/setup_cf-admin.sh" "$DEPLOYMENT_NAME" cf_admin "$EMAIL_ADDRESS"
 
 [ -f "$CF_CREDENTIALS" ] || FATAL "Cannot find CF admin credentials: $CF_CREDENTIALS. Has an admin user been created"
 
