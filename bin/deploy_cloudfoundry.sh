@@ -250,7 +250,6 @@ for component_version in `sh -c "'$BOSH_CLI' interpolate \
 	# Upper case values take priority as these are likely to be set by the person/thing running this script
 	if [ -n "$upper_value" ] && [ x"$upper_value" != x"$lower_value" ]; then
 		INFO "Using $upper_value for $component_version"
-		INFO "Overriding ${lower_value:-latest} version and using $upper_value for $component_version"
 		version="$upper_value"
 
 	elif [ -n "$lower_value" ] && [ -z "$UPGRADE_VERSIONS" -o x"$UPGRADE_VERSIONS" = x'false' ]; then
