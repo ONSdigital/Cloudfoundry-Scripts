@@ -51,7 +51,7 @@ findpath MANIFESTS_DIR "$MANIFESTS_DIR_RELATIVE"
 
 # Private, per deployment, ops files, eq for installation specific operartions
 # Publically available ops files, eg adjustments for VMware
-for i in Lite Full; do
+for i in Director CF; do
 	[ -d "$MANIFESTS_DIR_RELATIVE/Bosh-$i-Manifests/$CPI_TYPE" ] || FATAL "Unknown CPI type: $CPI_TYPE"
 
 	for j in PUBLIC PRIVATE; do
@@ -86,57 +86,57 @@ done
 # Common interpolated variables
 BOSH_COMMON_VARIABLES="$DEPLOYMENT_DIR_RELATIVE/common-variables.yml"
 
-# Lite interpolated variables
-BOSH_LITE_INTERPOLATED_MANIFEST="$DEPLOYMENT_DIR_RELATIVE/lite-interpolated.yml"
-BOSH_LITE_INTERPOLATED_STATIC_IPS="$DEPLOYMENT_DIR_RELATIVE/lite-static-ips.yml"
+# Director interpolated variables
+BOSH_DIRECTOR_INTERPOLATED_MANIFEST="$DEPLOYMENT_DIR_RELATIVE/director-interpolated.yml"
+BOSH_DIRECTOR_INTERPOLATED_STATIC_IPS="$DEPLOYMENT_DIR_RELATIVE/director-static-ips.yml"
 
 #
-BOSH_LITE_STATE_FILE="$DEPLOYMENT_DIR_RELATIVE/bosh-lite-$CPI_TYPE-state.json"
-BOSH_LITE_RELEASES="$DEPLOYMENT_DIR_RELATIVE/lite-releases.yml"
-BOSH_LITE_VARS_STORE="$DEPLOYMENT_DIR_RELATIVE/lite-var-store.yml"
+BOSH_DIRECTOR_STATE_FILE="$DEPLOYMENT_DIR_RELATIVE/bosh-director-$CPI_TYPE-state.json"
+BOSH_DIRECTOR_RELEASES="$DEPLOYMENT_DIR_RELATIVE/director-releases.yml"
+BOSH_DIRECTOR_VARS_STORE="$DEPLOYMENT_DIR_RELATIVE/director-var-store.yml"
 
-# Full interpolated variables
-BOSH_FULL_INTERPOLATED_CLOUD_CONFIG_VARS="$DEPLOYMENT_DIR_RELATIVE/cloud-config-variables-interpolated.yml"
-BOSH_FULL_INTERPOLATED_MANIFEST="$DEPLOYMENT_DIR_RELATIVE/full-interpolated.yml"
-BOSH_FULL_INTERPOLATED_STATIC_IPS="$DEPLOYMENT_DIR_RELATIVE/full-static-ips.yml"
-BOSH_FULL_INTERPOLATED_AVAILABILITY="$DEPLOYMENT_DIR_RELATIVE/full-variables-interpolated.yml"
+# CF interpolated variables
+BOSH_CF_INTERPOLATED_CLOUD_CONFIG_VARS="$DEPLOYMENT_DIR_RELATIVE/cloud-config-variables-interpolated.yml"
+BOSH_CF_INTERPOLATED_MANIFEST="$DEPLOYMENT_DIR_RELATIVE/cf-interpolated.yml"
+BOSH_CF_INTERPOLATED_STATIC_IPS="$DEPLOYMENT_DIR_RELATIVE/cf-static-ips.yml"
+BOSH_CF_INTERPOLATED_AVAILABILITY="$DEPLOYMENT_DIR_RELATIVE/cf-variables-interpolated.yml"
 
 # Common Manifests
 BOSH_COMMON_VARIABLES_MANIFEST="$MANIFESTS_DIR_RELATIVE/Bosh-Common-Manifests/Common-Variables.yml"
 
-# Bosh Lite Manifests
-BOSH_LITE_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/Bosh-Template.yml"
-BOSH_LITE_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/$CPI_TYPE/Adjustments.yml"
-BOSH_LITE_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/Static-IPs/Bosh-Static-IPs.yml"
-BOSH_LITE_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Lite-Manifests/Common-Variables.yml"
+# Bosh Director Manifests
+BOSH_DIRECTOR_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/Bosh-Template.yml"
+BOSH_DIRECTOR_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/$CPI_TYPE/Adjustments.yml"
+BOSH_DIRECTOR_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/Static-IPs/Bosh-Static-IPs.yml"
+BOSH_DIRECTOR_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/Common-Variables.yml"
 
 # Bosh Cloud Config Manifests
-BOSH_CLOUD_CONFIG_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$CPI_TYPE/Bosh-CloudConfig.yml"
-BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$CPI_TYPE/Availability/Bosh-Availability-$availability.yml"
+BOSH_CLOUD_CONFIG_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Bosh-CloudConfig.yml"
+BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Availability/Bosh-Availability-$availability.yml"
 
-# Bosh Full Manifests
-BOSH_FULL_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Bosh-Template.yml"
-BOSH_FULL_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$CPI_TYPE/Adjustments.yml"
-BOSH_FULL_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Static-IPs/Bosh-Static-IPs-$availability.yml"
-BOSH_FULL_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Common-Variables.yml"
-BOSH_FULL_AVAILABILITY_VARIABLES="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/Availability/Bosh-Availability-$availability.yml"
-BOSH_FULL_INSTANCES_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Full-Manifests/$CPI_TYPE/Bosh-Instance-Types.yml"
+# Bosh CF Manifests
+BOSH_CF_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Bosh-Template.yml"
+BOSH_CF_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Adjustments.yml"
+BOSH_CF_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Static-IPs/Bosh-Static-IPs-$availability.yml"
+BOSH_CF_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Common-Variables.yml"
+BOSH_CF_AVAILABILITY_VARIABLES="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Availability/Bosh-Availability-$availability.yml"
+BOSH_CF_INSTANCES_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Bosh-Instance-Types.yml"
 
 #
 #
-# BOSH_FULL_VARIABLES_STORE -> relocated to common.sh for use by setup-cf_admin.sh
+# BOSH_CF_VARIABLES_STORE -> relocated to common.sh for use by setup-cf_admin.sh
 
 
 for _f in BOSH_COMMON_VARIABLES_MANIFEST \
-	BOSH_LITE_MANIFEST_FILE BOSH_LITE_STATIC_IPS_FILE BOSH_LITE_VARIABLES_OPS_FILE BOSH_LITE_CPI_SPECIFIC_OPS_FILE \
+	BOSH_DIRECTOR_MANIFEST_FILE BOSH_DIRECTOR_STATIC_IPS_FILE BOSH_DIRECTOR_VARIABLES_OPS_FILE BOSH_DIRECTOR_CPI_SPECIFIC_OPS_FILE \
 	BOSH_CLOUD_CONFIG_FILE BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE \
-	BOSH_FULL_MANIFEST_FILE BOSH_FULL_STATIC_IPS_FILE BOSH_FULL_VARIABLES_OPS_FILE BOSH_FULL_AVAILABILITY_VARIABLES BOSH_FULL_INSTANCES_FILE; do
+	BOSH_CF_MANIFEST_FILE BOSH_CF_STATIC_IPS_FILE BOSH_CF_VARIABLES_OPS_FILE BOSH_CF_AVAILABILITY_VARIABLES BOSH_CF_INSTANCES_FILE; do
 
 	eval file="\$$_f"
 	englishified="`echo $_f | englishify | sed $SED_EXTENDED -e 's/-Ips/-IPs/g'`"
 
 	[ -n "$file" ] || FATAL "$_f has not been set"
-	
+
 	[ -f "$file" ] || FATAL "$englishified '$file' does not exist"
 
 	unset file englishified
@@ -144,5 +144,3 @@ done
 
 # Check we have bosh installed
 installed_bin bosh
-
-

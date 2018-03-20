@@ -5,7 +5,7 @@
 if [ -t 1 ]; then
 	COLOURS="`tput -T ${TERM:-dumb} colors 2>/dev/null | grep -E '^[0-9]+$' || :`"
 
-	# Colours may be negative 
+	# Colours may be negative
 	if [ -n "$COLOURS" ] && [ $COLOURS -ge 8 ]; then
 		FATAL_COLOUR="`tput setaf 1`"
 		INFO_COLOUR="`tput setaf 2`"
@@ -85,7 +85,7 @@ EOF
 	STEMCELL_CONFIG_FILE="$DEPLOYMENT_DIR/stemcells-config.sh"
 
 	# Required by setup-cf_admin.sh
-	BOSH_FULL_VARIABLES_STORE="$DEPLOYMENT_DIR_RELATIVE/full-var-store.yml"
+	BOSH_CF_VARIABLES_STORE="$DEPLOYMENT_DIR_RELATIVE/cf-var-store.yml"
 
 	# Load the environment config if we have been given one
 	if [ -f "$DEPLOYMENTS_CONFIG_DIR/$DEPLOYMENT_NAME/environment.sh" ]; then
