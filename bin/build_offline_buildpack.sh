@@ -83,6 +83,6 @@ else
 		"$GOBIN/buildpack-packager" -cached
 	else
 		INFO 'Building offline/cached buildpack'
-		"$GOBIN/buildpack-packager" build --cached -cachedir work/cache
+		"$GOBIN/buildpack-packager" build --cached
 	fi
 fi
