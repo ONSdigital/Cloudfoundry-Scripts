@@ -366,7 +366,7 @@ if [ x"$RUN_DRY_RUN" = x'true' -o x"$DEBUG" = x'true' ]; then
 fi
 
 INFO 'Setting up CF admin credentials'
-SECRET="`"$BOSH_CLI" interpolate --no-color --path '/instance_groups/name=uaa/properties/uaa/cf_admin/client_secret' "$BOSH_FULL_INTERPOLATED_MANIFEST"`"
+SECRET="`"$BOSH_CLI" interpolate --no-color --path '/jobs/name=uaa/properties/uaa/cf_admin/client_secret' "$BOSH_FULL_INTERPOLATED_MANIFEST"`"
 PASSWORD="`"$BOSH_CLI" interpolate --no-color --path '/properties/uaa/scim/users/name=cf_admin/password' "$BOSH_FULL_INTERPOLATED_MANIFEST"`"
 
         cat >"$CF_CREDENTIALS" <<EOF
