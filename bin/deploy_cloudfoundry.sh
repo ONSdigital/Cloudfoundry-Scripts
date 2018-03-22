@@ -29,6 +29,10 @@ BASE_DIR="`dirname \"$0\"`"
 
 . "$BASE_DIR/common-bosh.sh"
 
+extract_prefixed_env_var() {
+	eval echo \$"${1}_${2}"
+}
+
 # Check if we have any existing Bosh state
 if [ -f "$BOSH_DIRECTOR_STATE_FILE" ]; then
 	if [ x"$DELETE_BOSH_ENV" = x'true' ]; then
@@ -155,8 +159,16 @@ INFO "$STORE_ACTION common passwords"
 	"$BOSH_COMMON_VARIABLES_MANIFEST"
 
 INFO 'Interpolating Bosh Director manifest'
+
+
 sh -c "'$BOSH_CLI' interpolate \
 	--var-errs \
+	--var='az=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" aws_availability_zone1)' \
+	--var='default_key_name=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" bosh_ssh_key_name)' \
+	--var='iam_instance_profile=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" director_instance_profile)' \
+	--var='internal_ip=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" bosh_director_private_ip)' \
+	--var='subnet_id=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" director_az1_subnet)' \
+	--var='region=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" aws_region)' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_DIRECTOR_RELEASES' \
