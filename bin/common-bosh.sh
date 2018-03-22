@@ -109,13 +109,13 @@ BOSH_DIRECTOR_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/Bos
 BOSH_DIRECTOR_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/$CPI_TYPE/Adjustments.yml"
 BOSH_DIRECTOR_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/Static-IPs/Bosh-Static-IPs.yml"
 BOSH_DIRECTOR_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/Common-Variables.yml"
+BOSH_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/bosh-deployment"
 
 # Bosh Cloud Config Manifests
 BOSH_CLOUD_CONFIG_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Bosh-CloudConfig.yml"
 BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Availability/Bosh-Availability-$availability.yml"
 
 # Bosh CF Manifests
-BOSH_DEPLOYMENT_DIR='bosh-deployment'
 BOSH_CF_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Bosh-Template.yml"
 BOSH_CF_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Adjustments.yml"
 BOSH_CF_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Static-IPs/Bosh-Static-IPs-$availability.yml"
