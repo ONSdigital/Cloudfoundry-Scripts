@@ -160,6 +160,23 @@ INFO "$STORE_ACTION common passwords"
 
 INFO 'Interpolating Bosh Director manifest'
 
+director_aws_ops_file_options="-o $(ls "${BOSH_DEPLOYMENT_DIR}/aws/cpi.yml") \
+-o $(ls "${BOSH_DEPLOYMENT_DIR}/aws/cli-iam-instance-profile.yml") \
+-o $(ls "${BOSH_DEPLOYMENT_DIR}/aws/iam-instance-profile.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/databases.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/default-iam-instance-profile.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/elb.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/s3-blobstore.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/s3-compiled-package-cache.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/security-groups.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/ssh.yml")"
+
+director_ops_file_options="-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/bosh-password.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/cloud-provider.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/director-user.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/networks.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/ntp.yml") \
+-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/registry.yml")"
 
 sh -c "'$BOSH_CLI' interpolate \
 	--var-errs \
@@ -174,10 +191,8 @@ sh -c "'$BOSH_CLI' interpolate \
 	--vars-file='$BOSH_DIRECTOR_RELEASES' \
 	--vars-file='$BOSH_DIRECTOR_INTERPOLATED_STATIC_IPS' \
 	--vars-store='$BOSH_DIRECTOR_VARS_STORE' \
-	--ops-file='$BOSH_DIRECTOR_VARIABLES_OPS_FILE' \
-	--ops-file='$BOSH_DIRECTOR_CPI_SPECIFIC_OPS_FILE' \
-	$BOSH_DIRECTOR_PUBLIC_OPS_FILE_OPTIONS \
-	$BOSH_DIRECTOR_PRIVATE_OPS_FILE_OPTIONS \
+	$director_aws_ops_file_options \
+	$director_ops_file_options \
 	'$BOSH_DIRECTOR_MANIFEST_FILE'" >"$BOSH_DIRECTOR_INTERPOLATED_MANIFEST"
 
 INFO "$CREATE_ACTION Bosh environment"

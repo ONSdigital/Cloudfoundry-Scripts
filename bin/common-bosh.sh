@@ -115,6 +115,7 @@ BOSH_CLOUD_CONFIG_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Bosh
 BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Availability/Bosh-Availability-$availability.yml"
 
 # Bosh CF Manifests
+BOSH_DEPLOYMENT_DIR='bosh-deployment'
 BOSH_CF_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Bosh-Template.yml"
 BOSH_CF_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Adjustments.yml"
 BOSH_CF_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Static-IPs/Bosh-Static-IPs-$availability.yml"
