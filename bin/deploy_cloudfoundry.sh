@@ -184,6 +184,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='az=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" aws_availability_zone1)' \
 	--var='default_key_name=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" bosh_ssh_key_name)' \
 	--var='iam_instance_profile=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" director_instance_profile)' \
+	--var='default_security_groups=[$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" director_instance_security_group)]' \
 	--var='internal_ip=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" director_az1_reserved_ip6)' \
 	--var='subnet_id=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" director_az1_subnet)' \
 	--var='region=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" aws_region)' \
