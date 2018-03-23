@@ -157,8 +157,9 @@ INFO "$STORE_ACTION common passwords"
 	"$BOSH_COMMON_VARIABLES_MANIFEST"
 
 INFO 'Interpolating Bosh Director manifest'
-manifest_dir=$(ls "${MANIFESTS_DIR_RELATIVE}")
-bosh_deployment_dir=$(ls "${BOSH_DEPLOYMENT_DIR}")
+
+findpath manifest_dir "${MANIFESTS_DIR_RELATIVE}"
+findpath bosh_deployment_dir "${BOSH_DEPLOYMENT_DIR}"
 
 director_aws_ops_file_options="-o '${bosh_deployment_dir}/aws/cpi.yml' \
 -o '${bosh_deployment_dir}/aws/cli-iam-instance-profile.yml' \
