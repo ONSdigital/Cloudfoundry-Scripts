@@ -188,6 +188,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='internal_ip=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" director_az1_reserved_ip6)' \
 	--var='subnet_id=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" director_az1_subnet)' \
 	--var='region=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" aws_region)' \
+	--var='director_name=cf-bosh-director' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_DIRECTOR_RELEASES' \
