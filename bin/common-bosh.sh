@@ -108,7 +108,7 @@ BOSH_CF_INTERPOLATED_AVAILABILITY="$DEPLOYMENT_DIR_RELATIVE/cf-variables-interpo
 BOSH_COMMON_VARIABLES_MANIFEST="$MANIFESTS_DIR_RELATIVE/Bosh-Common-Manifests/Common-Variables.yml"
 
 # Bosh Director Manifests
-BOSH_DIRECTOR_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/Bosh-Template.yml"
+BOSH_DIRECTOR_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/bosh-deployment/bosh.yml"
 BOSH_DIRECTOR_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/$CPI_TYPE/Adjustments.yml"
 BOSH_DIRECTOR_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/Static-IPs/Bosh-Static-IPs.yml"
 BOSH_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/bosh-deployment"
