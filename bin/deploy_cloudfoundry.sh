@@ -159,24 +159,26 @@ INFO "$STORE_ACTION common passwords"
 	"$BOSH_COMMON_VARIABLES_MANIFEST"
 
 INFO 'Interpolating Bosh Director manifest'
+manifest_dir=$(ls "${MANIFESTS_DIR_RELATIVE}")
+bosh_deployment_dir=$(ls "${BOSH_DEPLOYMENT_DIR}")
 
-director_aws_ops_file_options="-o $(ls "${BOSH_DEPLOYMENT_DIR}/aws/cpi.yml") \
--o $(ls "${BOSH_DEPLOYMENT_DIR}/aws/cli-iam-instance-profile.yml") \
--o $(ls "${BOSH_DEPLOYMENT_DIR}/aws/iam-instance-profile.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/databases.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/default-iam-instance-profile.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/elb.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/s3-blobstore.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/s3-compiled-package-cache.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/security-groups.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/aws/ssh.yml")"
+director_aws_ops_file_options="-o '${bosh_deployment_dir}/aws/cpi.yml' \
+-o '${bosh_deployment_dir}/aws/cli-iam-instance-profile.yml' \
+-o '${bosh_deployment_dir}/aws/iam-instance-profile.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/databases.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/default-iam-instance-profile.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/elb.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/s3-blobstore.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/s3-compiled-package-cache.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/security-groups.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/ssh.yml'"
 
-director_ops_file_options="-o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/bosh-password.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/cloud-provider.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/director-user.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/networks.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/ntp.yml") \
--o $(ls "${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/operations/registry.yml")"
+director_ops_file_options="-o '${manifest_dir}/Bosh-Director-Manifests/operations/bosh-password.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/cloud-provider.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/director-user.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/networks.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/ntp.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/registry.yml'"
 
 sh -c "'$BOSH_CLI' interpolate \
 	--var-errs \
