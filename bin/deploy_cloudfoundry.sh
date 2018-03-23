@@ -72,8 +72,6 @@ if [ -n "$BOSH_DIRECTOR_PRIVATE_IP" ]; then
 
 	grep -Eq "^director_az[1-9]_reserved_ip[0-9]+='$BOSH_DIRECTOR_PRIVATE_IP'$" "$NETWORK_CONFIG_FILE" || \
 		FATAL "Bosh Director/Director IP '$BOSH_DIRECTOR_PRIVATE_IP' does not exist as a reserved IP within '$NETWORK_CONFIG_FILE'"
-
-	eval "${ENV_PREFIX}bosh_director_private_ip"="$BOSH_DIRECTOR_PRIVATE_IP"
 fi
 
 
@@ -185,7 +183,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='az=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" aws_availability_zone1)' \
 	--var='default_key_name=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" bosh_ssh_key_name)' \
 	--var='iam_instance_profile=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" director_instance_profile)' \
-	--var='internal_ip=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" bosh_director_private_ip)' \
+	--var='internal_ip=${BOSH_DIRECTOR_PRIVATE_IP}' \
 	--var='subnet_id=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" director_az1_subnet)' \
 	--var='region=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" aws_region)' \
 	--vars-env='$ENV_PREFIX_NAME' \
