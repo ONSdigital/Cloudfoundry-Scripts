@@ -207,10 +207,10 @@ INFO "$CREATE_ACTION Bosh environment"
 "$BOSH_CLI" create-env --tty --state="$BOSH_DIRECTOR_STATE_FILE" "$BOSH_DIRECTOR_INTERPOLATED_MANIFEST"
 
 INFO "$STORE_ACTION Bosh Director certificate"
-"$BOSH_CLI" interpolate --no-color --var-errs --path='/metadata/director_ca' "$BOSH_DIRECTOR_INTERPOLATED_MANIFEST" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
+"$BOSH_CLI" interpolate --no-color --var-errs --path=/director_ssl/certificate "$BOSH_DIRECTOR_VARS_STORE" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
 
 INFO "$STORE_ACTION Bosh Director password"
-BOSH_CLIENT_SECRET="`"$BOSH_CLI" interpolate --no-color --var-errs --path='/metadata/director_secret' "$BOSH_DIRECTOR_INTERPOLATED_MANIFEST"`"
+BOSH_CLIENT_SECRET="$("$BOSH_CLI" interpolate --no-color --var-errs --path='/director_password' "$BOSH_DIRECTOR_VARS_STORE")"
 
 if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE_BOSH_CONFIG" = x'true' ] || ! grep -Eq "^BOSH_CLIENT_SECRET='$BOSH_CLIENT_SECRET'" "$BOSH_DIRECTOR_CONFIG"; then
 	INFO 'Generating Bosh configuration'
