@@ -175,6 +175,7 @@ director_aws_ops_file_options="-o '${bosh_deployment_dir}/aws/cpi.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/ssh.yml'"
 
 director_ops_file_options="-o '${manifest_dir}/Bosh-Director-Manifests/operations/bosh-password.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/certs.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/cloud-provider.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/director-user.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/networks.yml' \
