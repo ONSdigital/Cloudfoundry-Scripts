@@ -206,8 +206,8 @@ sh -c "'$BOSH_CLI' interpolate \
 INFO "$CREATE_ACTION Bosh environment"
 "$BOSH_CLI" create-env --tty --state="$BOSH_DIRECTOR_STATE_FILE" "$BOSH_DIRECTOR_INTERPOLATED_MANIFEST"
 
-INFO "$STORE_ACTION Bosh Director certificate"
-"$BOSH_CLI" interpolate --no-color --var-errs --path=/director_ssl/certificate "$BOSH_DIRECTOR_VARS_STORE" >"$DEPLOYMENT_DIR_RELATIVE/director.crt"
+INFO "$STORE_ACTION Bosh Director CA certificate"
+"$BOSH_CLI" interpolate --no-color --var-errs --path=/director_ssl/ca "$BOSH_DIRECTOR_VARS_STORE" >"$DEPLOYMENT_DIR_RELATIVE/director_ca.crt"
 
 INFO "$STORE_ACTION Bosh Director password"
 BOSH_CLIENT_SECRET="$("$BOSH_CLI" interpolate --no-color --var-errs --path='/director_password' "$BOSH_DIRECTOR_VARS_STORE")"
@@ -220,7 +220,7 @@ BOSH_ENVIRONMENT='$director_dns'
 BOSH_DEPLOYMENT='$DEPLOYMENT_NAME'
 BOSH_CLIENT_SECRET='$BOSH_CLIENT_SECRET'
 BOSH_CLIENT='director'
-BOSH_CA_CERT='$DEPLOYMENT_DIR_RELATIVE/director.crt'
+BOSH_CA_CERT='$DEPLOYMENT_DIR_RELATIVE/director_ca.crt'
 EOF
 fi
 
