@@ -198,8 +198,8 @@ sh -c "'$BOSH_CLI' interpolate \
 	--vars-file='$BOSH_DIRECTOR_RELEASES' \
 	--vars-file='$BOSH_DIRECTOR_INTERPOLATED_STATIC_IPS' \
 	--vars-store='$BOSH_DIRECTOR_VARS_STORE' \
-	$director_aws_ops_file_options \
 	$director_ops_file_options \
+	$director_aws_ops_file_options \
 	'$BOSH_DIRECTOR_MANIFEST_FILE'" >"$BOSH_DIRECTOR_INTERPOLATED_MANIFEST"
 
 INFO "$CREATE_ACTION Bosh environment"
