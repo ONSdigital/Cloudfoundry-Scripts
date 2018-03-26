@@ -161,6 +161,13 @@ INFO 'Interpolating Bosh Director manifest'
 findpath manifest_dir "${MANIFESTS_DIR_RELATIVE}"
 findpath bosh_deployment_dir "${BOSH_DEPLOYMENT_DIR}"
 
+director_ops_file_options="-o '${manifest_dir}/Bosh-Director-Manifests/operations/bosh-password.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/certs.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/cloud-provider.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/director-user.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/networks.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/ntp.yml'"
+
 # Re-add this ops file when ci server has iam instance profile
 # -o '${bosh_deployment_dir}/aws/cli-iam-instance-profile.yml' \
 
@@ -172,15 +179,8 @@ director_aws_ops_file_options="-o '${bosh_deployment_dir}/aws/cpi.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/s3-blobstore.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/s3-compiled-package-cache.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/security-groups.yml' \
--o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/ssh.yml'"
-
-director_ops_file_options="-o '${manifest_dir}/Bosh-Director-Manifests/operations/bosh-password.yml' \
--o '${manifest_dir}/Bosh-Director-Manifests/operations/certs.yml' \
--o '${manifest_dir}/Bosh-Director-Manifests/operations/cloud-provider.yml' \
--o '${manifest_dir}/Bosh-Director-Manifests/operations/director-user.yml' \
--o '${manifest_dir}/Bosh-Director-Manifests/operations/networks.yml' \
--o '${manifest_dir}/Bosh-Director-Manifests/operations/ntp.yml' \
--o '${manifest_dir}/Bosh-Director-Manifests/operations/registry.yml'"
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/ssh.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/registry.yml'"
 
 sh -c "'$BOSH_CLI' interpolate \
 	--var-errs \
