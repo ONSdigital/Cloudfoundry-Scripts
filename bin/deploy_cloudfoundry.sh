@@ -161,8 +161,10 @@ INFO 'Interpolating Bosh Director manifest'
 findpath manifest_dir "${MANIFESTS_DIR_RELATIVE}"
 findpath bosh_deployment_dir "${BOSH_DEPLOYMENT_DIR}"
 
+# Re-add this ops file when ci server has iam instance profile
+# -o '${bosh_deployment_dir}/aws/cli-iam-instance-profile.yml' \
+
 director_aws_ops_file_options="-o '${bosh_deployment_dir}/aws/cpi.yml' \
--o '${bosh_deployment_dir}/aws/cli-iam-instance-profile.yml' \
 -o '${bosh_deployment_dir}/aws/iam-instance-profile.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/databases.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/default-iam-instance-profile.yml' \
@@ -189,6 +191,8 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='subnet_id=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" director_az1_subnet)' \
 	--var='region=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" aws_region)' \
 	--var='director_name=cf-bosh-director' \
+	--var='access_key_id=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" bosh_aws_access_key_id)' \
+	--var='secret_access_key=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" bosh_aws_secret_access_key)' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_DIRECTOR_RELEASES' \
