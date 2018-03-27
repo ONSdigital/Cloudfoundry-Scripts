@@ -49,11 +49,13 @@ if [ -f "$BOSH_DIRECTOR_STATE_FILE" ]; then
 	fi
 fi
 
+findpath manifest_dir "${MANIFESTS_DIR_RELATIVE}"
+
 # Do we need to generate the network configuration?
 if [ ! -f "$NETWORK_CONFIG_FILE" -o x"$REGENERATE_NETWORKS_CONFIG" = x'true' ]; then
 	INFO 'Generating network configuration'
 	echo '# Cloudfoundry network configuration' >"$NETWORK_CONFIG_FILE"
-	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*)_cidr\)\).*/\1/gp' "$BOSH_CLOUD_CONFIG_FILE" "$BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE" "$BOSH_DIRECTOR_MANIFEST_FILE" | sort -u`; do
+	for i in `sed $SED_EXTENDED -ne 's/.*\(\(([^).]*)_cidr\)\).*/\1/gp' "$BOSH_CLOUD_CONFIG_FILE" "$BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE" "${manifest_dir}/Bosh-Director-Manifests/operations/networks.yml" | sort -u`; do
 		eval cidr="\$${ENV_PREFIX}${i}_cidr"
 		"$BASE_DIR/process_cidrs.sh" "$i" "$cidr"
 	done >>"$NETWORK_CONFIG_FILE"
@@ -158,7 +160,6 @@ INFO "$STORE_ACTION common passwords"
 
 INFO 'Interpolating Bosh Director manifest'
 
-findpath manifest_dir "${MANIFESTS_DIR_RELATIVE}"
 findpath bosh_deployment_dir "${BOSH_DEPLOYMENT_DIR}"
 
 director_ops_file_options="-o '${manifest_dir}/Bosh-Director-Manifests/operations/bosh-password.yml' \
