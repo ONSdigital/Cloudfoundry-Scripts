@@ -339,7 +339,7 @@ if [ x"$UPLOAD_STEMCELL" = x'true' -o x"$REUPLOAD_STEMCELL" = x'true' ]; then
 	if [ -z "$STEMCELL_URL" ]; then
 		WARN 'No STEMCELL_URL provided, finding stemcell details from Bosh Director deployment'
 
-		STEMCELL_URL="`"$BOSH_CLI" interpolate --no-color --path '/resource_pools/name=bosh_vm/stemcell/url' "$BOSH_DIRECTOR_INTERPOLATED_MANIFEST"`"
+		STEMCELL_URL="`"$BOSH_CLI" interpolate --no-color --path '/resource_pools/name=vms/stemcell/url' "$BOSH_DIRECTOR_INTERPOLATED_MANIFEST"`"
 
 		[ -z "$STEMCELL_URL" ] && FATAL "Unable to determine Stemcell URL from '$BOSH_DIRECTOR_INTERPOLATED_MANIFEST' path '/resource_pools/name=*/stemcell'"
 	fi
