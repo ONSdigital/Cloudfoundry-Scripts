@@ -118,6 +118,7 @@ BOSH_CLOUD_CONFIG_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Bosh
 BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Availability/Bosh-Availability-$availability.yml"
 
 if [ $CPI_TYPE == "AWS" ]; then
+	BOSH_CLOUD_CONFIG_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/iaas-support/aws/cloud-config.yml"
 	if [ "${availability}" = MultiAZ ]; then
 		availability_type=multi
 	else
