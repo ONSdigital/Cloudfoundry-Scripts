@@ -117,13 +117,18 @@ BOSH_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/bosh-depl
 BOSH_CLOUD_CONFIG_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Bosh-CloudConfig.yml"
 BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Availability/Bosh-Availability-$availability.yml"
 
+if [ $CPI_TYPE == "AWS" ]; then
+	BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/iaas-support/$(echo "${CPI_TYPE}" | awk '{print tolower($0)}')/availability/$(echo "${availability}" | awk '{print tolower($0)}')-az.yml"
+fi
+
 # Bosh CF Manifests
-BOSH_CF_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Bosh-Template.yml"
+BOSH_CF_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/cf-deployment/cf-deployment.yml"
 BOSH_CF_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Adjustments.yml"
 BOSH_CF_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Static-IPs/Bosh-Static-IPs-$availability.yml"
 BOSH_CF_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Common-Variables.yml"
 BOSH_CF_AVAILABILITY_VARIABLES="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Availability/Bosh-Availability-$availability.yml"
 BOSH_CF_INSTANCES_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Bosh-Instance-Types.yml"
+BOSH_CF_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-CF-Manifests/cf-deployment"
 
 #
 #

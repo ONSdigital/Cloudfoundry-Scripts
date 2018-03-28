@@ -260,82 +260,56 @@ INFO 'Generating Cloud Config Variables'
 INFO 'Setting Cloud Config'
 "$BOSH_CLI" update-cloud-config --tty --vars-env="$ENV_PREFIX_NAME" --vars-file="$BOSH_CF_INTERPOLATED_CLOUD_CONFIG_VARS" "$BOSH_CLOUD_CONFIG_FILE"
 
-# Set release versions
-for component_version in `sh -c "'$BOSH_CLI' interpolate \
-		--no-color \
-		--vars-env='$ENV_PREFIX_NAME' \
-		--vars-file='$BOSH_COMMON_VARIABLES' \
-		--vars-file='$BOSH_CF_INTERPOLATED_AVAILABILITY' \
-		--vars-file='$BOSH_CF_INTERPOLATED_STATIC_IPS' \
-		--vars-file='$BOSH_CF_INSTANCES_FILE' \
-		--vars-store='$BOSH_CF_VARIABLES_STORE' \
-		--ops-file='$BOSH_CF_VARIABLES_OPS_FILE' \
-		--ops-file='$BOSH_CF_CPI_SPECIFIC_OPS_FILE' \
-		$BOSH_CF_PUBLIC_OPS_FILE_OPTIONS \
-		$BOSH_CF_PRIVATE_OPS_FILE_OPTIONS \
-		'$BOSH_CF_MANIFEST_FILE'" --path /releases | awk '/^  version: \(\([a-z0-9_]+\)\)/{gsub("(\\\(|\\\))",""); print $NF}'`; do
+findpath bosh_cf_deployment_dir "${BOSH_CF_DEPLOYMENT_DIR}"
 
-	upper="`echo "$component_version" | tr '[[:lower:]]' '[[:upper:]]'`"
+cf_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/use-compiled-releases.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/app-domain.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/app-scale.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/cf-admin-user.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/custom-buildpacks.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/disable-tcp-router.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/password-policy.yml'"
 
-	# eg CF_RELEASE=277
-	eval upper_value="\$$upper"
+cf_aws_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/aws.yml' \
+-o '${bosh_cf_deployment_dir}/operations/use-s3-blobstore.yml' \
+-o '${bosh_cf_deployment_dir}/operations/use-external-dbs.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/databases.yml'"
 
-	# eg cf_release=277
-	eval lower_value="\$$component_version"
-
-	# Upper case values take priority as these are likely to be set by the person/thing running this script
-	if [ -n "$upper_value" ] && [ x"$upper_value" != x"$lower_value" ]; then
-		INFO "Using $upper_value for $component_version"
-		version="$upper_value"
-
-	elif [ -n "$lower_value" ] && [ -z "$UPGRADE_VERSIONS" -o x"$UPGRADE_VERSIONS" = x'false' ]; then
-		INFO "Using previous version of $lower_value for $component_version"
-		version="$lower_value"
-
+if [ $CPI_TYPE == "AWS" ]; then
+	avail=$(echo "${availability}" | awk '{print tolower($0)}')
+	if [ "${avail}" == single ]; then
+		availability_ops_file="-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/single-az.yml'"
 	else
-		INFO "Using latest for $component_version"
-		version='latest'
+		availability_ops_file=""
 	fi
+fi
 
-	# If v='' then it downloads the latest.  If "$ENV_PREFIX${component_version}_url_suffix"='' then we get a complaint from Bosh:
-	# Invalid type '<nil>' for value '<nil>' and variable 'cf_version_url_suffix'. Supported types for interpolation within a string are integers and strings.
-	# Exit code 1
-	# ?v= or ?version= can both be used
-	[ x"$version" = x'latest' ] && url_suffix='?v=' || url_suffix="?v=$version"
-
-	export "$ENV_PREFIX${component_version}_url_suffix"="$url_suffix"
-
-	# Set the version for consumption by Bosh
-	export "$ENV_PREFIX$component_version"="$version"
-done
-
-# We can't do this before we have the versions set
-# XXX
-# XXX Unfortunately, running 'interpolate' causes Bosh to upload releases and stemcells and then they get re-uploaded during 'deploy'
-# XXX
 INFO 'Interpolating Bosh CF manifest'
 sh -c "'$BOSH_CLI' interpolate \
 	--no-color \
 	--var-errs \
+	--var='system_domain=system.$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" domain_name)' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_CF_INTERPOLATED_AVAILABILITY' \
 	--vars-file='$BOSH_CF_INTERPOLATED_STATIC_IPS' \
 	--vars-file='$BOSH_CF_INSTANCES_FILE' \
 	--vars-store='$BOSH_CF_VARIABLES_STORE' \
-	$BOSH_CF_PUBLIC_OPS_FILE_OPTIONS \
-	$BOSH_CF_PRIVATE_OPS_FILE_OPTIONS \
-	--ops-file='$BOSH_CF_VARIABLES_OPS_FILE' \
-	--ops-file='$BOSH_CF_CPI_SPECIFIC_OPS_FILE' \
+	$cf_ops_file_options \
+	$cf_aws_ops_file_options \
+	$availability_ops_file \
 	'$BOSH_CF_MANIFEST_FILE'" >"$BOSH_CF_INTERPOLATED_MANIFEST"
 
 INFO 'Checking if we need to upload any stemcells'
-for _s in `"$BOSH_CLI" interpolate --no-color --var-errs --path /stemcells "$BOSH_CF_INTERPOLATED_MANIFEST" | awk '{if($1 == "os:") print $2}'`; do
-	"$BOSH_CLI" stemcells --no-color | awk -v stemcell="$_s" 'BEGIN{ rc=1 }{if($3 == stemcell) rc=0 }END{ exit rc }' || UPLOAD_STEMCELL='true'
-done
+stemcell_version=$("$BOSH_CLI" interpolate --no-color --var-errs --path /stemcells/alias=default/version "$BOSH_CF_INTERPOLATED_MANIFEST")
+"$BOSH_CLI" stemcells --no-color | awk -v stemcell="${stemcell_version}" 'BEGIN{ rc=1 }{if($3 == stemcell) rc=0 }END{ exit rc }' || UPLOAD_STEMCELL='true'
 
 # Unfortunately, there is no way currently (2017/10/19) for Bosh/Director to automatically upload a stemcell in the same way it does for releases
 if [ x"$UPLOAD_STEMCELL" = x'true' -o x"$REUPLOAD_STEMCELL" = x'true' ]; then
+	if [ "${CPI_TYPE}" = AWS ] && [ ! "${stemcell_version}" = "" ]; then
+		STEMCELL_URL="https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubunut-trusty-go_agent?v=${stemcell_version}"
+	fi
+
 	if [ -z "$STEMCELL_URL" ]; then
 		WARN 'No STEMCELL_URL provided, finding stemcell details from Bosh Director deployment'
 
@@ -361,7 +335,7 @@ if [ x"$UPLOAD_STEMCELL" = x'true' -o x"$REUPLOAD_STEMCELL" = x'true' ]; then
 
 fi
 
-if [ x"$UPLOAD_RELEASES" = x'true' ]; then
+if [ x"$UPLOAD_RELEASES" = x'true' ] && [ ! "${CPI_TYPE}" = AWS ]; then
 	for _r in `ls releases`; do
 		release_name="`echo $_r | sed $SED_EXTENDED -e 's/-release$//g'`"
 
@@ -402,8 +376,8 @@ if [ x"$RUN_DRY_RUN" = x'true' -o x"$DEBUG" = x'true' ]; then
 fi
 
 INFO 'Setting up CF admin credentials'
-SECRET="`"$BOSH_CLI" interpolate --no-color --path '/jobs/name=uaa/properties/uaa/cf_admin/client_secret' "$BOSH_CF_INTERPOLATED_MANIFEST"`"
-PASSWORD="`"$BOSH_CLI" interpolate --no-color --path '/properties/uaa/scim/users/name=cf_admin/password' "$BOSH_CF_INTERPOLATED_MANIFEST"`"
+SECRET="`"$BOSH_CLI" interpolate --no-color --path '/uaa_admin_client_secret' "$BOSH_CF_VARIABLES_STORE"`"
+PASSWORD="`"$BOSH_CLI" interpolate --no-color --path '/cf_admin_password' "$BOSH_CF_VARIABLES_STORE"`"
 
         cat >"$CF_CREDENTIALS" <<EOF
 # Cloudfoundry credentials
