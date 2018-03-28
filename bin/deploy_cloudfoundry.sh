@@ -275,9 +275,8 @@ cf_aws_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/aws.yml' \
 -o '${bosh_cf_deployment_dir}/operations/use-external-dbs.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/databases.yml'"
 
-if [ $CPI_TYPE == "AWS" ]; then
-	avail=$(echo "${availability}" | awk '{print tolower($0)}')
-	if [ "${avail}" == single ]; then
+if [ $CPI_TYPE = "AWS" ]; then
+	if [ "${availability_type}" = single ]; then
 		availability_ops_file="-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/single-az.yml'"
 	else
 		availability_ops_file=""
