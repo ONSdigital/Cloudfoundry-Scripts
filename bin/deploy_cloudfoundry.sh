@@ -292,7 +292,6 @@ sh -c "'$BOSH_CLI' interpolate \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_CF_INTERPOLATED_AVAILABILITY' \
 	--vars-file='$BOSH_CF_INTERPOLATED_STATIC_IPS' \
-	--vars-file='$BOSH_CF_INSTANCES_FILE' \
 	--vars-store='$BOSH_CF_VARIABLES_STORE' \
 	$cf_ops_file_options \
 	$cf_aws_ops_file_options \
