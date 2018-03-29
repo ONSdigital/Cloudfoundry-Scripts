@@ -343,7 +343,7 @@ stemcell_version=$("$BOSH_CLI" interpolate --no-color --var-errs --path /stemcel
 # Unfortunately, there is no way currently (2017/10/19) for Bosh/Director to automatically upload a stemcell in the same way it does for releases
 if [ x"$UPLOAD_STEMCELL" = x'true' -o x"$REUPLOAD_STEMCELL" = x'true' ]; then
 	if [ "${CPI_TYPE}" = AWS ] && [ ! "${stemcell_version}" = "" ]; then
-		STEMCELL_URL="https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubunut-trusty-go_agent?v=${stemcell_version}"
+		STEMCELL_URL="https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=${stemcell_version}"
 	fi
 
 	if [ -z "$STEMCELL_URL" ]; then
