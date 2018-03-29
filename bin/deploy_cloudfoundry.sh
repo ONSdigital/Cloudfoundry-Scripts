@@ -269,6 +269,7 @@ cf_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/use-compiled-relea
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/app-domain.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/app-scale.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/cf-admin-user.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/consul-locket.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/custom-buildpacks.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/disable-tcp-router.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/password-policy.yml'"
