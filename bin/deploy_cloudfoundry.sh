@@ -271,9 +271,10 @@ cf_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/use-compiled-relea
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/password-policy.yml'"
 
 cf_aws_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/aws.yml' \
--o '${bosh_cf_deployment_dir}/operations/use-s3-blobstore.yml' \
 -o '${bosh_cf_deployment_dir}/operations/use-external-dbs.yml' \
--o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/databases.yml'"
+-o '${bosh_cf_deployment_dir}/operations/use-s3-blobstore.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/databases.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/s3-blobstore-instance-profile.yml'"
 
 if [ $CPI_TYPE = "AWS" ]; then
 	if [ "${availability_type}" = single ]; then
@@ -283,11 +284,48 @@ if [ $CPI_TYPE = "AWS" ]; then
 	fi
 fi
 
+cf_db_dns=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" cf_db_dns)
+
 INFO 'Interpolating Bosh CF manifest'
 sh -c "'$BOSH_CLI' interpolate \
 	--no-color \
 	--var-errs \
 	--var='system_domain=system.$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" domain_name)' \
+	--var='app_package_directory_key=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" package_bucket)' \
+	--var='buildpack_directory_key=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" buildpack_bucket)' \
+	--var='droplet_directory_key=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" droplet_bucket)' \
+	--var='resource_directory_key=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" resource_bucket)' \
+	--var='postgresql_backup_vm_type=default' \
+	--var='external_bbs_database_address=${cf_db_dns}' \
+	--var='external_bbs_database_name=diego' \
+	--var='external_bbs_database_password=$(bosh int --path /diego_db_password "${BOSH_COMMON_VARIABLES}")' \
+	--var='external_bbs_database_username=diego' \
+	--var='external_database_port=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" cf_db_port)' \
+	--var='external_database_type=postgres' \
+	--var='external_locket_database_address=${cf_db_dns}' \
+	--var='external_locket_database_name=locket' \
+	--var='external_locket_database_password=$(bosh int --path /locket_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
+	--var='external_locket_database_username=locket' \
+	--var='external_policy_server_database_address=${cf_db_dns}' \
+	--var='external_policy_server_database_name=policy_server' \
+	--var='external_policy_server_database_password=$(bosh int --path /policy_server_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
+	--var='external_policy_server_database_username=policy_server' \
+	--var='external_routing_api_database_address=${cf_db_dns}' \
+	--var='external_routing_api_database_name=routing_api' \
+	--var='external_routing_api_database_password=$(bosh int --path /routing_api_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
+	--var='external_routing_api_database_username=routing_api' \
+	--var='external_silk_controller_database_address=${cf_db_dns}' \
+	--var='external_silk_controller_database_name=silk' \
+	--var='external_silk_controller_database_password=$(bosh int --path /silk_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
+	--var='external_silk_controller_database_username=silk' \
+	--var='external_uaa_database_address=${cf_db_dns}' \
+	--var='external_uaa_database_name=uaadb' \
+	--var='external_uaa_database_password=$(bosh int --path /uaa_db_password "${BOSH_COMMON_VARIABLES}")' \
+	--var='external_uaa_database_username=uaaadmin' \
+	--var='external_cc_database_name=ccdb' \
+	--var='external_cc_database_address=${cf_db_dns}' \
+	--var='external_cc_database_password=$(bosh int --path /cc_db_password "${BOSH_COMMON_VARIABLES}")' \
+	--var='external_cc_database_username=ccadmin' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
 	--vars-file='$BOSH_CF_INTERPOLATED_AVAILABILITY' \
