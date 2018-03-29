@@ -63,8 +63,6 @@ if [ ! -f "$NETWORK_CONFIG_FILE" -o x"$REGENERATE_NETWORKS_CONFIG" = x'true' ]; 
 	REGENERATE_NETWORKS_CONFIG=true
 fi
 
-INFO 'Setting Bosh deployment name'
-export ${ENV_PREFIX}bosh_deployment="$DEPLOYMENT_NAME"
 INFO 'Loading Bosh SSH config'
 export_file_vars "$BOSH_SSH_CONFIG" "$ENV_PREFIX"
 INFO 'Loading Bosh network configuration'
@@ -218,7 +216,6 @@ if [ -n "$BOSH_DIRECTOR_CONFIG" -a ! -f "$BOSH_DIRECTOR_CONFIG" -o x"$REGENERATE
 	cat <<EOF >"$BOSH_DIRECTOR_CONFIG"
 # Bosh deployment config
 BOSH_ENVIRONMENT='$director_dns'
-BOSH_DEPLOYMENT='cf'
 BOSH_CLIENT_SECRET='$BOSH_CLIENT_SECRET'
 BOSH_CLIENT='director'
 BOSH_CA_CERT='$DEPLOYMENT_DIR_RELATIVE/director_ca.crt'
@@ -424,7 +421,7 @@ EOF
 
 # ... finally we get around to running the Bosh/CF deployment
 INFO 'Deploying Bosh'
-"$BOSH_CLI" deploy --tty "$BOSH_CF_INTERPOLATED_MANIFEST"
+"$BOSH_CLI" deploy -d cf --tty "$BOSH_CF_INTERPOLATED_MANIFEST"
 
 # Do we need to run any errands (eg smoke tests, registrations)
 if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x'true' -a -n "$POST_DEPLOY_ERRANDS" ]; then
