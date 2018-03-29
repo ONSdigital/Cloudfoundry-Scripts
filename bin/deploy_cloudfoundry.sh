@@ -256,7 +256,7 @@ INFO 'Generating Cloud Config Variables'
 	--var="cf-router-lb-group=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" application_elb_target_group_tcp80)" \
 	--var="cf-router-tls-lb-group=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" application_elb_target_group_tcp443)" \
 	--var="cf-ssh-lb-elb=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" cf_ssh_elb)" \
-	--vars=env="$ENV_PREFIX_NAME" \
+	--vars-env="$ENV_PREFIX_NAME" \
 	"$BOSH_CLOUD_VARIABLES_AVAILABILITY_FILE" >"$BOSH_CF_INTERPOLATED_CLOUD_CONFIG_VARS"
 
 INFO 'Setting Cloud Config'
