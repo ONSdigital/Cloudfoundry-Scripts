@@ -298,33 +298,33 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='postgresql_backup_vm_type=default' \
 	--var='external_bbs_database_address=${cf_db_dns}' \
 	--var='external_bbs_database_name=diego' \
-	--var='external_bbs_database_password=$(bosh int --path /diego_db_password "${BOSH_COMMON_VARIABLES}")' \
+	--var='external_bbs_database_password=$($BOSH_CLI int --path /diego_db_password "${BOSH_COMMON_VARIABLES}")' \
 	--var='external_bbs_database_username=diego' \
 	--var='external_database_port=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" cf_db_port)' \
 	--var='external_database_type=postgres' \
 	--var='external_locket_database_address=${cf_db_dns}' \
 	--var='external_locket_database_name=locket' \
-	--var='external_locket_database_password=$(bosh int --path /locket_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
+	--var='external_locket_database_password=$($BOSH_CLI int --path /locket_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
 	--var='external_locket_database_username=locket' \
 	--var='external_policy_server_database_address=${cf_db_dns}' \
 	--var='external_policy_server_database_name=policy_server' \
-	--var='external_policy_server_database_password=$(bosh int --path /policy_server_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
+	--var='external_policy_server_database_password=$($BOSH_CLI int --path /policy_server_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
 	--var='external_policy_server_database_username=policy_server' \
 	--var='external_routing_api_database_address=${cf_db_dns}' \
 	--var='external_routing_api_database_name=routing_api' \
-	--var='external_routing_api_database_password=$(bosh int --path /routing_api_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
+	--var='external_routing_api_database_password=$($BOSH_CLI int --path /routing_api_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
 	--var='external_routing_api_database_username=routing_api' \
 	--var='external_silk_controller_database_address=${cf_db_dns}' \
 	--var='external_silk_controller_database_name=silk' \
-	--var='external_silk_controller_database_password=$(bosh int --path /silk_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
+	--var='external_silk_controller_database_password=$($BOSH_CLI int --path /silk_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
 	--var='external_silk_controller_database_username=silk' \
 	--var='external_uaa_database_address=${cf_db_dns}' \
 	--var='external_uaa_database_name=uaadb' \
-	--var='external_uaa_database_password=$(bosh int --path /uaa_db_password "${BOSH_COMMON_VARIABLES}")' \
+	--var='external_uaa_database_password=$($BOSH_CLI int --path /uaa_db_password "${BOSH_COMMON_VARIABLES}")' \
 	--var='external_uaa_database_username=uaaadmin' \
 	--var='external_cc_database_name=ccdb' \
 	--var='external_cc_database_address=${cf_db_dns}' \
-	--var='external_cc_database_password=$(bosh int --path /cc_db_password "${BOSH_COMMON_VARIABLES}")' \
+	--var='external_cc_database_password=$($BOSH_CLI int --path /cc_db_password "${BOSH_COMMON_VARIABLES}")' \
 	--var='external_cc_database_username=ccadmin' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-file='$BOSH_COMMON_VARIABLES' \
