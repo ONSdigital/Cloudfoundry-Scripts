@@ -261,6 +261,7 @@ INFO 'Setting Cloud Config'
 	--var="cf-router-lb-group=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" application_elb_target_group_tcp80)" \
 	--var="cf-router-tls-lb-group=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" application_elb_target_group_tcp443)" \
 	--var="cf-ssh-lb-elb=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" cf_ssh_elb)" \
+	--var="cc_instance_profile=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" cc_bucket_access_instance_profile)" \
 	--vars-file="$BOSH_CF_INTERPOLATED_CLOUD_CONFIG_VARS" "$BOSH_CLOUD_CONFIG_FILE"
 
 findpath bosh_cf_deployment_dir "${BOSH_CF_DEPLOYMENT_DIR}"
@@ -277,8 +278,10 @@ cf_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/use-compiled-relea
 cf_aws_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/aws.yml' \
 -o '${bosh_cf_deployment_dir}/operations/use-external-dbs.yml' \
 -o '${bosh_cf_deployment_dir}/operations/use-s3-blobstore.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/cc-instance-profile.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/databases.yml' \
--o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/s3-blobstore-instance-profile.yml'"
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/s3-blobstore-instance-profile.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/tags.yml'"
 
 if [ $CPI_TYPE = "AWS" ]; then
 	if [ "${availability_type}" = single ]; then
