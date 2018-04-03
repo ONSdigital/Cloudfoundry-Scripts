@@ -434,7 +434,7 @@ EOF
 INFO 'Deploying Bosh'
 "$BOSH_CLI" deploy -d cf --tty "$BOSH_CF_INTERPOLATED_MANIFEST"
 
-"$BOSH_CLI" deploy -d cf --tty run-errand smoke-tests
+"$BOSH_CLI" run-errand -d cf --tty smoke-tests
 
 # Only valid smoke test with cf-deployment is 'smoke-tests'
 # Do we need to run any errands (eg smoke tests, registrations)
