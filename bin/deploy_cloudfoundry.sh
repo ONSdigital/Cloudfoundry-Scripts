@@ -438,7 +438,7 @@ if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x'true' -a -n "$POST_DEPLOY_ERRANDS" ]; the
 	INFO 'Running post deployment smoke tests'
 	for _e in $POST_DEPLOY_ERRANDS; do
 		INFO "Running errand: $_e"
-		"$BOSH_CLI" run-errand --tty "$_e"
+		"$BOSH_CLI" run-errand -d cf --tty "$_e"
 	done
 elif [ x"$SKIP_POST_DEPLOY_ERRANDS" = x'true' ]; then
 	INFO 'Skipping run of post deploy errands'
