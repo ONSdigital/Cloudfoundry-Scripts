@@ -434,19 +434,22 @@ EOF
 INFO 'Deploying Bosh'
 "$BOSH_CLI" deploy -d cf --tty "$BOSH_CF_INTERPOLATED_MANIFEST"
 
-# Do we need to run any errands (eg smoke tests, registrations)
-if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x'true' -a -n "$POST_DEPLOY_ERRANDS" ]; then
-	INFO 'Running post deployment smoke tests'
-	for _e in $POST_DEPLOY_ERRANDS; do
-		INFO "Running errand: $_e"
-		"$BOSH_CLI" run-errand -d cf --tty "$_e"
-	done
-elif [ x"$SKIP_POST_DEPLOY_ERRANDS" = x'true' ]; then
-	INFO 'Skipping run of post deploy errands'
+"$BOSH_CLI" deploy -d cf --tty run-errand smoke-tests
 
-elif [ -z "$POST_DEPLOY_ERRANDS" ]; then
-	INFO 'No post deploy errands to run'
-fi
+# Only valid smoke test with cf-deployment is 'smoke-tests'
+# Do we need to run any errands (eg smoke tests, registrations)
+# if [ x"$SKIP_POST_DEPLOY_ERRANDS" != x'true' -a -n "$POST_DEPLOY_ERRANDS" ]; then
+# 	INFO 'Running post deployment smoke tests'
+# 	for _e in $POST_DEPLOY_ERRANDS; do
+# 		INFO "Running errand: $_e"
+# 		"$BOSH_CLI" run-errand -d cf --tty "$_e"
+# 	done
+# elif [ x"$SKIP_POST_DEPLOY_ERRANDS" = x'true' ]; then
+# 	INFO 'Skipping run of post deploy errands'
+
+# elif [ -z "$POST_DEPLOY_ERRANDS" ]; then
+# 	INFO 'No post deploy errands to run'
+# fi
 
 # Save stemcell and release versions
 for i in stemcell release; do
