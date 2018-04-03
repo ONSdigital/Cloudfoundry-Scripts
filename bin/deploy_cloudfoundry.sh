@@ -179,6 +179,7 @@ director_aws_ops_file_options="-o '${bosh_deployment_dir}/aws/cpi.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/s3-compiled-package-cache.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/security-groups.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/ssh.yml' \
+-o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/tags.yml' \
 -o '${manifest_dir}/Bosh-Director-Manifests/operations/aws/registry.yml'"
 
 sh -c "'$BOSH_CLI' interpolate \
