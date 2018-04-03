@@ -22,7 +22,7 @@ INFO 'Loading Bosh config'
 export_file_vars "$BOSH_DIRECTOR_CONFIG"
 
 INFO 'Deleting Bosh Deployment'
-"$BOSH_CLI" delete-deployment --force --tty
+"$BOSH_CLI" delete-deployment -d cf --force --tty
 
 INFO 'Deleting Bosh bootstrap environment'
 "$BOSH_CLI" delete-env --tty --state="$BOSH_DIRECTOR_STATE_FILE" "$BOSH_DIRECTOR_INTERPOLATED_MANIFEST" || FATAL 'Bosh environment deletion failed'
