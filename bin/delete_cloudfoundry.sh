@@ -21,8 +21,11 @@ BASE_DIR="`dirname \"$0\"`"
 INFO 'Loading Bosh config'
 export_file_vars "$BOSH_DIRECTOR_CONFIG"
 
-INFO 'Deleting Bosh Deployment'
+INFO 'Deleting CF Deployment'
 "$BOSH_CLI" delete-deployment -d cf --force --tty
+
+INFO 'Deleting Rabbitmq Deployment'
+"$BOSH_CLI" delete-deployment -d rabbitmq --force --tty
 
 INFO 'Deleting Bosh bootstrap environment'
 "$BOSH_CLI" delete-env --tty --state="$BOSH_DIRECTOR_STATE_FILE" "$BOSH_DIRECTOR_INTERPOLATED_MANIFEST" || FATAL 'Bosh environment deletion failed'

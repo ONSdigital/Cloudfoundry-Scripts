@@ -134,10 +134,14 @@ BOSH_CF_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Static-IPs/Bo
 BOSH_CF_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Common-Variables.yml"
 BOSH_CF_AVAILABILITY_VARIABLES="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Availability/Bosh-Availability-$availability.yml"
 BOSH_CF_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-CF-Manifests/cf-deployment"
-
-#
-#
 # BOSH_CF_VARIABLES_STORE -> relocated to common.sh for use by setup-cf_admin.sh
+
+# Bosh RabbitMQ Manifests
+
+BOSH_RMQ_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/bosh-rmq-broker/manifest.yml"
+BOSH_RMQ_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-CF-Manifests/bosh-rmq-broker"
+BOSH_RMQ_INTERPOLATED_MANIFEST="$DEPLOYMENT_DIR_RELATIVE/rmq-interpolated.yml"
+BOSH_RMQ_VARIABLES_STORE="$DEPLOYMENT_DIR_RELATIVE/rmq-var-store.yml"
 
 
 for _f in BOSH_COMMON_VARIABLES_MANIFEST \

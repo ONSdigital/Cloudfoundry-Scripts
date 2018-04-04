@@ -290,8 +290,6 @@ cf_aws_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/use-external-d
 if [ $CPI_TYPE = "AWS" ]; then
 	if [ "${availability_type}" = single ]; then
 		availability_ops_file="-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/single-az.yml'"
-	else
-		availability_ops_file=""
 	fi
 fi
 
@@ -434,11 +432,13 @@ CF_ADMIN_PASSWORD='$PASSWORD'
 CF_ADMIN_CLIENT_SECRET='$SECRET'
 EOF
 
-# ... finally we get around to running the Bosh/CF deployment
-INFO 'Deploying Bosh'
+# ... finally we get around to running the CF deployment
+INFO 'Deploying CF'
 "$BOSH_CLI" deploy -d cf --tty "$BOSH_CF_INTERPOLATED_MANIFEST"
 
-"$BOSH_CLI" run-errand -d cf --tty smoke-tests
+if [ "$SKIP_POST_DEPLOY_ERRANDS" != 'true' ]; then
+	"$BOSH_CLI" run-errand -d cf --tty smoke-tests
+fi
 
 # Only valid smoke test with cf-deployment is 'smoke-tests'
 # Do we need to run any errands (eg smoke tests, registrations)
@@ -454,6 +454,32 @@ INFO 'Deploying Bosh'
 # elif [ -z "$POST_DEPLOY_ERRANDS" ]; then
 # 	INFO 'No post deploy errands to run'
 # fi
+
+if [ $CPI_TYPE = "AWS" ]; then
+	if [ "${availability_type}" = single ]; then
+		rmq_availability_ops_file="-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/single-az.yml'"
+	fi
+fi
+
+INFO 'Interpolating Bosh RabbitMQ manifest'
+sh -c "'$BOSH_CLI' interpolate \
+	--no-color \
+	--var-errs \
+	--var-file='loggregator_ca=<(bosh int --path /loggregator_ca/certificate ${BOSH_CF_VARIABLES_STORE})' \
+	--var-file='loggregator_cert=(bosh int --path /loggregator_tls_metron/certificate ${BOSH_CF_VARIABLES_STORE})' \
+	--var-file='loggregator_key=(bosh int --path /loggregator_tls_metron/private_key ${BOSH_CF_VARIABLES_STORE})' \
+	--vars-env='$ENV_PREFIX_NAME' \
+	--vars-store='$BOSH_RMQ_VARIABLES_STORE' \
+	$rmq_availability_ops_file \
+	'$BOSH_RMQ_MANIFEST_FILE'" >"$BOSH_RMQ_INTERPOLATED_MANIFEST"
+
+INFO 'Deploying RabbitMQ'
+"$BOSH_CLI" deploy -d rabbitmq --tty "$BOSH_RMQ_INTERPOLATED_MANIFEST"
+
+if [ "$SKIP_POST_DEPLOY_ERRANDS" != 'true' ]; then
+	"$BOSH_CLI" run-errand -d rabbitmq --tty registrar
+	"$BOSH_CLI" run-errand -d rabbitmq --tty smoke-tests
+fi
 
 # Save stemcell and release versions
 for i in stemcell release; do
