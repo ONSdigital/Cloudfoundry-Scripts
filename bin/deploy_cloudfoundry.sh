@@ -283,6 +283,7 @@ cf_aws_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/use-external-d
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/cc-instance-profile.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/databases.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/lb-security-groups.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/running-security-groups.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/s3-blobstore-instance-profile.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/tags.yml'"
 
