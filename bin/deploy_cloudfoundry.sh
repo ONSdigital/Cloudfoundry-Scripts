@@ -382,7 +382,8 @@ if [ x"$UPLOAD_STEMCELL" = x'true' -o x"$REUPLOAD_STEMCELL" = x'true' ]; then
 
 fi
 
-if [ x"$UPLOAD_RELEASES" = x'true' ] && [ ! "${CPI_TYPE}" = AWS ]; then
+# Upload any releases from the releases directory. e.g postgresql-databases-release
+if [ x"$UPLOAD_RELEASES" = x'true' ]; then
 	for _r in `ls releases`; do
 		release_name="`echo $_r | sed $SED_EXTENDED -e 's/-release$//g'`"
 
