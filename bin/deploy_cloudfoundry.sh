@@ -278,8 +278,7 @@ cf_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/use-compiled-relea
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/disable-tcp-router.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/password-policy.yml'"
 
-cf_aws_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/aws.yml' \
--o '${bosh_cf_deployment_dir}/operations/use-external-dbs.yml' \
+cf_aws_ops_file_options="-o '${bosh_cf_deployment_dir}/operations/use-external-dbs.yml' \
 -o '${bosh_cf_deployment_dir}/operations/use-s3-blobstore.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/cc-instance-profile.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/databases.yml' \
