@@ -458,27 +458,53 @@ fi
 if [ $CPI_TYPE = "AWS" ]; then
 	if [ "${availability_type}" = single ]; then
 		rmq_availability_ops_file="-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/aws/single-az.yml'"
+	else
+		rmq_availability_ops_file="-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/aws/multi-az.yml'"
 	fi
 fi
 
 INFO 'Interpolating Bosh RabbitMQ manifest'
 
-trap 'rm loggregator_ca.pem loggregator_cert.pem loggregator_key.pem' EXIT
+findpath bosh_rmq_deployment_dir "${BOSH_RMQ_DEPLOYMENT_DIR}"
 
-"$BOSH_CLI" int --path /loggregator_ca/certificate "${BOSH_CF_VARIABLES_STORE}" > loggregator_ca.pem
-"$BOSH_CLI" int --path /loggregator_tls_metron/certificate "${BOSH_CF_VARIABLES_STORE}" > loggregator_cert.pem
-"$BOSH_CLI" int --path /loggregator_tls_metron/private_key "${BOSH_CF_VARIABLES_STORE}" > loggregator_key.pem
+rmq_ops_file_options="-o '${bosh_rmq_deployment_dir}/manifests/add-cf-rabbitmq.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/broker-password.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/log-level.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/use-ha-proxy-hosts.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/remove-director-uuid.yml'"
+
+rmq_aws_ops_file_options="-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/aws/vm-type.yml'"
 
 sh -c "'$BOSH_CLI' interpolate \
 	--no-color \
 	--var-errs \
-	--var-file='loggregator_ca=loggregator_ca.pem' \
-	--var-file='loggregator_cert=loggregator_cert.pem' \
-	--var-file='loggregator_key=loggregator_key.pem' \
+	--var='stemcell-version=$($BOSH_CLI int --path /stemcells/alias=default/version "$BOSH_CF_INTERPOLATED_MANIFEST")' \
+	--var='deployment-name=rabbitmq-broker' \
+	--var='bosh-domain=system.$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" domain_name)' \
+	--var='rabbitmq-broker-hostname=rmq-broker' \
+	--var='multitenant-rabbitmq-broker-username=rmq-broker-user' \
+	--var='product-name=rabbitmq' \
+	--var='rabbitmq-broker-uuid=29727856-3a37-4c62-8adf-14b75bf599dc' \
+	--var='rabbitmq-broker-plan-uuid=b44c9b16-fba0-4af2-8bdb-51b6902e1661' \
+	--var='rabbitmq-management-hostname=rmq-mgmt' \
+	--var='rabbitmq-broker-username=rmq-broker-admin' \
+	--var='rabbitmq-management-username=rmq-mgmt-user' \
+	--var='cf-admin-username=cf_admin' \
+	--var='cf-admin-password=$($BOSH_CLI int --path /cf_admin_password "$BOSH_CF_VARIABLES_STORE")' \
+	--var='rabbitmq-broker-protocol=https' \
+	--var='cluster-partition-handling-strategy=pause_minority' \
+	--var='disk_alarm_threshold={mem_relative,0.4}' \
+	--var='haproxy-stats-username=haproxy-stats-user' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-store='$BOSH_RMQ_VARIABLES_STORE' \
+	$rmq_ops_file_options \
+	$rmq_aws_ops_file_options \
 	$rmq_availability_ops_file \
 	'$BOSH_RMQ_MANIFEST_FILE'" >"$BOSH_RMQ_INTERPOLATED_MANIFEST"
+
+INFO 'Uploading rabbitmq releases'
+"$BOSH_CLI" upload-release https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-release?v=241.0.0 --sha1 5ef82d43d29e3d3e65e4939707988b2b81f8aa1b
+"$BOSH_CLI" upload-release https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-multitenant-broker-release?v=14.0.0 --sha1 34ac077456ffc607f64c9a4a783db5c208772dd2
 
 INFO 'Deploying RabbitMQ'
 "$BOSH_CLI" deploy -d rabbitmq --tty "$BOSH_RMQ_INTERPOLATED_MANIFEST"

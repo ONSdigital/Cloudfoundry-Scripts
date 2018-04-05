@@ -138,8 +138,8 @@ BOSH_CF_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-CF-Manifests/cf-deploymen
 
 # Bosh RabbitMQ Manifests
 
-BOSH_RMQ_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/bosh-rmq-broker/manifest.yml"
-BOSH_RMQ_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-CF-Manifests/bosh-rmq-broker"
+BOSH_RMQ_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/cf-rabbitmq-multitenant-broker-release/manifests/cf-rabbitmq-broker-template.yml"
+BOSH_RMQ_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-CF-Manifests/cf-rabbitmq-multitenant-broker-release"
 BOSH_RMQ_INTERPOLATED_MANIFEST="$DEPLOYMENT_DIR_RELATIVE/rmq-interpolated.yml"
 BOSH_RMQ_VARIABLES_STORE="$DEPLOYMENT_DIR_RELATIVE/rmq-var-store.yml"
 
