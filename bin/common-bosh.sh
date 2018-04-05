@@ -45,7 +45,7 @@ eval availability="\$${ENV_PREFIX}availability"
 [ -z "$availability" ] && FATAL 'Availability type has not been set'
 [ x"$deployment_name" = x"$DEPLOYMENT_NAME" ] || FATAL "Deployment names do not match: $deployment_name != $DEPLOYMENT_NAME"
 
-MANIFESTS_DIR_RELATIVE="Bosh-Manifests"
+MANIFESTS_DIR_RELATIVE="Bosh-Deployment-Manifests"
 # Expand manifests dir to full path
 findpath MANIFESTS_DIR "$MANIFESTS_DIR_RELATIVE"
 
