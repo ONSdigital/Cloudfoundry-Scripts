@@ -462,12 +462,19 @@ if [ $CPI_TYPE = "AWS" ]; then
 fi
 
 INFO 'Interpolating Bosh RabbitMQ manifest'
+
+trap 'rm loggregator_ca.pem loggregator_cert.pem loggregator_key.pem' EXIT
+
+bosh int --path /loggregator_ca/certificate "${BOSH_CF_VARIABLES_STORE}" > loggregator_ca.pem
+bosh int --path /loggregator_tls_metron/certificate "${BOSH_CF_VARIABLES_STORE}" > loggregator_cert.pem
+bosh int --path /loggregator_tls_metron/private_key "${BOSH_CF_VARIABLES_STORE}" > loggregator_key.pem
+
 sh -c "'$BOSH_CLI' interpolate \
 	--no-color \
 	--var-errs \
-	--var-file='loggregator_ca=<(bosh int --path /loggregator_ca/certificate ${BOSH_CF_VARIABLES_STORE})' \
-	--var-file='loggregator_cert=(bosh int --path /loggregator_tls_metron/certificate ${BOSH_CF_VARIABLES_STORE})' \
-	--var-file='loggregator_key=(bosh int --path /loggregator_tls_metron/private_key ${BOSH_CF_VARIABLES_STORE})' \
+	--var-file='loggregator_ca=loggregator_ca.pem' \
+	--var-file='loggregator_cert=loggregator_cert.pem' \
+	--var-file='loggregator_key=loggregator_key.pem' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-store='$BOSH_RMQ_VARIABLES_STORE' \
 	$rmq_availability_ops_file \
