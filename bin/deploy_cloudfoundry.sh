@@ -465,9 +465,9 @@ INFO 'Interpolating Bosh RabbitMQ manifest'
 
 trap 'rm loggregator_ca.pem loggregator_cert.pem loggregator_key.pem' EXIT
 
-bosh int --path /loggregator_ca/certificate "${BOSH_CF_VARIABLES_STORE}" > loggregator_ca.pem
-bosh int --path /loggregator_tls_metron/certificate "${BOSH_CF_VARIABLES_STORE}" > loggregator_cert.pem
-bosh int --path /loggregator_tls_metron/private_key "${BOSH_CF_VARIABLES_STORE}" > loggregator_key.pem
+"$BOSH_CLI" int --path /loggregator_ca/certificate "${BOSH_CF_VARIABLES_STORE}" > loggregator_ca.pem
+"$BOSH_CLI" int --path /loggregator_tls_metron/certificate "${BOSH_CF_VARIABLES_STORE}" > loggregator_cert.pem
+"$BOSH_CLI" int --path /loggregator_tls_metron/private_key "${BOSH_CF_VARIABLES_STORE}" > loggregator_key.pem
 
 sh -c "'$BOSH_CLI' interpolate \
 	--no-color \
