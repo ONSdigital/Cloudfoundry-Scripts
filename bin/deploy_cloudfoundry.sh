@@ -478,7 +478,7 @@ rmq_aws_ops_file_options="-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/
 sh -c "'$BOSH_CLI' interpolate \
 	--no-color \
 	--var-errs \
-	--var='stemcell-version=$($BOSH_CLI int --path /stemcells/alias=default/version "$BOSH_CF_INTERPOLATED_MANIFEST")' \
+	--var='stemcell-version=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /stemcells/alias=default/version "$BOSH_CF_INTERPOLATED_MANIFEST")' \
 	--var='deployment-name=rabbitmq-broker' \
 	--var='bosh-domain=system.$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" domain_name)' \
 	--var='rabbitmq-broker-hostname=rmq-broker' \
@@ -490,7 +490,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='rabbitmq-broker-username=rmq-broker-admin' \
 	--var='rabbitmq-management-username=rmq-mgmt-user' \
 	--var='cf-admin-username=cf_admin' \
-	--var='cf-admin-password=$($BOSH_CLI int --path /cf_admin_password "$BOSH_CF_VARIABLES_STORE")' \
+	--var='cf-admin-password=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /cf_admin_password "$BOSH_CF_VARIABLES_STORE")' \
 	--var='rabbitmq-broker-protocol=https' \
 	--var='cluster-partition-handling-strategy=pause_minority' \
 	--var='disk_alarm_threshold={mem_relative,0.4}' \
