@@ -457,7 +457,7 @@ fi
 
 if [ $CPI_TYPE = "AWS" ]; then
 	if [ "${availability_type}" = single ]; then
-		rmq_availability_ops_file="-o '${manifest_dir}/Bosh-CF-Manifests/operations/aws/single-az.yml'"
+		rmq_availability_ops_file="-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/aws/single-az.yml'"
 	fi
 fi
 
