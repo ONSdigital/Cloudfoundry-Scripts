@@ -478,7 +478,7 @@ rmq_aws_ops_file_options="-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/
 sh -c "'$BOSH_CLI' interpolate \
 	--no-color \
 	--var-errs \
-	--var='stemcell-version=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /stemcells/alias=default/version "$BOSH_CF_INTERPOLATED_MANIFEST")' \
+	--var='stemcell-version=\"$("${BOSH_CLI}" interpolate --no-color --var-errs --path /stemcells/alias=default/version "$BOSH_CF_INTERPOLATED_MANIFEST")\"' \
 	--var='deployment-name=rabbitmq-broker' \
 	--var='bosh-domain=system.$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" domain_name)' \
 	--var='rabbitmq-broker-hostname=rmq-broker' \
