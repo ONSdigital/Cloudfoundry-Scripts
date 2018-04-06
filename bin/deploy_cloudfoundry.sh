@@ -507,11 +507,11 @@ INFO 'Uploading rabbitmq releases'
 "$BOSH_CLI" upload-release https://bosh.io/d/github.com/pivotal-cf/cf-rabbitmq-multitenant-broker-release?v=14.0.0 --sha1 34ac077456ffc607f64c9a4a783db5c208772dd2
 
 INFO 'Deploying RabbitMQ'
-"$BOSH_CLI" deploy -d rabbitmq --tty "$BOSH_RMQ_INTERPOLATED_MANIFEST"
+"$BOSH_CLI" deploy -d rabbitmq-broker --tty "$BOSH_RMQ_INTERPOLATED_MANIFEST"
 
 if [ "$SKIP_POST_DEPLOY_ERRANDS" != 'true' ]; then
-	"$BOSH_CLI" run-errand -d rabbitmq --tty registrar
-	"$BOSH_CLI" run-errand -d rabbitmq --tty smoke-tests
+	"$BOSH_CLI" run-errand -d rabbitmq-broker --tty registrar
+	"$BOSH_CLI" run-errand -d rabbitmq-broker --tty smoke-tests
 fi
 
 # Save stemcell and release versions
