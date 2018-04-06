@@ -510,7 +510,7 @@ INFO 'Deploying RabbitMQ'
 "$BOSH_CLI" deploy -d rabbitmq-broker --tty "$BOSH_RMQ_INTERPOLATED_MANIFEST"
 
 if [ "$SKIP_POST_DEPLOY_ERRANDS" != 'true' ]; then
-	"$BOSH_CLI" run-errand -d rabbitmq-broker --tty registrar
+	"$BOSH_CLI" run-errand -d rabbitmq-broker --tty broker-registrar
 	"$BOSH_CLI" run-errand -d rabbitmq-broker --tty smoke-tests
 fi
 
