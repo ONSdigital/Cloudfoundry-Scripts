@@ -493,7 +493,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='cf-admin-password=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /cf_admin_password "$BOSH_CF_VARIABLES_STORE")' \
 	--var='rabbitmq-broker-protocol=https' \
 	--var='cluster-partition-handling-strategy=pause_minority' \
-	--var='disk_alarm_threshold={mem_relative,0.4}' \
+	--var='disk_alarm_threshold=\"{mem_relative,0.4}\"' \
 	--var='haproxy-stats-username=haproxy-stats-user' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-store='$BOSH_RMQ_VARIABLES_STORE' \
