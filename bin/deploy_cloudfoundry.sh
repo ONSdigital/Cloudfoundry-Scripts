@@ -476,7 +476,7 @@ rmq_ops_file_options="-o '${bosh_rmq_deployment_dir}/manifests/add-cf-rabbitmq.y
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/remove-director-uuid.yml'"
 
 rmq_aws_ops_file_options="-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/aws/vm-type.yml' \
--o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/aws/broker-sec-groupss.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/aws/broker-sec-group.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/aws/tags.yml'"
 
 sh -c "'$BOSH_CLI' interpolate \
