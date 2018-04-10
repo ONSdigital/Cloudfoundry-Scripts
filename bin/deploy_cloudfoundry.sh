@@ -469,6 +469,7 @@ findpath bosh_rmq_deployment_dir "${BOSH_RMQ_DEPLOYMENT_DIR}"
 
 rmq_ops_file_options="-o '${bosh_rmq_deployment_dir}/manifests/add-cf-rabbitmq.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/broker-password.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/consul.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/log-level.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/use-ha-proxy-hosts.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/rmq-network.yml' \
@@ -501,6 +502,9 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='cluster-partition-handling-strategy=pause_minority' \
 	--var='disk_alarm_threshold=\"{mem_relative,0.4}\"' \
 	--var='haproxy-stats-username=haproxy-stats-user' \
+	--var='consul_release_url=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /releases/name=consul/url "$BOSH_CF_INTERPOLATED_MANIFEST")' \
+	--var='consul_release_version=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /releases/name=consul/version "$BOSH_CF_INTERPOLATED_MANIFEST")' \
+	--var='consul_release_sha1=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /releases/name=consul/sha1 "$BOSH_CF_INTERPOLATED_MANIFEST")' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-store='$BOSH_RMQ_VARIABLES_STORE' \
 	$rmq_ops_file_options \
