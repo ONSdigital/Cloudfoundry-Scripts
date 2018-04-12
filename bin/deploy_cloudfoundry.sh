@@ -107,6 +107,29 @@ if [ x"$DELETE_BOSH_ENV" = x'true' ]; then
 	rm -f "$BOSH_DIRECTOR_STATE_FILE"
 fi
 
+if [ x"$NO_CREATE_RELEASES" != x'true' -o ! -f "$BOSH_DIRECTOR_RELEASES" ]; then
+	INFO 'Creating releases'
+
+	for _r in `ls releases`; do
+		release_name="`echo $_r | sed $SED_EXTENDED -e 's/-release$//g'`"
+		release_varname="`echo $release_name | sed $SED_EXTENDED -e 's/-/_/g'`"
+		release_filename="$TOP_LEVEL_DIR/releases/$_r/$_r.tgz"
+		release_url_value="file://$release_filename"
+		release_url_varname="${release_varname}_url"
+		release_version_varname="${release_varname}_version"
+
+		if [ ! -f "$release_filename" -o x"$RECREATE_RELEASES" = x'true' ]; then
+			INFO ". creating release $_r"
+			"$BASE_DIR/bosh-create_release.sh" "$_r" "releases/$_r"
+
+			# We only use the file:// URL for the create-env Bosh. Once that is up, we upload the release
+			update_yml_var "$BOSH_DIRECTOR_RELEASES" "$release_url_varname" "$release_url_value"
+
+			UPLOAD_RELEASES='true'
+		fi
+	done
+fi
+
 if [ ! -f "$BOSH_DIRECTOR_STATE_FILE" ]; then
 	CREATE_ACTION='Creating'
 	STORE_ACTION='Storing'
@@ -154,6 +177,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='access_key_id=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" bosh_aws_access_key_id)' \
 	--var='secret_access_key=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" bosh_aws_secret_access_key)' \
 	--vars-env='$ENV_PREFIX_NAME' \
+	--vars-file='$BOSH_DIRECTOR_RELEASES' \
 	--vars-store='$BOSH_DIRECTOR_VARS_STORE' \
 	$director_ops_file_options \
 	$director_aws_ops_file_options \
