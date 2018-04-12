@@ -470,10 +470,10 @@ findpath bosh_rmq_deployment_dir "${BOSH_RMQ_DEPLOYMENT_DIR}"
 rmq_ops_file_options="-o '${bosh_rmq_deployment_dir}/manifests/add-cf-rabbitmq.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/broker-password.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/consul.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/disable-ha-proxy.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/log-level.yml' \
--o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/use-ha-proxy-hosts.yml' \
+-o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/use-dns-host.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/rmq-network.yml' \
--o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/ssl.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/plugins.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/ports.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/remove-director-uuid.yml'"
@@ -501,7 +501,6 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='rabbitmq-broker-protocol=https' \
 	--var='cluster-partition-handling-strategy=pause_minority' \
 	--var='disk_alarm_threshold=\"{mem_relative,0.4}\"' \
-	--var='haproxy-stats-username=haproxy-stats-user' \
 	--var='consul_release_url=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /releases/name=consul/url "$BOSH_CF_INTERPOLATED_MANIFEST")' \
 	--var='consul_release_version=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /releases/name=consul/version "$BOSH_CF_INTERPOLATED_MANIFEST")' \
 	--var='consul_release_sha1=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /releases/name=consul/sha1 "$BOSH_CF_INTERPOLATED_MANIFEST")' \
