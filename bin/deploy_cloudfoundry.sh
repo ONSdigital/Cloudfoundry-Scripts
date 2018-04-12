@@ -95,16 +95,6 @@ fi
 # We don't want the interpolated Bosh Director manifest to contain a full path to the SSH file
 #findpath "${ENV_PREFIX}bosh_ssh_key_file" "$bosh_ssh_key_file"
 
-# Bosh doesn't seem to be able to handle templating (eg ((variable))) and variables files at the same time, so we need to expand the variables and then use
-# the output when we do a bosh create-env/deploy
-if [ ! -f "$BOSH_DIRECTOR_INTERPOLATED_STATIC_IPS" -o x"$REINTERPOLATE_DIRECTOR_STATIC_IPS" = x'true' -o x"$REGENERATE_NETWORKS_CONFIG" = x"true" ]; then
-	INFO 'Generating Bosh Director static IPs'
-	"$BOSH_CLI" interpolate \
-		--var-errs \
-		--vars-env="$ENV_PREFIX_NAME" \
-		"$BOSH_DIRECTOR_STATIC_IPS_FILE" >"$BOSH_DIRECTOR_INTERPOLATED_STATIC_IPS"
-fi
-
 # Remove Bosh?
 if [ x"$DELETE_BOSH_ENV" = x'true' ]; then
 	INFO 'Removing existing Bosh bootstrap environment'
@@ -239,18 +229,6 @@ INFO 'Pointing Bosh client at newly deployed Bosh Director'
 INFO 'Attempting to login'
 "$BOSH_CLI" log-in --tty >&2
 
-if [ ! -f "$BOSH_CF_INTERPOLATED_STATIC_IPS" -o x"$REGENERATE_NETWORKS_CONFIG" = x'true' ]; then
-	INFO 'Generating Bosh static IPs'
-	"$BOSH_CLI" interpolate \
-		--no-color \
-		--var-errs \
-		--vars-env="$ENV_PREFIX_NAME" \
-		"$BOSH_CF_STATIC_IPS_FILE" >"$BOSH_CF_INTERPOLATED_STATIC_IPS"
-fi
-
-INFO 'Generating Availability Variables'
-"$BOSH_CLI" interpolate --var-errs --vars-env="$ENV_PREFIX_NAME" --vars-file="$BOSH_CF_INTERPOLATED_STATIC_IPS" "$BOSH_CF_AVAILABILITY_VARIABLES" >"$BOSH_CF_INTERPOLATED_AVAILABILITY"
-
 # Bosh doesn't expand variables from within variables files
 INFO 'Generating Cloud Config Variables'
 "$BOSH_CLI" interpolate --var-errs \
@@ -336,9 +314,6 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='external_cc_database_password=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /cc_db_password "${BOSH_COMMON_VARIABLES}")' \
 	--var='external_cc_database_username=ccadmin' \
 	--vars-env='$ENV_PREFIX_NAME' \
-	--vars-file='$BOSH_COMMON_VARIABLES' \
-	--vars-file='$BOSH_CF_INTERPOLATED_AVAILABILITY' \
-	--vars-file='$BOSH_CF_INTERPOLATED_STATIC_IPS' \
 	--vars-store='$BOSH_CF_VARIABLES_STORE' \
 	$cf_ops_file_options \
 	$cf_aws_ops_file_options \

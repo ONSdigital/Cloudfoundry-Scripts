@@ -104,13 +104,8 @@ BOSH_CF_INTERPOLATED_MANIFEST="$DEPLOYMENT_DIR_RELATIVE/cf-interpolated.yml"
 BOSH_CF_INTERPOLATED_STATIC_IPS="$DEPLOYMENT_DIR_RELATIVE/cf-static-ips.yml"
 BOSH_CF_INTERPOLATED_AVAILABILITY="$DEPLOYMENT_DIR_RELATIVE/cf-variables-interpolated.yml"
 
-# Common Manifests
-BOSH_COMMON_VARIABLES_MANIFEST="$MANIFESTS_DIR_RELATIVE/Bosh-Common-Manifests/Common-Variables.yml"
-
 # Bosh Director Manifests
 BOSH_DIRECTOR_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/bosh-deployment/bosh.yml"
-BOSH_DIRECTOR_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/$CPI_TYPE/Adjustments.yml"
-BOSH_DIRECTOR_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-Director-Manifests/Static-IPs/Bosh-Static-IPs.yml"
 BOSH_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-Director-Manifests/bosh-deployment"
 
 # Bosh Cloud Config Manifests
@@ -129,15 +124,10 @@ fi
 
 # Bosh CF Manifests
 BOSH_CF_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/cf-deployment/cf-deployment.yml"
-BOSH_CF_CPI_SPECIFIC_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/$CPI_TYPE/Adjustments.yml"
-BOSH_CF_STATIC_IPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Static-IPs/Bosh-Static-IPs-$availability.yml"
-BOSH_CF_VARIABLES_OPS_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Common-Variables.yml"
-BOSH_CF_AVAILABILITY_VARIABLES="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/Availability/Bosh-Availability-$availability.yml"
 BOSH_CF_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-CF-Manifests/cf-deployment"
 # BOSH_CF_VARIABLES_STORE -> relocated to common.sh for use by setup-cf_admin.sh
 
 # Bosh RabbitMQ Manifests
-
 BOSH_RMQ_MANIFEST_FILE="$MANIFESTS_DIR_RELATIVE/Bosh-CF-Manifests/cf-rabbitmq-multitenant-broker-release/manifests/cf-rabbitmq-broker-template.yml"
 BOSH_RMQ_DEPLOYMENT_DIR="${MANIFESTS_DIR_RELATIVE}/Bosh-CF-Manifests/cf-rabbitmq-multitenant-broker-release"
 BOSH_RMQ_INTERPOLATED_MANIFEST="$DEPLOYMENT_DIR_RELATIVE/rmq-interpolated.yml"
