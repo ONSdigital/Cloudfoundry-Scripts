@@ -107,30 +107,6 @@ if [ x"$DELETE_BOSH_ENV" = x'true' ]; then
 	rm -f "$BOSH_DIRECTOR_STATE_FILE"
 fi
 
-if [ x"$NO_CREATE_RELEASES" != x'true' -o ! -f "$BOSH_DIRECTOR_RELEASES" ]; then
-	INFO 'Creating releases'
-
-	for _r in `ls releases`; do
-		release_name="`echo $_r | sed $SED_EXTENDED -e 's/-release$//g'`"
-		release_varname="`echo $release_name | sed $SED_EXTENDED -e 's/-/_/g'`"
-		release_filename="$TOP_LEVEL_DIR/releases/$_r/$_r.tgz"
-		release_url_value="file://$release_filename"
-		release_url_varname="${release_varname}_url"
-		release_version_varname="${release_varname}_version"
-
-		if [ ! -f "$release_filename" -o x"$RECREATE_RELEASES" = x'true' ]; then
-			INFO ". creating release $_r"
-			"$BASE_DIR/bosh-create_release.sh" "$_r" "releases/$_r"
-
-			# We only use the file:// URL for the create-env Bosh. Once that is up, we upload the release
-			update_yml_var "$BOSH_DIRECTOR_RELEASES" "$release_url_varname" "$release_url_value"
-
-			UPLOAD_RELEASES='true'
-		fi
-	done
-fi
-
-
 if [ ! -f "$BOSH_DIRECTOR_STATE_FILE" ]; then
 	CREATE_ACTION='Creating'
 	STORE_ACTION='Storing'
@@ -138,13 +114,6 @@ else
 	CREATE_ACTION='Updating'
 	STORE_ACTION='Potentially updating'
 fi
-
-INFO "$STORE_ACTION common passwords"
-"$BOSH_CLI" interpolate \
-	--tty \
-	--var-errs \
-	--vars-store="$BOSH_COMMON_VARIABLES" \
-	"$BOSH_COMMON_VARIABLES_MANIFEST"
 
 INFO 'Interpolating Bosh Director manifest'
 
@@ -185,9 +154,6 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='access_key_id=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" bosh_aws_access_key_id)' \
 	--var='secret_access_key=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" bosh_aws_secret_access_key)' \
 	--vars-env='$ENV_PREFIX_NAME' \
-	--vars-file='$BOSH_COMMON_VARIABLES' \
-	--vars-file='$BOSH_DIRECTOR_RELEASES' \
-	--vars-file='$BOSH_DIRECTOR_INTERPOLATED_STATIC_IPS' \
 	--vars-store='$BOSH_DIRECTOR_VARS_STORE' \
 	$director_ops_file_options \
 	$director_aws_ops_file_options \
@@ -285,7 +251,7 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='postgresql_backup_vm_type=default' \
 	--var='external_bbs_database_address=${cf_db_dns}' \
 	--var='external_bbs_database_name=diego' \
-	--var='external_bbs_database_password=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /diego_db_password "${BOSH_COMMON_VARIABLES}")' \
+	--var='external_bbs_database_password=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /diego_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
 	--var='external_bbs_database_username=diego' \
 	--var='external_database_port=$(extract_prefixed_env_var "${ENV_PREFIX_NAME}" cf_db_port)' \
 	--var='external_database_type=postgres' \
@@ -307,11 +273,11 @@ sh -c "'$BOSH_CLI' interpolate \
 	--var='external_silk_controller_database_username=silk' \
 	--var='external_uaa_database_address=${cf_db_dns}' \
 	--var='external_uaa_database_name=uaadb' \
-	--var='external_uaa_database_password=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /uaa_db_password "${BOSH_COMMON_VARIABLES}")' \
+	--var='external_uaa_database_password=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /uaa_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
 	--var='external_uaa_database_username=uaaadmin' \
 	--var='external_cc_database_name=ccdb' \
 	--var='external_cc_database_address=${cf_db_dns}' \
-	--var='external_cc_database_password=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /cc_db_password "${BOSH_COMMON_VARIABLES}")' \
+	--var='external_cc_database_password=$("${BOSH_CLI}" interpolate --no-color --var-errs --path /cc_db_password "${BOSH_DIRECTOR_VARS_STORE}")' \
 	--var='external_cc_database_username=ccadmin' \
 	--vars-env='$ENV_PREFIX_NAME' \
 	--vars-store='$BOSH_CF_VARIABLES_STORE' \
