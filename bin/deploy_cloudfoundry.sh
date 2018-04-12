@@ -469,11 +469,9 @@ findpath bosh_rmq_deployment_dir "${BOSH_RMQ_DEPLOYMENT_DIR}"
 
 rmq_ops_file_options="-o '${bosh_rmq_deployment_dir}/manifests/add-cf-rabbitmq.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/broker-password.yml' \
--o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/consul.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/log-level.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/use-ha-proxy-hosts.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/rmq-network.yml' \
--o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/ssl.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/plugins.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/ports.yml' \
 -o '${manifest_dir}/Bosh-CF-Manifests/bosh-rmq-broker/operations/remove-director-uuid.yml'"
